@@ -1,25 +1,26 @@
 {% extends 'index.html' %}
 
 {% block page_title %}
-    Game Details
-    {{ game.when }}
+    Next games
 {% endblock %}
 
 {% block content %}
-    <div class="card card-border bg-base-100 w-full">
-        <div class="card-body">
-            <div class="flex gap-2 items-center">
-                <div>
-                    Week {{ game.when|date:'W - d M Y' }}
-                </div>
-                <div class="flex gap-2 text-zinc-500 font-semibold">
-                    {{ game.status }}
-                </div>
-                <div>
-                    description: {{ game.description }}
-                </div>
-            </div>
-            <div class="flex gap-2 items-center">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Week</th>
+            <th>Date</th>
+            <th>Players</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for game in games %}
+            <tr>
+                <td>{{ game.when|date:'W' }}</td>
+                <td>{{ game.when|date:'d M Y' }}</td>
+                <td>
                     {%  if game.number_of_occupied_slots == 10 %}
                         <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
                     {%  endif %}
@@ -32,16 +33,13 @@
                     {%  if game.number_of_occupied_slots <= 7 %}
                         <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
                     {%  endif %}
-            </div>
-            <div class="flex gap-2 items-center">{{ game.slot_1 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_2 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_3 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_4 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_5 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_6 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_7 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_8 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_9 }}</div>
-            <div class="flex gap-2 items-center">{{ game.slot_10 }}</div>
-        </div>
-    </div>{% endblock %}
+                </td>
+                <td>{{ game.status }}</td>
+                <td><a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">Details</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+{% endblock content %}
+
