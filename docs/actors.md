@@ -42,7 +42,7 @@
    - slot_2 : player_id
    - slot_3 : player_id
    - slot_4 : player_id
-   - slot_5 : player_id
+   - slot_5 : player_id 
    - slot_6 : player_id
    - slot_7 : player_id
    - slot_8 : player_id

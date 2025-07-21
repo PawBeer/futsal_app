@@ -18,8 +18,7 @@
         {% for game in games %}
             <tr>
                 <td>{{ game.when|date:'W' }}</td>
-                <td>{{ game.when }}</td>
-{#                <td>{{ game.when|date:'d M Y' }}</td>#}
+                <td>{{ game.when|date:'d M Y' }}</td>
                 <td>{{ game.status }}</td>
                 <td><a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">details</a></td>
             </tr>

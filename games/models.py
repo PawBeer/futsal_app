@@ -19,30 +19,18 @@ class Game(models.Model):
     slot_9 = models.IntegerField(null=True)
     slot_10 = models.IntegerField(null=True)
 
+    def __str__(self):
+        return f"{self.when} - {self.status}"
 
-    @staticmethod
-    def get_all_games():
-        with open('games/migrations/games.csv', 'r', encoding='utf-8') as games:
-            reader = csv.DictReader(games, delimiter=',')
+    def number_of_occupied_slots(self):
+        slots = [
+            self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5,
+            self.slot_6, self.slot_7, self.slot_8, self.slot_9, self.slot_10
+        ]
+        sum = 0
+        for slot in slots:
+            if slot not in (None, 0):
+                sum += 1
+        return sum
 
-            return list(map(
-                lambda row: Game(
-                    row['id'],
-                    row['when'],
-                    row['status'],
-                )
-            , reader))
-
-    @staticmethod
-    def get_game_by_id(game_id):
-        with open('games/migrations/games.csv', 'r', encoding='utf-8') as games:
-            reader = csv.DictReader(games, delimiter=',')
-
-            for row in reader:
-                if row['id'] == game_id:
-                    return Game(
-                        row['id'],
-                        row['when'],
-                        row['status'],
-                        )
 
