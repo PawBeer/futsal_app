@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Players
+{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Nickname</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Mobile number</th>
+            <th>Player role</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for player in players %}
+            <tr>
+                <td>{{ player.nickname }}</td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.surname }}</td>
+                <td>{{ player.email }}</td>
+                <td>{{ player.mobile_number }}</td>
+                <td>{{ player.mobile_number }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+{% endblock content %}
+
