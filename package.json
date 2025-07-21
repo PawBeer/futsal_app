@@ -1,0 +1,31 @@
+{
+  "name": "futsal_app",
+  "version": "1.0.0",
+  "description": "Create a file with installed libraries (packages) for the project:\r ```bash\r pip freeze > requirements.txt\r ```",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "watch:css": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/dist/styles.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PawBeer/futsal_app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PawBeer/futsal_app/issues"
+  },
+  "homepage": "https://github.com/PawBeer/futsal_app#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "daisyui": "^5.0.46"
+  }
+}
