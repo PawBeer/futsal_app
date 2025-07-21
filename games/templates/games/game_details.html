@@ -1,0 +1,37 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Game Details
+    {{ game.when }}
+{% endblock %}
+
+{% block content %}
+    <div class="card card-border bg-base-100 w-full">
+        <div class="card-body">
+            <div class="flex gap-2 items-center">
+                <div>
+                    Week {{ game.when }}
+{#                    Week {{ game.when|date:'W - d M Y' }}#}
+                </div>
+                <div class="flex gap-2 text-zinc-500 font-semibold">
+                    {{ game.status }}
+                </div>
+                <div>
+                    description: {{ game.description }}
+                </div>
+            </div>
+            <div class="flex gap-2 items-center">
+                <div>Lista graczy:</div>
+            </div>
+            <div class="flex gap-2 items-center">{{ game.slot_1 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_2 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_3 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_4 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_5 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_6 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_7 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_8 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_9 }}</div>
+            <div class="flex gap-2 items-center">{{ game.slot_10 }}</div>
+        </div>
+    </div>{% endblock %}
