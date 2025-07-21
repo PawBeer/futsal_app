@@ -6,7 +6,7 @@ import datetime
 
 class Game(models.Model):
     when = models.DateField()
-    status = models.CharField(max_length=100)
+    status = models.CharField(max_length=100, default='planned')
     description = models.TextField(null=True)
     slot_1 = models.IntegerField(null=True)
     slot_2 = models.IntegerField(null=True)
