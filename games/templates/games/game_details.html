@@ -20,7 +20,18 @@
                 </div>
             </div>
             <div class="flex gap-2 items-center">
-                <div>Lista graczy:</div>
+                    {%  if game.number_of_occupied_slots == 10 %}
+                        <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                    {%  endif %}
+                    {%  if game.number_of_occupied_slots == 9 %}
+                        <div class="radial-progress text-green-300" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                    {%  endif %}                    
+                    {%  if game.number_of_occupied_slots == 8 %}
+                        <div class="radial-progress text-warning" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                    {%  endif %}                    
+                    {%  if game.number_of_occupied_slots <= 7 %}
+                        <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                    {%  endif %}
             </div>
             <div class="flex gap-2 items-center">{{ game.slot_1 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_2 }}</div>
