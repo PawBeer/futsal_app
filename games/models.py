@@ -4,6 +4,7 @@ import datetime
 from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator, MaxValueValidator
 from django.core.validators import RegexValidator
 
+
 # Create your models here.
 
 class Game(models.Model):
@@ -56,8 +57,19 @@ class Player(models.Model):
         return self.nickname if self.nickname != "N/A" else f"{self.name} {self.surname}"
 
 
-class Status(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+class PlayerStatus(models.Model):
+    player_status_name = models.CharField(max_length=50, unique=True)
+    def __str__(self):
+        return self.player_status_name
+
+
+class BookingHistoryForGame(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='status_history')
+    player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('player', 'game')
 
     def __str__(self):
-        return self.name
+        return f"{self.player} - {self.player_status} on {self.game}"
