@@ -28,8 +28,8 @@ def game_details(request, game_id):
     return render(request, 'games/game_details.html', {
         "game": found_game,
         "breadcrumbs": [
-            Breadcrumb(reverse('next_games_url'), 'Next games'),
             Breadcrumb(reverse('past_games_url'), 'Past games'),
+            Breadcrumb(reverse('next_games_url'), 'Next games'),
             Breadcrumb(reverse('game_details_url', args=[found_game.id]), found_game.when),
         ],
     })
