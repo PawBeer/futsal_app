@@ -6,6 +6,7 @@
     <title>{%  block page_title%}Games{%  endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/main.css' %}">
 </head>
 <body>
 <div class="navbar bg-base-100 shadow-sm">
@@ -17,13 +18,13 @@
   <div class="flex gap-2">
     <div class="dropdown dropdown-end">
       <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-10 rounded-full">
+        <div class="w-15 rounded-full">
           <img
-            alt="Tailwind CSS Navbar component"
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+            alt="logo"
+            src="{% static 'img/logo.jpeg' %}" />
         </div>
       </div>
-      <ul
+      <ul 
         tabindex="0"
         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
         <li>
