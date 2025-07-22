@@ -44,6 +44,7 @@ phone_validator = RegexValidator(
 
 
 class Player(models.Model):
+    ROLE_CHOICES = [('Active','Active'),('Inactive','Inactive'),('Permanent','Permanent')]
     name = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
     surname = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
     email = models.EmailField(max_length=255, validators=[MinLengthValidator(3)])
@@ -52,6 +53,7 @@ class Player(models.Model):
         validators=[RegexValidator(regex=r'^\d{9}$', message="Mobile number must contain exactly 9 digits")]
     )
     nickname = models.CharField(max_length=255, default='N/A', validators=[MinLengthValidator(3)])
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Active')
 
     def __str__(self):
         return self.nickname if self.nickname != "N/A" else f"{self.name} {self.surname}"

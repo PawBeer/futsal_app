@@ -35,7 +35,7 @@
                 <td>{{ player.nickname }}</td>
                 <td>{{ player.name }}</td>
                 <td>{{ player.surname }}</td>
-                <td>{{ player.mobile_number }}</td>
+                <td>{{ player.role }}</td>
                 <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a></td>
             </tr>
         {% endfor %}

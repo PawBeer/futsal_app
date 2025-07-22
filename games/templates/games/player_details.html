@@ -8,14 +8,12 @@
 {% block content %}
     <div class="card card-border bg-base-100 w-full">
         <div class="card-body">
-            <div class="flex gap-2 items-center">
-                Nickname: <div class="bold">{{ player.nickname }}</div>
-                Name: <div class="bold">{{ player.name }}</div>
-                Surname: <div class="bold">{{ player.surname }}</div>
-                Email: <div class="bold">{{ player.email }}</div>
-                Mobile number: <div class="bold">{{ player.mobile_number }}</div>
-                Player role: <div class="bold">{{ player.nickname }}</div>
-            </div>
+                <p class="bold">Nickname: {{ player.nickname }}</p>
+                <p class="bold">Name: {{ player.name }}</p>
+                <p class="bold">Surname: {{ player.surname }}</p>
+                <p class="bold">Email: {{ player.email }}</p>
+                <p class="bold">Mobile number: {{ player.mobile_number }}</p>
+                <p class="bold">Player role: {{ player.role }}</p>
             </div>
         </div>
 {% endblock %}
