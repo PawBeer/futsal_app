@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Player Details
+    {{ game.when }}
+{% endblock %}
+
+{% block content %}
+    <div class="card card-border bg-base-100 w-full">
+        <div class="card-body">
+            <div class="flex gap-2 items-center">
+                Nickname: <div class="bold">{{ player.nickname }}</div>
+                Name: <div class="bold">{{ player.name }}</div>
+                Surname: <div class="bold">{{ player.surname }}</div>
+                Email: <div class="bold">{{ player.email }}</div>
+                Mobile number: <div class="bold">{{ player.mobile_number }}</div>
+                Player role: <div class="bold">{{ player.nickname }}</div>
+            </div>
+            </div>
+        </div>
+{% endblock %}

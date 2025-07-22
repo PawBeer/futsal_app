@@ -5,15 +5,28 @@
 {% endblock %}
 
 {% block content %}
+    <div class="grid grid-cols-4 gap-6 mb-8">
+        <div class="card shadow-xl">
+            <div class="card-body">
+                <div class="text-xl font-semibold">{{ details.id__count }}</div>
+                <p class="text-sm">Number of players</p>
+            </div>
+        </div>
+        <div class="card shadow-xl">
+                <div class="card-body">
+                    <div class="text-xl font-semibold">{{ details.id__count }}</div>
+                    <p class="text-sm">Number of active players</p>
+                </div>
+            </div>
+    </div>
     <table class="table">
         <thead>
         <tr>
             <th>Nickname</th>
             <th>Name</th>
             <th>Surname</th>
-            <th>Email</th>
-            <th>Mobile number</th>
             <th>Player role</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -22,9 +35,8 @@
                 <td>{{ player.nickname }}</td>
                 <td>{{ player.name }}</td>
                 <td>{{ player.surname }}</td>
-                <td>{{ player.email }}</td>
                 <td>{{ player.mobile_number }}</td>
-                <td>{{ player.mobile_number }}</td>
+                <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a></td>
             </tr>
         {% endfor %}
         </tbody>
