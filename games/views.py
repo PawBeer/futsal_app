@@ -3,7 +3,7 @@ from django.shortcuts import render
 from .models import Game, BookingHistoryForGame
 from django.urls import reverse
 from .models import Player
-from django.db.models import Avg, Min, Max, Count
+from django.db.models import Avg, Min, Max, Count, Q
 
 
 class Breadcrumb:
@@ -37,7 +37,10 @@ def game_details(request, game_id):
 def all_players(request):
     found_players = Player.objects.all()
     found_players_aggregation = found_players.aggregate(
-        Count('id')
+        total_players = Count('id'),
+        permanent_players=Count('id', filter=Q(role='Permanent')),
+        active_players=Count('id', filter=Q(role='Active')),
+        inactive_players=Count('id', filter=Q(role='Inactive')),
     )
     return render(request, 'games/all_players.html', {
         'players': found_players,
