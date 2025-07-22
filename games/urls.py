@@ -6,4 +6,5 @@ urlpatterns = [
     path('game/<game_id>/', views.game_details, name='game_details_url'),
     path('players/', views.all_players, name='all_players_url'),
     path('players/<player_id>/', views.player_details, name='player_details_url'),
+    path('booking_history/', views.booking_history, name='booking_history_url'),
 ]

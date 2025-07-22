@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Booking History
+{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Status for Game</th>
+            <th>Player</th>
+            <th>Status for Player</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in booking_history %}
+            <tr>
+                <td>{{ record.game_id }}</td>
+                <td>{{ record.game_id }}</td>
+                <td>{{ record.player_id }}</td>
+                <td>{{ record.player_status_id }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+{% endblock content %}
+

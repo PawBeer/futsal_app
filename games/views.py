@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.shortcuts import render
-from .models import Game
+from .models import Game, BookingHistoryForGame
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count
@@ -34,7 +34,6 @@ def game_details(request, game_id):
         ],
     })
 
-
 def all_players(request):
     found_players = Player.objects.all()
     found_players_aggregation = found_players.aggregate(
@@ -55,3 +54,7 @@ def player_details(request, player_id):
             Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.name),
         ]
     })
+
+def booking_history(request):
+    found_booking_history = BookingHistoryForGame.objects.all()
+    return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
