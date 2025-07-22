@@ -11,7 +11,12 @@
 <body>
 <div class="navbar bg-base-100 shadow-sm">
   <div class="flex-1">
-    <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl">Next games</a>
+      <a href="{% url 'next_games_url' %}" >
+          <div class="avatar w-20">
+              <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar">
+          </div>
+      </a>
+      <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl">Next games</a>
     <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl">Players</a>
     <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl">Past games</a>
   </div>
@@ -39,6 +44,17 @@
     </div>
   </div>
 </div>
+
+{% if breadcrumbs %}
+    <div class="breadcrumbs text-sm px-10">
+      <ul>
+          {% for b in breadcrumbs %}
+              <li><a href="{{ b.path }}">{{ b.label }}</a></li>
+          {% endfor %}
+      </ul>
+    </div>
+{% endif %}
+
 <div class="mx-auto px-2 my-12>">
     {%  block content %}
     {%  endblock %}
