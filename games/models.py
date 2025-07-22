@@ -1,6 +1,8 @@
 from django.db import models
 import csv
 import datetime
+from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -34,3 +36,28 @@ class Game(models.Model):
         return sum
 
 
+phone_validator = RegexValidator(
+    regex=r'^(\d{9})$',
+    message="Mobile number must contain exactly 9 digits"
+)
+
+
+class Player(models.Model):
+    name = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
+    surname = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
+    email = models.EmailField(max_length=255, validators=[MinLengthValidator(3)])
+    mobile_number = models.CharField(
+        max_length=9,
+        validators=[RegexValidator(regex=r'^\d{9}$', message="Mobile number must contain exactly 9 digits")]
+    )
+    nickname = models.CharField(max_length=255, default='N/A', validators=[MinLengthValidator(3)])
+
+    def __str__(self):
+        return self.nickname if self.nickname != "N/A" else f"{self.name} {self.surname}"
+
+
+class Status(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
