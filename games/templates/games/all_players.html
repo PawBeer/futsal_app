@@ -31,6 +31,19 @@
             </div>
         </div>
     </div>
+    <div class="card shadow-lg mb-8 p-4">
+        <form class="flex gap-2">
+            <label class="input">
+                Name
+                <input {% if filter %} value="{{ filter }}" {% endif %} name="name" type="text" class="grow" placeholder="Search by name...">
+                <span class="badge badge-neutral badge-xs">Optional</span>        
+            </label>
+            <button type="submit" class="btn btn-outline">Search</button>
+            {% if filter %}
+                <a href="{% url 'all_players_url' %}" class="btn btn-outline">Clear filter</a>
+            {% endif %}
+        </form>
+        </div>
     <table class="table">
         <thead>
         <tr>

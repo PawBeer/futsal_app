@@ -37,7 +37,17 @@ def game_details(request, game_id):
     })
 
 def all_players(request):
-    found_players = Player.objects.all()
+    filter = request.GET.get('name')
+
+    if filter and len(filter) > 1:
+        found_players = Player.objects.filter(
+            Q(name__icontains=filter) |
+            Q(surname__icontains=filter) |
+            Q(nickname__icontains=filter)
+        )
+    else:
+        found_players = Player.objects.all()
+
     found_players_aggregation = found_players.aggregate(
         total_players = Count('id'),
         permanent_players=Count('id', filter=Q(role='Permanent')),
@@ -45,6 +55,7 @@ def all_players(request):
         inactive_players=Count('id', filter=Q(role='Inactive')),
     )
     return render(request, 'games/all_players.html', {
+        'filter': filter,
         'players': found_players,
         'details': found_players_aggregation
     })
