@@ -69,6 +69,7 @@ class BookingHistoryForGame(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='status_history')
     player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('player', 'game')

@@ -12,6 +12,7 @@
             <th>Status for Game</th>
             <th>Player</th>
             <th>Status for Player</th>
+            <th>Created</th>
         </tr>
         </thead>
         <tbody>
@@ -21,6 +22,7 @@
                 <td>{{ record.game_id }}</td>
                 <td>{{ record.player_id }}</td>
                 <td>{{ record.player_status_id }}</td>
+                <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
             </tr>
         {% endfor %}
         </tbody>
