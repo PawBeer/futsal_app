@@ -44,4 +44,27 @@
             <div class="flex gap-2 items-center">{{ game.slot_9 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_10 }}</div>
         </div>
+    
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Player</th>
+            <th>Status for Player</th>
+            <th>Created</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in booking_history %}
+            <tr>
+                {% if record.player.nickname != 'N/A' %}
+                    <td>{{ record.player.nickname }}</td>
+                {% else %}
+                    <td>{{ record.player.name }} {{ record.player.surname }}</td>
+                {% endif %}
+                <td>{{ record.player_status.player_status_name }}</td>
+                <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
     </div>{% endblock %}

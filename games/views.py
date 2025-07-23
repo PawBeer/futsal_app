@@ -25,8 +25,10 @@ def past_games(request):
 
 def game_details(request, game_id):
     found_game = Game.objects.get(id=game_id)
+    found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
         "game": found_game,
+        "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
             Breadcrumb(reverse('next_games_url'), 'Next games'),

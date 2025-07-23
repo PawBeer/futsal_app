@@ -34,9 +34,7 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Nickname</th>
-            <th>Name</th>
-            <th>Surname</th>
+            <th>Player</th>
             <th>Player role</th>
             <th>Actions</th>
         </tr>
@@ -44,9 +42,11 @@
         <tbody>
         {% for player in players %}
             <tr>
-                <td>{{ player.nickname }}</td>
-                <td>{{ player.name }}</td>
-                <td>{{ player.surname }}</td>
+                {% if player.nickname != 'N/A' %}
+                    <td>{{ player.nickname }}</td>
+                {% else %}
+                    <td>{{ player.name }} {{ player.surname }}</td>
+                {% endif %}
                 <td>{{ player.role }}</td>
                 <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a></td>
             </tr>
