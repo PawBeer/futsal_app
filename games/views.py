@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Game, BookingHistoryForGame
 from django.urls import reverse
 from .models import Player
@@ -24,7 +24,7 @@ def past_games(request):
 
 
 def game_details(request, game_id):
-    found_game = Game.objects.get(id=game_id)
+    found_game = get_object_or_404(Game,id=game_id)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
         "game": found_game,
@@ -51,7 +51,7 @@ def all_players(request):
 
 
 def player_details(request, player_id):
-    found_player = Player.objects.get(id=player_id)
+    found_player = get_object_or_404(Player, id=player_id)
     return render(request, 'games/player_details.html', {
         "player": found_player,
         "breadcrumbs": [
