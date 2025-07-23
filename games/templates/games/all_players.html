@@ -5,29 +5,29 @@
 {% endblock %}
 
 {% block content %}
-    <div class="grid grid-cols-4 gap-6 mb-8">
-        <div class="card shadow-xl bg-players-blue">
+    <div class="grid grid-cols-4 gap-6 mb-8 mr-10">
+        <div class="card shadow-xl bg-players-purple">
             <div class="card-body">
                 <div class="text-xl font-semibold">{{ details.total_players }}</div>
-                <p class="text-sm">Number of players</p>
+                <p class="text-sm">Total players</p>
             </div>
         </div>
         <div class="card shadow-xl bg-players-green">
             <div class="card-body">
                 <div class="text-xl font-semibold">{{ details.permanent_players }}</div>
-                <p class="text-sm">Number of permanent players</p>
+                <p class="text-sm">Permanent players</p>
             </div>
         </div>
-        <div class="card shadow-xl bg-players-purple">
+        <div class="card shadow-xl bg-players-blue">
             <div class="card-body">
                 <div class="text-xl font-semibold">{{ details.active_players }}</div>
-                <p class="text-sm">Number of active players</p>
+                <p class="text-sm">Active players</p>
             </div>
         </div>
         <div class="card shadow-xl bg-players-red">
             <div class="card-body">
                 <div class="text-xl font-semibold">{{ details.inactive_players }}</div>
-                <p class="text-sm">Number of inactive players</p>
+                <p class="text-sm">Inactive players</p>
             </div>
         </div>
     </div>

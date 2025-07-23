@@ -8,8 +8,6 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --color-green-200: oklch(92.5% 0.084 155.995);
-    --color-green-600: oklch(62.7% 0.194 149.214);
-    --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-zinc-500: oklch(55.2% 0.016 285.938);
     --color-black: #000;
     --spacing: 0.25rem;
@@ -948,6 +946,9 @@
         }
       }
     }
+  }
+  .mr-10 {
+    margin-right: calc(var(--spacing) * 10);
   }
   .mb-8 {
     margin-bottom: calc(var(--spacing) * 8);
