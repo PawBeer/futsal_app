@@ -1,6 +1,6 @@
 from datetime import datetime
-from django.shortcuts import render, get_object_or_404
-from .models import Game, BookingHistoryForGame
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Game, BookingHistoryForGame, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
@@ -70,7 +70,21 @@ def player_details(request, player_id):
             Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.name),
         ]
     })
+def add_player(request):
+    if request.method == 'POST':
+        Player.objects.create(
+            name=request.POST['name'],
+            surname=request.POST['surname'],
+            nickname=request.POST['nickname'],
+            email=request.POST['email'],
+            mobile_number=request.POST['mobile_number'],
+            role=request.POST['role']
+        )
+        return redirect('all_players_url')
+    return render(request, 'games/add_player.html')
 
+def add_player_with_form(request):
+    return render(request, 'games/add_player_with_form.html')
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
