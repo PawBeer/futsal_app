@@ -8,7 +8,7 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Date</th>
+            <th>Game date</th>
             <th>Status for Game</th>
             <th>Player</th>
             <th>Status for Player</th>
@@ -18,10 +18,14 @@
         <tbody>
         {% for record in booking_history %}
             <tr>
-                <td>{{ record.game_id }}</td>
-                <td>{{ record.game_id }}</td>
-                <td>{{ record.player_id }}</td>
-                <td>{{ record.player_status_id }}</td>
+                <td>{{ record.game.when }}</td>
+                <td>{{ record.game.status }}</td>
+                {% if record.player.nickname != 'N/A' %}
+                    <td>{{ record.player.nickname }}</td>
+                {% else %}
+                    <td>{{ record.player.name }} {{ record.player.surname }}</td>
+                {% endif %}
+                <td>{{ record.player_status.player_status_name }}</td>
                 <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
             </tr>
         {% endfor %}
