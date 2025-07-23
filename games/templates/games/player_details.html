@@ -7,13 +7,41 @@
 
 {% block content %}
     <div class="card card-border bg-base-100 w-full">
-        <div class="card-body">
-                <p class="bold">Nickname: {{ player.nickname }}</p>
-                <p class="bold">Name: {{ player.name }}</p>
-                <p class="bold">Surname: {{ player.surname }}</p>
-                <p class="bold">Email: {{ player.email }}</p>
-                <p class="bold">Mobile number: {{ player.mobile_number }}</p>
-                <p class="bold">Player role: {{ player.role }}</p>
-            </div>
-        </div>
+        <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
+            <thead>
+            <tr class="border-b border-neutral">
+                <th colspan="2" class="text-lg font-semibold text-center">Player profile</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if player.nickname and player.nickname != 'N/A' %}
+                <tr class="border-b border-neutral">
+                    <td class="font-semibold py-2 px-4">Nickname</td>
+                    <td class="py-2 px-4">{{ player.nickname }}</td>
+                </tr>
+            {% endif %}
+            <tr class="border-b border-neutral">
+                <td class="font-semibold py-2 px-4">Name</td>
+                <td class="py-2 px-4">{{ player.name }}</td>
+            </tr>
+            <tr class="border-b border-neutral">
+                <td class="font-semibold py-2 px-4">Surname</td>
+                <td class="py-2 px-4">{{ player.surname }}</td>
+            </tr>
+            <tr class="border-b border-neutral">
+                <td class="font-semibold py-2 px-4">Email</td>
+                <td class="py-2 px-4">{{ player.email }}</td>
+            </tr>
+            <tr class="border-b border-neutral">
+                <td class="font-semibold py-2 px-4">Mobile number</td>
+                <td class="py-2 px-4">{{ player.mobile_number }}</td>
+            </tr>
+            <tr>
+                <td class="font-semibold py-2 px-4">Player role</td>
+                <td class="py-2 px-4">{{ player.role }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
 {% endblock %}

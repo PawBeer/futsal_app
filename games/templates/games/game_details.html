@@ -6,32 +6,46 @@
 {% endblock %}
 
 {% block content %}
-    <div class="card card-border bg-base-100 w-full">
+    <div class="card shadow-lg card-border bg-base-100 w-full">
         <div class="card-body">
-            <div class="flex gap-2 items-center">
-                <div>
+            <div class="flex gap-2">
+                <div class="text-xl font-bold">
                     Week {{ game.when|date:'W - d M Y' }}
+                    <div class="flex gap-2 text-zinc-500 font-semibold">
+                        {{ game.status }}
+                    </div>
+                    <div class="flex gap-2 items-center fill-neutral-content font-normal text-base">
+                        description: {{ game.description }}
+                    </div>
                 </div>
-                <div class="flex gap-2 text-zinc-500 font-semibold">
-                    {{ game.status }}
-                </div>
-                <div>
-                    description: {{ game.description }}
-                </div>
+        
+            <div class="flex gap-2 items-center mx-auto">
+                {% if game.number_of_occupied_slots == 10 %}
+                    <div class="radial-progress text-success"
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+                         aria-valuenow="{{ game.number_of_occupied_slots }}"
+                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                {% endif %}
+                {% if game.number_of_occupied_slots == 9 %}
+                    <div class="radial-progress text-green-200"
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+                         aria-valuenow="{{ game.number_of_occupied_slots }}"
+                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                {% endif %}
+                {% if game.number_of_occupied_slots == 8 %}
+                    <div class="radial-progress text-warning"
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+                         aria-valuenow="{{ game.number_of_occupied_slots }}"
+                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                {% endif %}
+                {% if game.number_of_occupied_slots <= 7 %}
+                    <div class="radial-progress text-error"
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+                         aria-valuenow="{{ game.number_of_occupied_slots }}"
+                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                {% endif %}
+            
             </div>
-            <div class="flex gap-2 items-center">
-                    {%  if game.number_of_occupied_slots == 10 %}
-                        <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                    {%  endif %}
-                    {%  if game.number_of_occupied_slots == 9 %}
-                        <div class="radial-progress text-green-200" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                    {%  endif %}                    
-                    {%  if game.number_of_occupied_slots == 8 %}
-                        <div class="radial-progress text-warning" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                    {%  endif %}                    
-                    {%  if game.number_of_occupied_slots <= 7 %}
-                        <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                    {%  endif %}
             </div>
             <div class="flex gap-2 items-center">{{ game.slot_1 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_2 }}</div>
@@ -44,27 +58,29 @@
             <div class="flex gap-2 items-center">{{ game.slot_9 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_10 }}</div>
         </div>
-    
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Player</th>
-            <th>Status for Player</th>
-            <th>Created</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for record in booking_history %}
+        <div class="card shadow-lg text-center bg-base-100 text-xl font-semibold m-5">
+            Booking history for this game
+        </div>
+        <table class="table">
+            <thead>
             <tr>
-                {% if record.player.nickname != 'N/A' %}
-                    <td>{{ record.player.nickname }}</td>
-                {% else %}
-                    <td>{{ record.player.name }} {{ record.player.surname }}</td>
-                {% endif %}
-                <td>{{ record.player_status.player_status_name }}</td>
-                <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+                <th>Player</th>
+                <th>Status for Player</th>
+                <th>Created</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for record in booking_history %}
+                <tr>
+                    {% if record.player.nickname != 'N/A' %}
+                        <td>{{ record.player.nickname }}</td>
+                    {% else %}
+                        <td>{{ record.player.name }} {{ record.player.surname }}</td>
+                    {% endif %}
+                    <td>{{ record.player_status.player_status_name }}</td>
+                    <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>{% endblock %}
