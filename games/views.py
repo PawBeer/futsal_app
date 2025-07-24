@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
@@ -24,7 +26,7 @@ def past_games(request):
     found_games = Game.objects.filter(when__lt=datetime.today()).order_by('-when').all()
     return render(request, 'games/past_games.html', {'games': found_games})
 
-
+@login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game,id=game_id)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
@@ -62,7 +64,7 @@ def all_players(request):
         'details': found_players_aggregation
     })
 
-
+@login_required
 def player_details(request, player_id):
     found_player = get_object_or_404(Player, id=player_id)
     return render(request, 'games/player_details.html', {
@@ -72,6 +74,8 @@ def player_details(request, player_id):
             Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.name),
         ]
     })
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_player(request):
     if request.method == 'POST':
         Player.objects.create(
@@ -85,8 +89,11 @@ def add_player(request):
         return redirect('all_players_url')
     return render(request, 'games/add_player.html')
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_player_with_form(request):
     return render(request, 'games/add_player_with_form.html')
+@login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
@@ -98,6 +105,8 @@ class AddPlayerView(View):
         return render(request, 'games/add_player_with_form.html', {
             'form': form
         })
+
+    @user_passes_test(lambda u: u.is_superuser)
     def post(self, request):
         pass
 
@@ -107,6 +116,8 @@ class AddGameView(View):
         return render(request, 'games/add_game_with_form.html',{
             'form': form
         })
+
+    @user_passes_test(lambda u: u.is_superuser)
     def post(self, request):
         form = GameForm(request.POST)
         logged_user = request.user
