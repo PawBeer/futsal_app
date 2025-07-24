@@ -5,6 +5,7 @@
    - email 
    - mobile_no
    - nickname
+   - role(perme, ac)
 
 
 2. PLAYER_STATUS (lub ENUM)

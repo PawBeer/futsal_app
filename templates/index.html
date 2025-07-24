@@ -9,21 +9,21 @@
     <link rel="stylesheet" href="{% static 'dist/main.css' %}">
 </head>
 <body>
-<div class="navbar bg-base-100 shadow-sm">
+<div class="navbar bg-base-100 shadow-sm p-5 mb-5">
   <div class="flex-1">
       <a href="{% url 'next_games_url' %}" >
           <div class="avatar w-24">
               <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar">
           </div>
       </a>
-      <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl">Next games</a>
-    <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl">Players</a>
-    <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl">Past games</a>
-    <a href="{% url 'booking_history_url' %}" class="btn btn-ghost text-xl">Booking history</a>
+      <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active{% endif %}">Next games</a>
+      <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active{% endif %}">Players</a>
+      <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active{% endif %}">Past games</a>
+      <a href="{% url 'booking_history_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active{% endif %}">Booking history</a>
   </div>
   <div class="flex gap-2">
-      <a href="{% url 'add_game_with_form_url' %}" class="btn btn-ghost text-xl">Add game</a>
-      <a href="{% url 'add_player_with_form_url' %}" class="btn btn-ghost text-xl">Add player</a>
+      <a href="{% url 'add_game_with_form_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_with_form_url' %}btn-active{% endif %}">Add game</a>
+      <a href="{% url 'add_player_with_form_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_with_form_url' %}btn-active{% endif %}">Add player</a>
     <div class="dropdown dropdown-end">
       <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
         <div class="w-15 rounded-full">
