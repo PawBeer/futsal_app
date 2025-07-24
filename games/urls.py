@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
+
 urlpatterns = [
     path('', views.next_games, name='next_games_url'),
     path('past/', views.past_games, name='past_games_url'),
@@ -10,4 +12,6 @@ urlpatterns = [
     path('add_player_with_form', views.AddPlayerView.as_view(), name='add_player_with_form_url'),
     path('add_game_with_form', views.AddGameView.as_view(), name='add_game_with_form_url'),
     path('booking_history/', views.booking_history, name='booking_history_url'),
+    path('logout/', LogoutView.as_view(next_page='/members/login'), name='logout_url'),
+
 ]

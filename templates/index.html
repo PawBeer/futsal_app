@@ -45,7 +45,12 @@
           </a>
         </li>
         <li><a>Settings</a></li>
-        <li><a>Logout</a></li>
+        <li>
+            <form method="post" action="{% url 'logout_url' %}">
+                {% csrf_token %}
+                <button>Logout</button>
+            </form>
+        </li>
       </ul>
     </div>
   </div>
