@@ -4,6 +4,8 @@ from .models import Game, BookingHistoryForGame, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
+from django.views import View
+from .forms import PlayerForm
 
 
 class Breadcrumb:
@@ -88,3 +90,13 @@ def add_player_with_form(request):
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
+
+
+class AddPlayerView(View):
+    def get(self, request):
+        form = PlayerForm()
+        return render(request, 'games/add_player_with_form.html', {
+            'form': form
+        })
+    def post(self, request):
+        pass

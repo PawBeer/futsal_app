@@ -47,12 +47,12 @@ class Player(models.Model):
     ROLE_CHOICES = [('Active','Active'),('Inactive','Inactive'),('Permanent','Permanent')]
     name = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
     surname = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
+    nickname = models.CharField(max_length=255, default='N/A', validators=[MinLengthValidator(3)])
     email = models.EmailField(max_length=255, validators=[MinLengthValidator(3)])
     mobile_number = models.CharField(
         max_length=9,
         validators=[RegexValidator(regex=r'^\d{9}$', message="Mobile number must contain exactly 9 digits")]
     )
-    nickname = models.CharField(max_length=255, default='N/A', validators=[MinLengthValidator(3)])
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Active')
 
     def __str__(self):
