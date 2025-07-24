@@ -5,7 +5,7 @@ from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
 from django.views import View
-from .forms import PlayerForm
+from .forms import PlayerForm, GameForm
 
 
 class Breadcrumb:
@@ -96,6 +96,15 @@ class AddPlayerView(View):
     def get(self, request):
         form = PlayerForm()
         return render(request, 'games/add_player_with_form.html', {
+            'form': form
+        })
+    def post(self, request):
+        pass
+
+class AddGameView(View):
+    def get(self, request):
+        form = GameForm()
+        return render(request, 'games/add_game_with_form.html',{
             'form': form
         })
     def post(self, request):
