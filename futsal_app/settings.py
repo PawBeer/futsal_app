@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'games',
+    'member.apps.MemberConfig'
 ]
 
 MIDDLEWARE = [
@@ -126,5 +127,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+SESSION_COOKIE_AGE = 3000
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+LOGIN_REDIRECT_URL = '/games'
 
