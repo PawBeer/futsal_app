@@ -16,7 +16,7 @@ class Player(models.Model):
     ROLE_CHOICES = [('Active','Active'),('Inactive','Inactive'),('Permanent','Permanent')]
     name = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
     surname = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
-    nickname = models.CharField(max_length=255, default='N/A', validators=[MinLengthValidator(3)])
+    nickname = models.CharField(max_length=255, blank=True, null=True, default=None)
     email = models.EmailField(max_length=255, validators=[MinLengthValidator(3)])
     mobile_number = models.CharField(
         max_length=9,
@@ -25,7 +25,7 @@ class Player(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Active')
 
     def __str__(self):
-        return self.nickname if self.nickname != "N/A" else f"{self.name} {self.surname}"
+        return self.nickname if self.nickname else f"{self.name} {self.surname}"
 
 
 class PlayerStatus(models.Model):
