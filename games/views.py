@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Game, BookingHistoryForGame, Player, PlayerStatus
+from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
@@ -108,6 +108,14 @@ class AddGameView(View):
             'form': form
         })
     def post(self, request):
-        pass
+        form = GameForm(request.POST)
+        logged_user = request.user
+        if form.is_valid():
+            game = form.save(commit=False)
+            game.when = datetime.today()
+            game.save()
+            form.save_m2m()
+
+            return redirect('game_details_url', game.id)
 
 

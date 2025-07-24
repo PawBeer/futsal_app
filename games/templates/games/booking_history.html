@@ -23,7 +23,7 @@
                 {% if record.player.nickname != 'N/A' %}
                     <td>{{ record.player.nickname }}</td>
                 {% else %}
-                    <td>{{ record.player.name }} {{ record.player.surname }}</td>
+                    <td>{{ record.player.user.first_name }} {{ record.player.user.last_name }}</td>
                 {% endif %}
                 <td>{{ record.player_status.player_status_name }}</td>
                 <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>

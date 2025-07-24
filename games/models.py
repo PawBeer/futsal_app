@@ -3,6 +3,7 @@ import csv
 import datetime
 from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator, MaxValueValidator
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -13,11 +14,9 @@ phone_validator = RegexValidator(
 
 
 class Player(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     ROLE_CHOICES = [('Active','Active'),('Inactive','Inactive'),('Permanent','Permanent')]
-    name = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
-    surname = models.CharField(max_length=255, validators=[MinLengthValidator(3)])
     nickname = models.CharField(max_length=255, blank=True, null=True, default=None)
-    email = models.EmailField(max_length=255, validators=[MinLengthValidator(3)])
     mobile_number = models.CharField(
         max_length=9,
         validators=[RegexValidator(regex=r'^\d{9}$', message="Mobile number must contain exactly 9 digits")]

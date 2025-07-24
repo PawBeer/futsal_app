@@ -1,6 +1,6 @@
     <form class="w-[400px] flex flex-col gap-2" method="POST">
         {% csrf_token %}
-        
+
         {% for field in form %}
             {% if field.widget_type == 'textarea' %}
                 <fieldset class="fieldset">
