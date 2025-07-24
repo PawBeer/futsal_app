@@ -4,38 +4,7 @@ import datetime
 from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator, MaxValueValidator
 from django.core.validators import RegexValidator
 
-
 # Create your models here.
-
-class Game(models.Model):
-    when = models.DateField()
-    status = models.CharField(max_length=100, default='planned')
-    description = models.TextField(null=True)
-    slot_1 = models.IntegerField(null=True)
-    slot_2 = models.IntegerField(null=True)
-    slot_3 = models.IntegerField(null=True)
-    slot_4 = models.IntegerField(null=True)
-    slot_5 = models.IntegerField(null=True)
-    slot_6 = models.IntegerField(null=True)
-    slot_7 = models.IntegerField(null=True)
-    slot_8 = models.IntegerField(null=True)
-    slot_9 = models.IntegerField(null=True)
-    slot_10 = models.IntegerField(null=True)
-
-    def __str__(self):
-        return f"{self.when} - {self.status}"
-
-    def number_of_occupied_slots(self):
-        slots = [
-            self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5,
-            self.slot_6, self.slot_7, self.slot_8, self.slot_9, self.slot_10
-        ]
-        sum = 0
-        for slot in slots:
-            if slot not in (None, 0):
-                sum += 1
-        return sum
-
 
 phone_validator = RegexValidator(
     regex=r'^(\d{9})$',
@@ -64,6 +33,34 @@ class PlayerStatus(models.Model):
     def __str__(self):
         return self.player_status_name
 
+class Game(models.Model):
+    when = models.DateField()
+    status = models.CharField(max_length=100, default='planned')
+    description = models.TextField(null=True, blank = True)
+    slot_1 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_1_games')
+    slot_2 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_2_games')
+    slot_3 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_3_games')
+    slot_4 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_4_games')
+    slot_5 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_5_games')
+    slot_6 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_6_games')
+    slot_7 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_7_games')
+    slot_8 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_8_games')
+    slot_9 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_9_games')
+    slot_10 = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='slot_10_games')
+
+    def __str__(self):
+        return f"{self.when} - {self.status}"
+
+    def number_of_occupied_slots(self):
+        slots = [
+            self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5,
+            self.slot_6, self.slot_7, self.slot_8, self.slot_9, self.slot_10
+        ]
+        count = 0
+        for slot in slots:
+            if slot is not None:
+                count += 1
+        return count
 
 class BookingHistoryForGame(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
