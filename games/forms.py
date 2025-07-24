@@ -15,3 +15,6 @@ class GameForm(forms.ModelForm):
     class Meta:
         model = Game
         fields = '__all__'
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'form-control  h-12 border-1'}),
+        }
