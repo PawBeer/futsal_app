@@ -47,7 +47,22 @@
             
             </div>
             </div>
-            <div class="flex gap-2 items-center">{{ game.slot_1 }}</div>
+            <div class="flex gap-2">
+                <div class="text-xl font-bold">
+                    <label>Slot 1</label>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <select name="slot_1">
+                        <option value="">---</option>
+                            {% for player in players %}
+                                <option value="{{ player.pk }}" {% if game.slot_1 and player.pk == game.slot_1.pk %}selected{% endif %}>
+                                    {{ player.user.username }}
+                                </option>
+                            {% endfor %}
+                    </select>
+                </div>
+            </div>
+        
             <div class="flex gap-2 items-center">{{ game.slot_2 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_3 }}</div>
             <div class="flex gap-2 items-center">{{ game.slot_4 }}</div>

@@ -29,9 +29,11 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game,id=game_id)
+    players = Player.objects.all().order_by('user__username')
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
         "game": found_game,
+        'players': players,
         "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
