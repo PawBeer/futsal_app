@@ -20,11 +20,7 @@
             <tr>
                 <td>{{ record.game.when }}</td>
                 <td>{{ record.game.status }}</td>
-                {% if record.player.user.username != 'N/A' %}
-                    <td>{{ record.player.user.username }}</td>
-                {% else %}
-                    <td>{{ record.player.user.first_name }} {{ record.player.user.last_name }}</td>
-                {% endif %}
+                <td>{{ record.player.user.username }}</td>
                 <td>{{ record.player_status.player_status_name }}</td>
                 <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
             </tr>
