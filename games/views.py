@@ -71,7 +71,7 @@ def player_details(request, player_id):
         "player": found_player,
         "breadcrumbs": [
             Breadcrumb(reverse('all_players_url'), 'All Players'),
-            Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.user.username),
+            Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.user),
         ]
     })
 @login_required

@@ -16,7 +16,6 @@ def register(request):
         user.save()
         Player.objects.create(
             user=user,
-            nickname=user.username,
             mobile_number=form.cleaned_data['mobile_number']
         )
         return redirect('login')
