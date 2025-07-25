@@ -8,11 +8,8 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
     --color-green-200: oklch(92.5% 0.084 155.995);
-    --color-blue-200: oklch(88.2% 0.059 254.128);
     --color-zinc-500: oklch(55.2% 0.016 285.938);
-    --color-zinc-700: oklch(37% 0.013 285.805);
     --color-black: #000;
-    --color-white: #fff;
     --spacing: 0.25rem;
     --container-md: 28rem;
     --text-sm: 0.875rem;
@@ -1014,17 +1011,8 @@
   .z-1 {
     z-index: 1;
   }
-  .m-2 {
-    margin: calc(var(--spacing) * 2);
-  }
-  .m-3 {
-    margin: calc(var(--spacing) * 3);
-  }
   .m-5 {
     margin: calc(var(--spacing) * 5);
-  }
-  .m-10 {
-    margin: calc(var(--spacing) * 10);
   }
   .filter {
     display: flex;
@@ -1070,9 +1058,6 @@
   }
   .mx-2 {
     margin-inline: calc(var(--spacing) * 2);
-  }
-  .mx-3 {
-    margin-inline: calc(var(--spacing) * 3);
   }
   .mx-auto {
     margin-inline: auto;
@@ -1187,9 +1172,6 @@
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
-  .mb-5 {
-    margin-bottom: calc(var(--spacing) * 5);
-  }
   .mb-8 {
     margin-bottom: calc(var(--spacing) * 8);
   }
@@ -1286,9 +1268,6 @@
     width: var(--size);
     height: var(--size);
   }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
-  }
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -1303,9 +1282,6 @@
   }
   .w-52 {
     width: calc(var(--spacing) * 52);
-  }
-  .w-400 {
-    width: calc(var(--spacing) * 400);
   }
   .w-\[400px\] {
     width: 400px;
@@ -1392,9 +1368,6 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
   }
-  .border-accent {
-    border-color: var(--color-accent);
-  }
   .border-accent-content {
     border-color: var(--color-accent-content);
   }
@@ -1410,17 +1383,8 @@
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
-  .p-3 {
-    padding: calc(var(--spacing) * 3);
-  }
   .p-4 {
     padding: calc(var(--spacing) * 4);
-  }
-  .p-5 {
-    padding: calc(var(--spacing) * 5);
-  }
-  .p-10 {
-    padding: calc(var(--spacing) * 10);
   }
   .badge-xs {
     --size: calc(var(--size-selector, 0.25rem) * 4);
@@ -1556,11 +1520,6 @@
         --btn-noise: none;
       }
     }
-  }
-  .btn-sm {
-    --fontsize: 0.75rem;
-    --btn-p: 0.75rem;
-    --size: calc(var(--size-field, 0.25rem) * 8);
   }
   .badge-neutral {
     --badge-color: var(--color-neutral);

@@ -4,12 +4,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign in</title>
+    <title>Sign up</title>
     <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
     <link rel="stylesheet" href="{% static 'dist/main.css' %}">
 </head>
 <body>
-{%  include 'common/tailwind-form.html' with form=form button_name='Sign in' %}
-<div>Don't have an account? <a href="{% url 'register_url' %}">Sign up</a> </div>
+{% include 'common/tailwind-form.html' with form=form button_name="Sign up" %}
 </body>
 </html>
