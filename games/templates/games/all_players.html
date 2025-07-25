@@ -32,18 +32,29 @@
         </div>
     </div>
     <div class="card shadow-lg mb-8 p-4">
-        <form class="flex gap-2">
-            <label class="input">
-                Name
-                <input {% if filter %} value="{{ filter }}" {% endif %} name="name" type="text" class="grow" placeholder="Search by name...">
-                <span class="badge badge-neutral badge-xs">Optional</span>        
-            </label>
-            <button type="submit" class="btn btn-outline">Search</button>
-            {% if filter %}
-                <a href="{% url 'all_players_url' %}" class="btn btn-outline">Clear filter</a>
+        <form class="flex gap-2" method="GET" action="{% url 'all_players_url' %}">
+            <button type="submit" name="permanent" value="1" class="btn btn-outline">
+                Permanent
+            </button>
+
+            {% if request.GET.permanent %}
+                <a href="{% url 'all_players_url' %}" class="btn btn-outline">Back to all players</a>
             {% endif %}
         </form>
-        </div>
+    </div>
+    <form class="flex gap-2">
+        <label class="input">
+            Name
+            <input {% if filter %} value="{{ filter }}" {% endif %} name="name" type="text" class="grow"
+                                   placeholder="Search by name...">
+            <span class="badge badge-neutral badge-xs">Optional</span>
+        </label>
+        <button type="submit" class="btn btn-outline">Search</button>
+        {% if filter %}
+            <a href="{% url 'all_players_url' %}" class="btn btn-outline">Clear filter</a>
+        {% endif %}
+    </form>
+    </div>
     <table class="table">
         <thead>
         <tr>
@@ -61,11 +72,12 @@
                     <td>{{ player.name }} {{ player.surname }}</td>
                 {% endif %}
                 <td>{{ player.role }}</td>
-                <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a></td>
+                <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    
+
 {% endblock content %}
 

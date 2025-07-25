@@ -26,9 +26,10 @@ def past_games(request):
     found_games = Game.objects.filter(when__lt=datetime.today()).order_by('-when').all()
     return render(request, 'games/past_games.html', {'games': found_games})
 
+
 @login_required
 def game_details(request, game_id):
-    found_game = get_object_or_404(Game,id=game_id)
+    found_game = get_object_or_404(Game, id=game_id)
     players = Player.objects.all().order_by('user__username')
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
@@ -42,20 +43,30 @@ def game_details(request, game_id):
         ],
     })
 
+
 def all_players(request):
     filter = request.GET.get('name')
+    permanent = request.GET.get('permanent')
 
     if filter and len(filter) > 1:
         found_players = Player.objects.filter(
-            Q(name__icontains=filter) |
-            Q(surname__icontains=filter) |
-            Q(username__icontains=filter)
+            Q(user__first_name__icontains=filter) |
+            Q(user__last_name__icontains=filter) |
+            Q(user__username__icontains=filter)
         )
     else:
         found_players = Player.objects.all()
 
+    queryset = Player.objects.all()
+    if permanent:
+        found_players = queryset.filter(role__iexact='permanent')
+    # if active:
+    #     found_players = queryset.filter(role__iexact='active')
+    # if inactive:
+    #     found_players = queryset.filter(role__iexact='inactive')
+
     found_players_aggregation = found_players.aggregate(
-        total_players = Count('id'),
+        total_players=Count('id'),
         permanent_players=Count('id', filter=Q(role='Permanent')),
         active_players=Count('id', filter=Q(role='Active')),
         inactive_players=Count('id', filter=Q(role='Inactive')),
@@ -63,8 +74,9 @@ def all_players(request):
     return render(request, 'games/all_players.html', {
         'filter': filter,
         'players': found_players,
-        'details': found_players_aggregation
+        'details': found_players_aggregation,
     })
+
 
 @login_required
 def player_details(request, player_id):
@@ -76,6 +88,8 @@ def player_details(request, player_id):
             Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.user),
         ]
     })
+
+
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def add_player(request):
@@ -90,10 +104,13 @@ def add_player(request):
         return redirect('all_players_url')
     return render(request, 'games/add_player.html')
 
+
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def add_player_with_form(request):
     return render(request, 'games/add_player_with_form.html')
+
+
 @login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
@@ -111,10 +128,11 @@ class AddPlayerView(View):
     def post(self, request):
         pass
 
+
 class AddGameView(View):
     def get(self, request):
         form = GameForm()
-        return render(request, 'games/add_game_with_form.html',{
+        return render(request, 'games/add_game_with_form.html', {
             'form': form
         })
 
@@ -129,5 +147,3 @@ class AddGameView(View):
             form.save_m2m()
 
             return redirect('game_details_url', game.id)
-
-
