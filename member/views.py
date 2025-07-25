@@ -13,11 +13,10 @@ def register(request):
     form = RegisterForm(request.POST)
     if form.is_valid():
         user = form.save(commit=False)
-        user.username = user.username.lower()
         user.save()
         Player.objects.create(
             user=user,
-            nickname=form.cleaned_data['nickname'],
+            nickname=user.username,
             mobile_number=form.cleaned_data['mobile_number']
         )
         return redirect('login')
