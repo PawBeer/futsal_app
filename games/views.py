@@ -47,7 +47,7 @@ def all_players(request):
         found_players = Player.objects.filter(
             Q(name__icontains=filter) |
             Q(surname__icontains=filter) |
-            Q(nickname__icontains=filter)
+            Q(username__icontains=filter)
         )
     else:
         found_players = Player.objects.all()
@@ -71,7 +71,7 @@ def player_details(request, player_id):
         "player": found_player,
         "breadcrumbs": [
             Breadcrumb(reverse('all_players_url'), 'All Players'),
-            Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.name),
+            Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.user.username),
         ]
     })
 @login_required
@@ -81,7 +81,6 @@ def add_player(request):
         Player.objects.create(
             name=request.POST['name'],
             surname=request.POST['surname'],
-            nickname=request.POST['nickname'],
             email=request.POST['email'],
             mobile_number=request.POST['mobile_number'],
             role=request.POST['role']

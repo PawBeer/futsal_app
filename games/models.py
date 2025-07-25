@@ -16,7 +16,6 @@ phone_validator = RegexValidator(
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     ROLE_CHOICES = [('Active','Active'),('Inactive','Inactive'),('Permanent','Permanent')]
-    nickname = models.CharField(max_length=255, blank=True, null=True, default=None)
     mobile_number = models.CharField(
         max_length=9,
         validators=[RegexValidator(regex=r'^\d{9}$', message="Mobile number must contain exactly 9 digits")]
@@ -24,7 +23,7 @@ class Player(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Active')
 
     def __str__(self):
-        return self.nickname if self.nickname else f"{self.name} {self.surname}"
+        return self.user.username if self.user else "(No user)"
 
 
 class PlayerStatus(models.Model):

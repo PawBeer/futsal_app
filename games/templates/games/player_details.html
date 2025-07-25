@@ -14,19 +14,19 @@
             </tr>
             </thead>
             <tbody>
-            {% if player.nickname and player.nickname != 'N/A' %}
+            {% if player.user.username and player.user.username != 'N/A' %}
                 <tr class="border-b border-neutral">
-                    <td class="font-semibold py-2 px-4">Nickname</td>
-                    <td class="py-2 px-4">{{ player.nickname }}</td>
+                    <td class="font-semibold py-2 px-4">Username</td>
+                    <td class="py-2 px-4">{{ player.user.username }}</td>
                 </tr>
             {% endif %}
             <tr class="border-b border-neutral">
                 <td class="font-semibold py-2 px-4">Name</td>
-                <td class="py-2 px-4">{{ player.name }}</td>
+                <td class="py-2 px-4">{{ player.first_name }}</td>
             </tr>
             <tr class="border-b border-neutral">
                 <td class="font-semibold py-2 px-4">Surname</td>
-                <td class="py-2 px-4">{{ player.surname }}</td>
+                <td class="py-2 px-4">{{ player.user.last_name }}</td>
             </tr>
             <tr class="border-b border-neutral">
                 <td class="font-semibold py-2 px-4">Email</td>

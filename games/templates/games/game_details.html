@@ -72,8 +72,8 @@
             <tbody>
             {% for record in booking_history %}
                 <tr>
-                    {% if record.player.nickname != 'N/A' %}
-                        <td>{{ record.player.nickname }}</td>
+                    {% if record.player.user.username != 'N/A' %}
+                        <td>{{ record.player.user.username }}</td>
                     {% else %}
                         <td>{{ record.player.name }} {{ record.player.surname }}</td>
                     {% endif %}

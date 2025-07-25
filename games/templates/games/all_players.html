@@ -55,8 +55,8 @@
         <tbody>
         {% for player in players %}
             <tr>
-                {% if player.nickname != 'N/A' %}
-                    <td>{{ player.nickname }}</td>
+                {% if player.user.username != 'N/A' %}
+                    <td>{{ player.user.username }}</td>
                 {% else %}
                     <td>{{ player.name }} {{ player.surname }}</td>
                 {% endif %}
