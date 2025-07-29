@@ -45,36 +45,36 @@ def game_details(request, game_id):
 
 
 def all_players(request):
-    filter = request.GET.get('name')
-    permanent = request.GET.get('permanent')
+    filter_name = request.GET.get('name', '').strip()
+    status = request.GET.get('status')
 
-    if filter and len(filter) > 1:
-        found_players = Player.objects.filter(
-            Q(user__first_name__icontains=filter) |
-            Q(user__last_name__icontains=filter) |
-            Q(user__username__icontains=filter)
-        )
-    else:
-        found_players = Player.objects.all()
-
-    queryset = Player.objects.all()
-    if permanent:
-        found_players = queryset.filter(role__iexact='permanent')
-    # if active:
-    #     found_players = queryset.filter(role__iexact='active')
-    # if inactive:
-    #     found_players = queryset.filter(role__iexact='inactive')
-
-    found_players_aggregation = found_players.aggregate(
+    stat_counts = Player.objects.aggregate(
         total_players=Count('id'),
         permanent_players=Count('id', filter=Q(role='Permanent')),
         active_players=Count('id', filter=Q(role='Active')),
         inactive_players=Count('id', filter=Q(role='Inactive')),
     )
+
+    players = Player.objects.all()
+    if filter_name and len(filter_name) > 1:
+        players = players.filter(
+            Q(user__first_name__icontains=filter_name) |
+            Q(user__last_name__icontains=filter_name) |
+            Q(user__username__icontains=filter_name)
+        )
+    if status == 'permanent':
+        players = players.filter(role='Permanent')
+    elif status == 'active':
+        players = players.filter(role='Active')
+    elif status == 'inactive':
+        players = players.filter(role='Inactive')
+
+    # Pass both stat_counts and players to the template
     return render(request, 'games/all_players.html', {
-        'filter': filter,
-        'players': found_players,
-        'details': found_players_aggregation,
+        'filter': filter_name,
+        'players': players,
+        'details': stat_counts,
+        'status': status,
     })
 
 
