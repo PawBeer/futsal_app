@@ -30,11 +30,13 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
+    slots = [found_game.slot_1, found_game.slot_2, found_game.slot_3, found_game.slot_4, found_game.slot_5, found_game.slot_6, found_game.slot_7, found_game.slot_8, found_game.slot_9, found_game.slot_10 ]
     players = Player.objects.all().order_by('user__username')
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
         "game": found_game,
         'players': players,
+        'slots': slots,
         "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
