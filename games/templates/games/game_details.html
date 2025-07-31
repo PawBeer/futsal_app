@@ -19,26 +19,26 @@
             </div>
 
             <div class="flex justify-center w-full">
-                {% if game.number_of_occupied_slots == 10 %}
+                {% if number_of_confirmed_players == 10 %}
                     <div class="radial-progress text-success"
-                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-                         aria-valuenow="{{ game.number_of_occupied_slots }}"
-                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                {% elif game.number_of_occupied_slots == 9 %}
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ number_of_confirmed_players }}*10;"
+                         aria-valuenow="{{ number_of_confirmed_players }}"
+                         role="progressbar">{{ number_of_confirmed_players }}</div>
+                {% elif number_of_confirmed_players == 9 %}
                     <div class="radial-progress text-green-200"
-                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-                         aria-valuenow="{{ game.number_of_occupied_slots }}"
-                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
-                {% elif game.number_of_occupied_slots == 8 %}
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ number_of_confirmed_players }}*10;"
+                         aria-valuenow="{{ number_of_confirmed_players }}"
+                         role="progressbar">{{ number_of_confirmed_players }}</div>
+                {% elif number_of_confirmed_players == 8 %}
                     <div class="radial-progress text-warning"
-                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-                         aria-valuenow="{{ game.number_of_occupied_slots }}"
-                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ number_of_confirmed_players }}*10;"
+                         aria-valuenow="{{ number_of_confirmed_players }}"
+                         role="progressbar">{{ number_of_confirmed_players }}</div>
                 {% else %}
                     <div class="radial-progress text-error"
-                         style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-                         aria-valuenow="{{ game.number_of_occupied_slots }}"
-                         role="progressbar">{{ game.number_of_occupied_slots }}</div>
+                         style="--size:65px; --thickness: 0.7rem; --value:{{ number_of_confirmed_players }}*10;"
+                         aria-valuenow="{{ number_of_confirmed_players }}"
+                         role="progressbar">{{ number_of_confirmed_players }}</div>
                 {% endif %}
             </div>
         </div>
@@ -49,7 +49,7 @@
                   class="bg-base-100 p-6 rounded-lg shadow-lg bg-gray-800 text-gray-100">
                 {% csrf_token %}
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
-                    <span class="w-28 text-center">Absent</span>
+                    <span class="w-28 text-center">Play</span>
                     <span class="w-48 text-center">Permanent Player</span>
                     <span class="w-48 text-center">Substitute Player</span>
                 </div>
