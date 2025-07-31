@@ -34,12 +34,14 @@ def game_details(request, game_id):
     players = Player.objects.all().order_by('user__username')
     players_for_game = players.filter(status_history__game_id=game_id)
     confirmed_players_for_game = players_for_game.filter(status_history__player_status__exact=1)
+    cancelled_players_for_game = players_for_game.filter(status_history__player_status__exact=2)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
     return render(request, 'games/game_details.html', {
         "game": found_game,
         'players': players,
         'slots': slots,
         "confirmed_players_for_game": confirmed_players_for_game,
+        "cancelled_players_for_game": cancelled_players_for_game,
         "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
