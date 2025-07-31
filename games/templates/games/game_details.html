@@ -1,138 +1,136 @@
 {% extends 'index.html' %}
 
 {% block page_title %}
-    Game Details
-    {{ game.when }}
+    Game Details {{ game.when }}
 {% endblock %}
 
 {% block content %}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 max-w-6xl bg-base-100 rounded-lg shadow-lg">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 max-w-full bg-base-100 rounded-lg shadow-lg">
 
-  <div class="flex flex-col items-center space-y-6">
-    <div class="text-xl font-bold">
-      Week {{ game.when|date:'W - d M Y' }}
-      <div class="flex gap-2 text-zinc-500 font-semibold mt-1">
-        {{ game.status }}
-      </div>
-      <div class="flex gap-2 items-center fill-neutral-content font-normal text-base mt-2">
-        description: {{ game.description }}
-      </div>
-    </div>
-
-    <div class="flex justify-center w-full">
-      {% if game.number_of_occupied_slots == 10 %}
-        <div class="radial-progress text-success"
-             style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-             aria-valuenow="{{ game.number_of_occupied_slots }}"
-             role="progressbar">{{ game.number_of_occupied_slots }}</div>
-      {% elif game.number_of_occupied_slots == 9 %}
-        <div class="radial-progress text-green-200"
-             style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-             aria-valuenow="{{ game.number_of_occupied_slots }}"
-             role="progressbar">{{ game.number_of_occupied_slots }}</div>
-      {% elif game.number_of_occupied_slots == 8 %}
-        <div class="radial-progress text-warning"
-             style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-             aria-valuenow="{{ game.number_of_occupied_slots }}"
-             role="progressbar">{{ game.number_of_occupied_slots }}</div>
-      {% else %}
-        <div class="radial-progress text-error"
-             style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
-             aria-valuenow="{{ game.number_of_occupied_slots }}"
-             role="progressbar">{{ game.number_of_occupied_slots }}</div>
-      {% endif %}
-    </div>
-  </div>
-
-  <form method="post" class="bg-base-100" action="{% url 'game_details_url' game_id=game.id %}" class="p-6 rounded-lg shadow-lg bg-gray-800 text-gray-100">
-    {% csrf_token %}
-  
-    <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
-      <span class="w-28 text-center">Absent</span>
-      <span class="w-48 text-center">Permanent Player</span>
-      <span class="w-48 text-center">Substitute Player</span>
-    </div>
-  
-    <div class="divide-y divide-gray-600 rounded-b">
-      {% for slot in slots %}
-        <div class="flex items-center py-2">
-          <label class="flex justify-center w-28">
-            <input type="checkbox"
-                   name="disable_slot_{{ slot.pk }}"
-                   id="disable_slot_{{ slot.pk }}"
-                   class="toggle toggle-primary"
-                   checked
-                   onchange="toggleSelect({{ slot.pk }})">
-          </label>
-  
-          <span class="w-48 text-center text-gray-300">{{ slot }}</span>
-  
-          <span class="w-48 flex justify-center">
-            <select name="slot_{{ slot.pk }}"
-                    id="slot_select_{{ slot.pk }}"
-                    class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
-                    style="display: none;">
-              <option value="" class="bg-gray-700 text-gray-100">---</option>
-              {% for player in players %}
-                <option value="{{ player.pk }}" class="bg-gray-700 text-gray-100">{{ player.user.username }}</option>
-              {% endfor %}
-            </select>
-          </span>
+    <div class="flex flex-col items-center space-y-6 p-4">
+      <div class="text-xl font-bold">
+        Week {{ game.when|date:'W - d M Y' }}
+        <div class="flex gap-2 text-zinc-500 font-semibold mt-1">
+          {{ game.status }}
         </div>
-      {% endfor %}
-    </div>
-  
-    <button type="submit" class="mt-8 btn btn-primary w-full">
-      Update
-    </button>
-  </form>
+        <div class="flex gap-2 items-center fill-neutral-content font-normal text-base mt-2">
+          description: {{ game.description }}
+        </div>
+      </div>
 
+      <div class="flex justify-center w-full">
+        {% if game.number_of_occupied_slots == 10 %}
+          <div class="radial-progress text-success"
+               style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+               aria-valuenow="{{ game.number_of_occupied_slots }}"
+               role="progressbar">{{ game.number_of_occupied_slots }}</div>
+        {% elif game.number_of_occupied_slots == 9 %}
+          <div class="radial-progress text-green-200"
+               style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+               aria-valuenow="{{ game.number_of_occupied_slots }}"
+               role="progressbar">{{ game.number_of_occupied_slots }}</div>
+        {% elif game.number_of_occupied_slots == 8 %}
+          <div class="radial-progress text-warning"
+               style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+               aria-valuenow="{{ game.number_of_occupied_slots }}"
+               role="progressbar">{{ game.number_of_occupied_slots }}</div>
+        {% else %}
+          <div class="radial-progress text-error"
+               style="--size:65px; --thickness: 0.7rem; --value:{{ game.number_of_occupied_slots }}*10;"
+               aria-valuenow="{{ game.number_of_occupied_slots }}"
+               role="progressbar">{{ game.number_of_occupied_slots }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="p-4">
+      <form method="post"
+            action="{% url 'game_details_url' game_id=game.id %}"
+            class="bg-base-100 p-6 rounded-lg shadow-lg bg-gray-800 text-gray-100">
+        {% csrf_token %}
+        <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
+          <span class="w-28 text-center">Absent</span>
+          <span class="w-48 text-center">Permanent Player</span>
+          <span class="w-48 text-center">Substitute Player</span>
+        </div>
+        <div class="divide-y divide-gray-600 rounded-b">
+          {% for confirmed_player in confirmed_players_for_game %}
+          <div class="flex items-center py-2">
+            <label for="disable_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
+              <input type="checkbox"
+                     name="disable_slot_{{ confirmed_player.pk }}"
+                     id="disable_slot_{{ confirmed_player.pk }}"
+                     class="toggle toggle-primary"
+                     checked
+                     onchange="toggleSelect({{ confirmed_player.pk }})">
+            </label>
+            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+            <span class="w-48 flex justify-center">
+              <select name="slot_{{ confirmed_player.pk }}"
+                      id="slot_select_{{ confirmed_player.pk }}"
+                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
+                      style="display: none;">
+                <option value="">---</option>
+                {% for available_player in players %}
+                  <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
+                {% endfor %}
+              </select>
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="mt-8 btn btn-primary w-full">
+          Update
+        </button>
+      </form>
+
+      <script>
+      function toggleSelect(slotPk) {
+        const checkbox = document.getElementById('disable_slot_' + slotPk);
+        const select = document.getElementById('slot_select_' + slotPk);
+        if (checkbox && select) {
+          if (checkbox.checked) {
+            select.style.display = 'none';
+            select.selectedIndex = 0;
+          } else {
+            select.style.display = '';
+          }
+        }
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        {% for confirmed_player in confirmed_players_for_game %}
+          toggleSelect({{ confirmed_player.pk }});
+        {% endfor %}
+      });
+      </script>
+    </div>
+    
+    <div class="p-4 flex flex-col gap-4">
+      <div class="card shadow-lg text-center bg-base-100 text-xl font-semibold">
+          Booking history for this game
+      </div>
+      <table class="table">
+          <thead>
+          <tr>
+              <th>Player</th>
+              <th>Status for Player</th>
+              <th>Created</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for record in booking_history %}
+              <tr>
+                  {% if record.player.user.username != 'N/A' %}
+                      <td>{{ record.player.user.username }}</td>
+                  {% else %}
+                      <td>{{ record.player.name }} {{ record.player.surname }}</td>
+                  {% endif %}
+                  <td>{{ record.player_status.player_status_name }}</td>
+                  <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+              </tr>
+          {% endfor %}
+          </tbody>
+      </table>
+    </div>
 </div>
-
-<script>
-function toggleSelect(slotPk) {
-  const checkbox = document.getElementById('disable_slot_' + slotPk);
-  const select = document.getElementById('slot_select_' + slotPk);
-  if (checkbox.checked) {
-    select.style.display = 'none';
-    select.selectedIndex = 0;
-  } else {
-    select.style.display = '';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  {% for slot in slots %}
-    toggleSelect({{ slot.pk }});
-  {% endfor %}
-});
-</script>
-
-
-        <div class="card shadow-lg text-center bg-base-100 text-xl font-semibold m-5">
-            Booking history for this game
-        </div>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Player</th>
-                <th>Status for Player</th>
-                <th>Created</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for record in booking_history %}
-                <tr>
-                    {% if record.player.user.username != 'N/A' %}
-                        <td>{{ record.player.user.username }}</td>
-                    {% else %}
-                        <td>{{ record.player.name }} {{ record.player.surname }}</td>
-                    {% endif %}
-                    <td>{{ record.player_status.player_status_name }}</td>
-                    <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
 {% endblock %}
