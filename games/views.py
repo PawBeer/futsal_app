@@ -30,7 +30,6 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    slots = [found_game.slot_1, found_game.slot_2, found_game.slot_3, found_game.slot_4, found_game.slot_5, found_game.slot_6, found_game.slot_7, found_game.slot_8, found_game.slot_9, found_game.slot_10 ]
     players = Player.objects.all().order_by('user__username')
     players_for_game = players.filter(status_history__game_id=game_id)
     planned_players_for_game = players_for_game.filter(status_history__player_status__exact=1)
@@ -40,7 +39,6 @@ def game_details(request, game_id):
     return render(request, 'games/game_details.html', {
         "game": found_game,
         'players': players,
-        'slots': slots,
         "planned_players_for_game": planned_players_for_game,
         "cancelled_players_for_game": cancelled_players_for_game,
         'number_of_confirmed_players': number_of_confirmed_players,
