@@ -56,10 +56,10 @@
                 <div class="divide-y divide-gray-600 rounded-b">
                     {% for planned_player in planned_players_for_game %}
                         <div class="flex items-center py-2">
-                            <label for="disable_slot_{{ planned_player }}" class="flex justify-center w-28">
+                            <label for="play_slot_{{ planned_player }}" class="flex justify-center w-28">
                                 <input type="checkbox"
-                                       name="disable_slot_{{ planned_player.pk }}"
-                                       id="disable_slot_{{ planned_player.pk }}"
+                                       name="play_slot_{{ planned_player.pk }}"
+                                       id="play_slot_{{ planned_player.pk }}"
                                        class="toggle toggle-primary"
                                        checked
                                        onchange="toggleSelect({{ planned_player.pk }})">
@@ -80,10 +80,10 @@
                     {% endfor %}
                     {% for cancelled_players in cancelled_players_for_game %}
                         <div class="flex items-center py-2">
-                            <label for="disable_slot_{{ cancelled_players.pk }}" class="flex justify-center w-28">
+                            <label for="play_slot_{{ cancelled_players.pk }}" class="flex justify-center w-28">
                                 <input type="checkbox"
-                                       name="disable_slot_{{ cancelled_players.pk }}"
-                                       id="disable_slot_{{ cancelled_players.pk }}"
+                                       name="play_slot_{{ cancelled_players.pk }}"
+                                       id="play_slot_{{ cancelled_players.pk }}"
                                        class="toggle toggle-primary"
                                        onchange="toggleSelect({{ cancelled_players.pk }})">
                             </label>
@@ -109,7 +109,7 @@
 
             <script>
                 function toggleSelect(slotPk) {
-                    const checkbox = document.getElementById('disable_slot_' + slotPk);
+                    const checkbox = document.getElementById('play_slot_' + slotPk);
                     const select = document.getElementById('slot_select_' + slotPk);
                     if (checkbox && select) {
                         if (checkbox.checked) {
