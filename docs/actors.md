@@ -37,8 +37,8 @@
    - ID (PK)
    - status (FK: GAME_STATUS) 
    - when : date
-   
    - description: text
+   
    - slot_1 : player_id
    - slot_2 : player_id
    - slot_3 : player_id

@@ -54,20 +54,20 @@
                     <span class="w-48 text-center">Substitute Player</span>
                 </div>
                 <div class="divide-y divide-gray-600 rounded-b">
-                    {% for confirmed_player in confirmed_players_for_game %}
+                    {% for planned_player in planned_players_for_game %}
                         <div class="flex items-center py-2">
-                            <label for="disable_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
+                            <label for="disable_slot_{{ planned_player }}" class="flex justify-center w-28">
                                 <input type="checkbox"
-                                       name="disable_slot_{{ confirmed_player.pk }}"
-                                       id="disable_slot_{{ confirmed_player.pk }}"
+                                       name="disable_slot_{{ planned_player.pk }}"
+                                       id="disable_slot_{{ planned_player.pk }}"
                                        class="toggle toggle-primary"
                                        checked
-                                       onchange="toggleSelect({{ confirmed_player.pk }})">
+                                       onchange="toggleSelect({{ planned_player.pk }})">
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
-              <select name="slot_{{ confirmed_player.pk }}"
-                      id="slot_select_{{ confirmed_player.pk }}"
+              <select name="slot_{{ planned_player.pk }}"
+                      id="slot_select_{{ planned_player.pk }}"
                       class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
                       style="display: none;">
                 <option value="">---</option>
