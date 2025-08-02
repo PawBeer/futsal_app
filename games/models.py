@@ -25,11 +25,14 @@ class Player(models.Model):
     def __str__(self):
         return self.user.username if self.user else "(No user)"
 
+    def get_latest_booking_for_game(self, game):
+        return BookingHistoryForGame.objects.filter(player=self, game=game).order_by('-creation_date').first()
+
 
 class PlayerStatus(models.Model):
-    player_status_name = models.CharField(max_length=50, unique=True)
+    player_status = models.CharField(max_length=50, unique=True)
     def __str__(self):
-        return self.player_status_name
+        return self.player_status
 
 class Game(models.Model):
     when = models.DateField()
@@ -45,9 +48,6 @@ class BookingHistoryForGame(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='status_history')
     player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('player', 'game')
 
     def __str__(self):
         return f"{self.player} - {self.player_status} on {self.game}"

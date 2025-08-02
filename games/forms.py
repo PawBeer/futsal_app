@@ -18,3 +18,9 @@ class GameForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'class': 'form-control  h-12 border-1'}),
         }
+
+# class BookingHistoryForGame(forms.Form):
+#     game = forms.ModelChoiceField(queryset=Game.objects.all())
+#     player = forms.ModelChoiceField(queryset=Player.objects.all())
+#     player_status = forms.ChoiceField(choices=choices)
+#     creation_date = forms.DateTimeField()

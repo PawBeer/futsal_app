@@ -66,16 +66,16 @@
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
-              <select name="slot_{{ planned_player.pk }}"
-                      id="slot_select_{{ planned_player.pk }}"
-                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
-                      style="display: none;">
-                <option value="">---</option>
-                  {% for available_player in players %}
-                      <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
-                  {% endfor %}
-              </select>
-            </span>
+                                <select name="slot_{{ planned_player.pk }}"
+                                        id="slot_select_{{ planned_player.pk }}"
+                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
+                                        style="display: none;">
+                                        <option value="">---</option>
+                                    {% for available_player in players %}
+                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </span>
                         </div>
                     {% endfor %}
                     {% for cancelled_players in cancelled_players_for_game %}
@@ -152,7 +152,7 @@
                         {% else %}
                             <td>{{ record.player.name }} {{ record.player.surname }}</td>
                         {% endif %}
-                        <td>{{ record.player_status.player_status_name }}</td>
+                        <td>{{ record.player_status.player_status }}</td>
                         <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
                     </tr>
                 {% endfor %}

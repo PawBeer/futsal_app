@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
@@ -30,18 +30,57 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    players = Player.objects.all().order_by('user__username')
-    players_for_game = players.filter(status_history__game_id=game_id)
-    planned_players_for_game = players_for_game.filter(status_history__player_status__exact=1)
-    cancelled_players_for_game = players_for_game.filter(status_history__player_status__exact=2)
-    number_of_confirmed_players = planned_players_for_game.count()
+    players_for_game = Player.objects.filter(status_history__game=found_game).order_by('user__username').distinct()
+
+    player_status_planned = PlayerStatus.objects.get(player_status='planned')
+    player_status_cancelled = PlayerStatus.objects.get(player_status='cancelled')
+
+    latest_bookings = {
+        player.pk: player.get_latest_booking_for_game(found_game)
+        for player in players_for_game
+    }
+
+    if request.method == 'POST':
+        for player in players_for_game:
+            checkbox_name = f'play_slot_{player.pk}'
+
+            if checkbox_name in request.POST:
+                BookingHistoryForGame.objects.create(
+                    player=player,
+                    game=found_game,
+                    player_status=player_status_planned,
+                    creation_date=timezone.now(),
+                )
+            else:
+                BookingHistoryForGame.objects.create(
+                    player=player,
+                    game=found_game,
+                    player_status=player_status_cancelled,
+                    creation_date=timezone.now(),
+                )
+
+        return redirect('game_details_url', game_id=found_game.id)
+
+    planned_players_for_game = [
+        player for player in players_for_game
+        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_planned
+    ]
+
+    cancelled_players_for_game = [
+        player for player in players_for_game
+        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_cancelled
+    ]
+
+    number_of_confirmed_players = len(planned_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
+
     return render(request, 'games/game_details.html', {
         "game": found_game,
-        'players': players,
+        "players": players_for_game,
+        "latest_bookings": latest_bookings,
         "planned_players_for_game": planned_players_for_game,
         "cancelled_players_for_game": cancelled_players_for_game,
-        'number_of_confirmed_players': number_of_confirmed_players,
+        "number_of_confirmed_players": number_of_confirmed_players,
         "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
