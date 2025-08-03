@@ -96,7 +96,7 @@ def game_details(request, game_id):
         if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_confirmed
     ]
 
-    number_of_confirmed_players = len(planned_players_for_game)
+    number_of_confirmed_players = len(planned_players_for_game) + len(confirmed_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game)
 
     return render(request, 'games/game_details.html', {
