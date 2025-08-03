@@ -48,12 +48,16 @@
                   action="{% url 'game_details_url' game_id=game.id %}"
                   class="bg-base-100 p-6 rounded-lg shadow-lg bg-gray-800 text-gray-100">
                 {% csrf_token %}
+            <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
+            Permanent players
+        </div>
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                     <span class="w-28 text-center">Play</span>
-                    <span class="w-48 text-center">Permanent Player</span>
+                    <span class="w-48 text-center">Player</span>
                     <span class="w-48 text-center">Substitute Player</span>
                 </div>
                 <div class="divide-y divide-gray-600 rounded-b">
+                
                     {% for planned_player in planned_players_for_game %}
                         <div class="flex items-center py-2">
                             <label for="play_slot_{{ planned_player }}" class="flex justify-center w-28">
@@ -78,27 +82,82 @@
                             </span>
                         </div>
                     {% endfor %}
-                    {% for cancelled_players in cancelled_players_for_game %}
+                    {% for cancelled_player in cancelled_players_for_game %}
                         <div class="flex items-center py-2">
-                            <label for="play_slot_{{ cancelled_players.pk }}" class="flex justify-center w-28">
+                            <label for="play_slot_{{ cancelled_player.pk }}" class="flex justify-center w-28">
                                 <input type="checkbox"
-                                       name="play_slot_{{ cancelled_players.pk }}"
-                                       id="play_slot_{{ cancelled_players.pk }}"
+                                       name="play_slot_{{ cancelled_player.pk }}"
+                                       id="play_slot_{{ cancelled_player.pk }}"
                                        class="toggle toggle-primary"
-                                       onchange="toggleSelect({{ cancelled_players.pk }})">
+                                       onchange="toggleSelect({{ cancelled_player.pk }})">
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ cancelled_players.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
-              <select name="slot_{{ cancelled_players.pk }}"
-                      id="slot_select_{{ cancelled_players.pk }}"
+              <select name="slot_{{ cancelled_player.pk }}"
+                      id="slot_select_{{ cancelled_player.pk }}"
                       class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
               >
                   <option value="">---</option>
-                  {% for available_player in players %}
+                  {% for available_player in all_players %}
                       <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
                   {% endfor %}
               </select>
             </span>
+                        </div>
+                    {% endfor %}
+               <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
+            Reserved players
+        </div>
+                <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
+                    <span class="w-28 text-center">Play</span>
+                    <span class="w-48 text-center">Player</span>
+                    <span class="w-48 text-center">Substituted Player</span>
+                </div>
+                                {% for reserved_player in reserved_players_for_game %}
+                        <div class="flex items-center py-2">
+                            <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
+                                <input type="checkbox"
+                                       name="play_slot_{{ reserved_player.pk }}"
+                                       id="play_slot_{{ reserved_player.pk }}"
+                                       class="toggle toggle-primary"
+                                       onchange="toggleSelect({{ reserved_player.pk }})">
+                            </label>
+                            <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
+                            <span class="w-48 flex justify-center">
+              <select name="slot_{{ reserved_player.pk }}"
+                      id="slot_select_{{ reserved_player.pk }}"
+                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
+              >
+                  <option value="">---</option>
+                  {% for available_player in all_players %}
+                      <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
+                  {% endfor %}
+              </select>
+            </span>
+                        </div>
+                    {% endfor %}
+                {% for confirmed_player in confirmed_players_for_game %}
+                        <div class="flex items-center py-2">
+                            <label for="play_slot_{{ confirmed_player }}" class="flex justify-center w-28">
+                                <input type="checkbox"
+                                       name="play_slot_{{ confirmed_player.pk }}"
+                                       id="play_slot_{{ confirmed_player.pk }}"
+                                       class="toggle toggle-primary"
+                                       checked
+                                       onchange="toggleSelect({{ confirmed_player.pk }})">
+                            </label>
+                            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+                            <span class="w-48 flex justify-center">
+                                <select name="slot_{{ confirmed_player.pk }}"
+                                        id="slot_select_{{ confirmed_player.pk }}"
+                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
+                                        style="display: none;">
+                                        <option value="">---</option>
+                                    {% for available_player in players %}
+                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </span>
                         </div>
                     {% endfor %}
                 </div>
