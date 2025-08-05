@@ -76,25 +76,19 @@ def game_details(request, game_id):
 
         return redirect('game_details_url', game_id=found_game.id)
 
-    planned_players_for_game = [
-        player for player in players_for_game
-        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_planned
-    ]
+    def get_players_by_status(players_for_game, latest_bookings, status):
+        players_and_dates = [
+            (player, latest_bookings[player.pk].creation_date)
+            for player in players_for_game
+            if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == status
+        ]
+        players_and_dates.sort(key=lambda x: x[1])
+        return [player for player, date in players_and_dates]
 
-    cancelled_players_for_game = [
-        player for player in players_for_game
-        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_cancelled
-    ]
-
-    reserved_players_for_game = [
-        player for player in players_for_game
-        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_reserved
-    ]
-
-    confirmed_players_for_game = [
-        player for player in players_for_game
-        if latest_bookings[player.pk] and latest_bookings[player.pk].player_status == player_status_confirmed
-    ]
+    planned_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_planned)
+    cancelled_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_cancelled)
+    reserved_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_reserved)
+    confirmed_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_confirmed)
 
     number_of_confirmed_players = len(planned_players_for_game) + len(confirmed_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game).order_by('-creation_date')

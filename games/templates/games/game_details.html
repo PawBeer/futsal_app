@@ -70,15 +70,6 @@
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
-{#                                <select name="slot_{{ planned_player.pk }}"#}
-{#                                        id="slot_select_{{ planned_player.pk }}"#}
-{#                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"#}
-{#                                        style="display: none;">#}
-{#                                        <option value="">---</option>#}
-{#                                    {% for available_player in players %}#}
-{#                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
-{#                                    {% endfor %}#}
-{#                                </select>#}
                             </span>
                         </div>
                     {% endfor %}
@@ -93,15 +84,6 @@
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
-{#              <select name="slot_{{ cancelled_player.pk }}"#}
-{#                      id="slot_select_{{ cancelled_player.pk }}"#}
-{#                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"#}
-{#              >#}
-{#                  <option value="">---</option>#}
-{#                  {% for available_player in all_players %}#}
-{#                      <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
-{#                  {% endfor %}#}
-{#              </select>#}
             </span>
                         </div>
                     {% endfor %}
@@ -150,7 +132,7 @@
                             <span class="w-48 flex justify-center">
               <select name="slot_{{ reserved_player.pk }}"
                       id="slot_select_{{ reserved_player.pk }}"
-                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100" 
+                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
                       style="display: none;">
 >                  <option value="">---</option>
                   {% for available_player in players %}
