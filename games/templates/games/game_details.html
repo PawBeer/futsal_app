@@ -66,7 +66,8 @@
                                        id="play_slot_{{ planned_player.pk }}"
                                        class="toggle toggle-primary"
                                        checked
-                                       onchange="toggleSelect({{ planned_player.pk }})">
+{#                                       onchange="toggleSelect({{ planned_player.pk }})"#}
+                                >
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
                             <span class="w-48 flex justify-center">
@@ -80,7 +81,8 @@
                                        name="play_slot_{{ cancelled_player.pk }}"
                                        id="play_slot_{{ cancelled_player.pk }}"
                                        class="toggle toggle-primary"
-                                       onchange="toggleSelect({{ cancelled_player.pk }})">
+{#                                       onchange="toggleSelect({{ cancelled_player.pk }})"#}
+                                >
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
         <span class="w-48 flex justify-center">
@@ -109,7 +111,8 @@
                                        id="play_slot_{{ confirmed_player.pk }}"
                                        class="toggle toggle-primary"
                                        checked
-                                       onchange="toggleSelect({{ confirmed_player.pk }})">
+{#                                       onchange="toggleSelect({{ confirmed_player.pk }})"#}
+                                >
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
 {#                            <span class="w-48 flex justify-center">#}
@@ -131,7 +134,8 @@
                                        name="play_slot_{{ reserved_player.pk }}"
                                        id="play_slot_{{ reserved_player.pk }}"
                                        class="toggle toggle-primary"
-                                       onchange="toggleSelect({{ reserved_player.pk }})">
+{#                                       onchange="toggleSelect({{ reserved_player.pk }})"#}
+                                >
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
 {#                            <span class="w-48 flex justify-center">#}
