@@ -1777,6 +1777,11 @@
   .p-6 {
     padding: calc(var(--spacing) * 6);
   }
+  .badge-lg {
+    --size: calc(var(--size-selector, 0.25rem) * 7);
+    font-size: 1rem;
+    padding-inline: calc(0.25rem * 3.5 - var(--border));
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -1833,6 +1838,9 @@
   .text-error {
     color: var(--color-error);
   }
+  .text-error-content {
+    color: var(--color-error-content);
+  }
   .text-gray-100 {
     color: var(--color-gray-100);
   }
@@ -1845,6 +1853,9 @@
   .text-green-200 {
     color: var(--color-green-200);
   }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
   .text-success {
     color: var(--color-success);
   }
@@ -1853,6 +1864,9 @@
   }
   .text-zinc-500 {
     color: var(--color-zinc-500);
+  }
+  .italic {
+    font-style: italic;
   }
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
@@ -1933,6 +1947,14 @@
         --btn-noise: none;
       }
     }
+  }
+  .badge-error {
+    --badge-color: var(--color-error);
+    --badge-fg: var(--color-error-content);
+  }
+  .badge-success {
+    --badge-color: var(--color-success);
+    --badge-fg: var(--color-success-content);
   }
   .btn-primary {
     --btn-color: var(--color-primary);

@@ -93,6 +93,11 @@ def game_details(request, game_id):
     number_of_confirmed_players = len(planned_players_for_game) + len(confirmed_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game).order_by('-creation_date')
 
+    cancelled_with_substitutes = []
+    for idx, cancelled_player in enumerate(cancelled_players_for_game):
+        substitute = confirmed_players_for_game[idx] if idx < len(confirmed_players_for_game) else None
+        cancelled_with_substitutes.append((cancelled_player, substitute))
+
     return render(request, 'games/game_details.html', {
         "game": found_game,
         "all_players": all_players,
@@ -103,6 +108,7 @@ def game_details(request, game_id):
         "reserved_players_for_game": reserved_players_for_game,
         "confirmed_players_for_game": confirmed_players_for_game,
         "number_of_confirmed_players": number_of_confirmed_players,
+        "cancelled_with_substitutes": cancelled_with_substitutes,
         "booking_history": found_booking_history,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),

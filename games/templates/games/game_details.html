@@ -73,7 +73,7 @@
                             </span>
                         </div>
                     {% endfor %}
-                    {% for cancelled_player in cancelled_players_for_game %}
+                    {% for cancelled_player, substitute in cancelled_with_substitutes %}
                         <div class="flex items-center py-2">
                             <label for="play_slot_{{ cancelled_player.pk }}" class="flex justify-center w-28">
                                 <input type="checkbox"
@@ -83,10 +83,15 @@
                                        onchange="toggleSelect({{ cancelled_player.pk }})">
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
-                            <span class="w-48 flex justify-center">
-            </span>
-                        </div>
-                    {% endfor %}
+        <span class="w-48 flex justify-center">
+            {% if substitute %}
+               <span class="badge badge-success">{{ substitute.user.username }}</span>
+            {% else %}
+               <span class="badge badge-error">free slot</span>
+            {% endif %}
+        </span>
+    </div>
+{% endfor %}
                <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
             Reserved players
         </div>
