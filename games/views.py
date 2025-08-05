@@ -8,6 +8,8 @@ from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
 from django.views import View
 from .forms import PlayerForm, GameForm
+from django.views.decorators.http import require_POST
+
 
 
 class Breadcrumb:
@@ -42,39 +44,6 @@ def game_details(request, game_id):
         player.pk: player.get_latest_booking_for_game(found_game)
         for player in players_for_game
     }
-
-    if request.method == 'POST':
-        for player in players_for_game:
-            checkbox_name = f'play_slot_{player.pk}'
-            current_booking = latest_bookings.get(player.pk)
-            current_status = current_booking.player_status if current_booking else None
-
-            checkbox_is_checked = checkbox_name in request.POST
-
-            if current_status == player_status_planned:
-                new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
-
-            elif current_status == player_status_cancelled:
-                new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
-
-            elif current_status == player_status_reserved:
-                new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
-
-            elif current_status == player_status_confirmed:
-                new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
-
-            else:
-                new_status = current_status
-
-            if current_status != new_status:
-                BookingHistoryForGame.objects.create(
-                    player=player,
-                    game=found_game,
-                    player_status=new_status,
-                    creation_date=timezone.now(),
-                )
-
-        return redirect('game_details_url', game_id=found_game.id)
 
     def get_players_by_status(players_for_game, latest_bookings, status):
         players_and_dates = [
@@ -117,7 +86,68 @@ def game_details(request, game_id):
             Breadcrumb(reverse('game_details_url', args=[found_game.id]), found_game.when),
         ],
     })
+@login_required
+@require_POST
+def game_status_update(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    status_value = request.POST.get('status')
+    description = request.POST.get('description')
 
+    if status_value:
+        game.status = status_value
+    if description is not None:
+        game.description = description
+    game.save()
+    return redirect('game_details_url', game_id=game_id)
+
+
+@login_required
+@require_POST
+def game_player_status_update(request, game_id):
+    found_game = get_object_or_404(Game, id=game_id)
+    players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
+
+    player_status_planned = PlayerStatus.objects.get(player_status='planned')
+    player_status_cancelled = PlayerStatus.objects.get(player_status='cancelled')
+    player_status_reserved = PlayerStatus.objects.get(player_status='reserved')
+    player_status_confirmed = PlayerStatus.objects.get(player_status='confirmed')
+
+    latest_bookings = {
+        player.pk: player.get_latest_booking_for_game(found_game)
+        for player in players_for_game
+    }
+
+    for player in players_for_game:
+        checkbox_name = f'play_slot_{player.pk}'
+        current_booking = latest_bookings.get(player.pk)
+        current_status = current_booking.player_status if current_booking else None
+
+        checkbox_is_checked = checkbox_name in request.POST
+
+        if current_status == player_status_planned:
+            new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
+
+        elif current_status == player_status_cancelled:
+            new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
+
+        elif current_status == player_status_reserved:
+            new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
+
+        elif current_status == player_status_confirmed:
+            new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
+
+        else:
+            new_status = current_status
+
+        if current_status != new_status:
+            BookingHistoryForGame.objects.create(
+                player=player,
+                game=found_game,
+                player_status=new_status,
+                creation_date=timezone.now(),
+            )
+
+    return redirect('game_details_url', game_id=game_id)
 
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
@@ -222,3 +252,4 @@ class AddGameView(View):
             form.save_m2m()
 
             return redirect('game_details_url', game.id)
+
