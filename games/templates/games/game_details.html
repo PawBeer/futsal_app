@@ -98,7 +98,7 @@
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                     <span class="w-28 text-center">Play</span>
                     <span class="w-48 text-center">Player</span>
-                    <span class="w-48 text-center">Temporarily for Player</span>
+{#                    <span class="w-48 text-center">Temporarily for Player</span>#}
                 </div>
 
                 {% for confirmed_player in confirmed_players_for_game %}
@@ -112,16 +112,16 @@
                                        onchange="toggleSelect({{ confirmed_player.pk }})">
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
-                            <span class="w-48 flex justify-center">
-                                <select name="slot_{{ confirmed_player.pk }}"
-                                        id="slot_select_{{ confirmed_player.pk }}"
-                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100">
-                                        <option value="">---</option>
-                                    {% for available_player in players %}
-                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
-                                    {% endfor %}
-                                </select>
-                            </span>
+{#                            <span class="w-48 flex justify-center">#}
+{#                                <select name="slot_{{ confirmed_player.pk }}"#}
+{#                                        id="slot_select_{{ confirmed_player.pk }}"#}
+{#                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100">#}
+{#                                        <option value="">---</option>#}
+{#                                    {% for available_player in players %}#}
+{#                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
+{#                                    {% endfor %}#}
+{#                                </select>#}
+{#                            </span>#}
                         </div>
                     {% endfor %}
                 {% for reserved_player in reserved_players_for_game %}
@@ -134,17 +134,17 @@
                                        onchange="toggleSelect({{ reserved_player.pk }})">
                             </label>
                             <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
-                            <span class="w-48 flex justify-center">
-              <select name="slot_{{ reserved_player.pk }}"
-                      id="slot_select_{{ reserved_player.pk }}"
-                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"
-                      style="display: none;">
->                  <option value="">---</option>
-                  {% for available_player in players %}
-                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>
-                                    {% endfor %}
-              </select>
-            </span>
+{#                            <span class="w-48 flex justify-center">#}
+{#              <select name="slot_{{ reserved_player.pk }}"#}
+{#                      id="slot_select_{{ reserved_player.pk }}"#}
+{#                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"#}
+{#                      style="display: none;">#}
+{#>                  <option value="">---</option>#}
+{#                  {% for available_player in players %}#}
+{#                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
+{#                                    {% endfor %}#}
+{#              </select>#}
+{#            </span>#}
                         </div>
                     {% endfor %}
                 </div>
@@ -153,29 +153,29 @@
                 </button>
             </form>
 
-            <script>
-                function toggleSelect(slotPk) {
-                    const checkbox = document.getElementById('play_slot_' + slotPk);
-                    const select = document.getElementById('slot_select_' + slotPk);
-                    if (checkbox && select) {
-                        if (checkbox.checked) {
-                            select.style.display = '';
-                        } else {
-                            select.style.display = 'none';
-                            select.selectedIndex = 0;
-                        }
-                    }
-                }
-
-                document.addEventListener('DOMContentLoaded', () => {
-                    {% for confirmed_player in confirmed_players_for_game %}
-                        toggleSelect({{ confirmed_player.pk }});
-                    {% endfor %}
-                    {% for cancelled_player in cancelled_players_for_game %}
-                        toggleSelect({{ cancelled_player.pk }});
-                    {% endfor %}
-                });
-            </script>
+{#            <script>#}
+{#                function toggleSelect(slotPk) {#}
+{#                    const checkbox = document.getElementById('play_slot_' + slotPk);#}
+{#                    const select = document.getElementById('slot_select_' + slotPk);#}
+{#                    if (checkbox && select) {#}
+{#                        if (checkbox.checked) {#}
+{#                            select.style.display = '';#}
+{#                        } else {#}
+{#                            select.style.display = 'none';#}
+{#                            select.selectedIndex = 0;#}
+{#                        }#}
+{#                    }#}
+{#                }#}
+{##}
+{#                document.addEventListener('DOMContentLoaded', () => {#}
+{#                    {% for confirmed_player in confirmed_players_for_game %}#}
+{#                        toggleSelect({{ confirmed_player.pk }});#}
+{#                    {% endfor %}#}
+{#                    {% for cancelled_player in cancelled_players_for_game %}#}
+{#                        toggleSelect({{ cancelled_player.pk }});#}
+{#                    {% endfor %}#}
+{#                });#}
+{#            </script>#}
         </div>
 
         <div class="p-4 flex flex-col gap-4">
