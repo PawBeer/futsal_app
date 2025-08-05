@@ -89,9 +89,9 @@ def game_details(request, game_id):
     cancelled_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_cancelled)
     reserved_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_reserved)
     confirmed_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_confirmed)
-
     number_of_confirmed_players = len(planned_players_for_game) + len(confirmed_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game).order_by('-creation_date')
+    status_options = ["planned", "played", "cancelled"]
 
     cancelled_with_substitutes = []
     for idx, cancelled_player in enumerate(cancelled_players_for_game):
@@ -110,6 +110,7 @@ def game_details(request, game_id):
         "number_of_confirmed_players": number_of_confirmed_players,
         "cancelled_with_substitutes": cancelled_with_substitutes,
         "booking_history": found_booking_history,
+        "status_options": status_options,
         "breadcrumbs": [
             Breadcrumb(reverse('past_games_url'), 'Past games'),
             Breadcrumb(reverse('next_games_url'), 'Next games'),
