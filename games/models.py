@@ -35,8 +35,13 @@ class PlayerStatus(models.Model):
         return self.player_status
 
 class Game(models.Model):
+    STATUS_CHOICES = [
+        ('Planned', 'Planned'),
+        ('Played', 'Played'),
+        ('Cancelled', 'Cancelled'),
+    ]
     when = models.DateField()
-    status = models.CharField(max_length=100, default='planned')
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='Planned')
     description = models.TextField(null=True, blank = True)
 
     def __str__(self):

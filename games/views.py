@@ -60,7 +60,7 @@ def game_details(request, game_id):
     confirmed_players_for_game = get_players_by_status(players_for_game, latest_bookings, player_status_confirmed)
     number_of_confirmed_players = len(planned_players_for_game) + len(confirmed_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(game=found_game).order_by('-creation_date')
-    status_options = ["Planned", "Played", "Cancelled"]
+    status_options = [choice[0] for choice in Game.STATUS_CHOICES]
 
     cancelled_with_substitutes = []
     for idx, cancelled_player in enumerate(cancelled_players_for_game):
