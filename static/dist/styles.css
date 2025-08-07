@@ -1603,6 +1603,9 @@
   .h-\[1em\] {
     height: 1em;
   }
+  .min-h-screen {
+    min-height: 100vh;
+  }
   .w-15 {
     width: calc(var(--spacing) * 15);
   }
@@ -1654,6 +1657,9 @@
       outline: 2px solid currentColor;
       outline-offset: 2px;
     }
+  }
+  .cursor-not-allowed {
+    cursor: not-allowed;
   }
   .cursor-pointer {
     cursor: pointer;
@@ -1765,6 +1771,9 @@
   .bg-base-100 {
     background-color: var(--color-base-100);
   }
+  .bg-base-200 {
+    background-color: var(--color-base-200);
+  }
   .bg-gray-700 {
     background-color: var(--color-gray-700);
   }
@@ -1797,6 +1806,9 @@
   }
   .text-center {
     text-align: center;
+  }
+  .text-right {
+    text-align: right;
   }
   .text-lg {
     font-size: var(--text-lg);
@@ -1842,6 +1854,12 @@
   }
   .text-green-200 {
     color: var(--color-green-200);
+  }
+  .text-neutral-content {
+    color: var(--color-neutral-content);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
   }
   .text-success {
     color: var(--color-success);

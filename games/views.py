@@ -185,12 +185,25 @@ def all_players(request):
 
 @login_required
 def player_details(request, player_id):
-    found_player = get_object_or_404(Player, id=player_id)
+    player = get_object_or_404(Player, id=player_id)
+    user = player.user
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.email = request.POST.get('email', '')
+        user.save()
+
+        player.mobile_number = request.POST.get('mobile_number', '')
+        player.role = request.POST.get('role', '')
+        player.save()
+
+        return redirect('player_details_url', player_id=player.id)
+
     return render(request, 'games/player_details.html', {
-        "player": found_player,
+        "player": player,
         "breadcrumbs": [
             Breadcrumb(reverse('all_players_url'), 'All Players'),
-            Breadcrumb(reverse('player_details_url', args=[found_player.id]), found_player.user),
+            Breadcrumb(reverse('player_details_url', args=[player.id]), player.user),
         ]
     })
 
@@ -214,7 +227,6 @@ def add_player(request):
 @user_passes_test(lambda u: u.is_superuser)
 def add_player_with_form(request):
     return render(request, 'games/add_player_with_form.html')
-
 
 @login_required()
 def booking_history(request):
