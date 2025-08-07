@@ -25,7 +25,7 @@
   <div class="flex gap-2">
     {% if user.is_authenticated and user.is_superuser %}
         <a href="{% url 'add_game_with_form_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_with_form_url' %}btn-active border-accent-content{% endif %}">Add game</a>
-      <a href="{% url 'add_player_with_form_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_with_form_url' %}btn-active border-accent-content{% endif %}">Add player</a>
+      <a href="{% url 'add_player_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player' %}btn-active border-accent-content{% endif %}">Add player</a>
     {% endif %}
     <div class="dropdown dropdown-end">
       <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
