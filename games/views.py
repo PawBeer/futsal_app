@@ -232,7 +232,7 @@ def add_player(request):
                 user.save()
 
                 player = Player(user=user, mobile_number=mobile_number, role=role)
-                player.full_clean()
+                # player.full_clean()
                 player.save()
 
                 messages.success(request, f"Player '{username}' It has been added successfully.")
