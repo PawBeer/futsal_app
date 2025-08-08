@@ -294,3 +294,18 @@ class AddGameView(View):
 
             return redirect('game_details_url', game.id)
 
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def add_game(request):
+    if request.method == 'POST':
+        Game.objects.create(
+            when=datetime.strptime(request.POST.get('when',''), '%Y-%m-%d'),
+            status=request.POST.get('status', 'Planned'),
+            description = request.POST.get('description', ''),
+        )
+        return redirect('next_games_url')
+
+    return render(request, 'games/add_game.html', {
+            'role_choices': Game.STATUS_CHOICES,
+        })
