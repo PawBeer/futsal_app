@@ -1,9 +1,9 @@
-{%  load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{%  block page_title%}Games{%  endblock %}</title>
+    <title>{% block page_title %}Games{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
     <link rel="stylesheet" href="{% static 'dist/main.css' %}">
@@ -12,68 +12,83 @@
 </head>
 <body class="dark text-gray-100">
 <div class="navbar bg-base-100 shadow-sm p-4 mb-4">
-  <div class="flex-1">
-      <a class="mx-2" href="{% url 'next_games_url' %}" >
-          <div class="avatar w-24">
-              <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar">
-          </div>
-      </a>
-      <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next games</a>
-      <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
-      <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past games</a>
-      <a href="{% url 'booking_history_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active border-accent-content{% endif %}">Booking history</a>
-  </div>
-  <div class="flex gap-2">
-    {% if user.is_authenticated and user.is_superuser %}
-        <a href="{% url 'add_game_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_url' %}btn-active border-accent-content{% endif %}">Add game</a>
-      <a href="{% url 'add_player_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_url' %}btn-active border-accent-content{% endif %}">Add player</a>
-    {% endif %}
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-15 rounded-full">
-          <img
-            alt="logo"
-            src="{% static 'img/logo.jpeg' %}" />
-        </div>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li>{{ user.get_username }}</li>
-          <li>
-          <a class="justify-between">
-            Profile
-            <span class="badge">New</span>
-          </a>
-        </li>
-        <li><a>Log in</a></li>
-        <li>
-        </li>
-        <li><a>Settings</a></li>
-        <li>
-            <form method="post" action="{% url 'logout_url' %}">
-                {% csrf_token %}
-                <button>Logout</button>
-            </form>
-        </li>
-      </ul>
+    <div class="flex-1">
+        <a class="mx-2" href="{% url 'next_games_url' %}">
+            <div class="avatar w-24">
+                <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar">
+            </div>
+        </a>
+        <a href="{% url 'next_games_url' %}"
+           class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next
+            games</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'all_players_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
+        {% endif %}
+        <a href="{% url 'past_games_url' %}"
+           class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past
+            games</a>
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'booking_history_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active border-accent-content{% endif %}">Booking
+                history</a>
+        {% endif %}
     </div>
-  </div>
+    <div class="flex gap-2">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'add_game_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_url' %}btn-active border-accent-content{% endif %}">Add
+                game</a>
+            <a href="{% url 'add_player_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_url' %}btn-active border-accent-content{% endif %}">Add
+                player</a>
+        {% endif %}
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                <div class="w-15 rounded-full">
+                    <img
+                            alt="logo"
+                            src="{% static 'img/logo.jpeg' %}"/>
+                </div>
+            </div>
+            <ul
+                    tabindex="0"
+                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                <li>{{ user.get_username }}</li>
+                <li>
+                    <a class="justify-between">
+                        Profile
+                        <span class="badge">New</span>
+                    </a>
+                </li>
+                <li><a>Log in</a></li>
+                <li>
+                </li>
+                <li><a>Settings</a></li>
+                <li>
+                    <form method="post" action="{% url 'logout_url' %}">
+                        {% csrf_token %}
+                        <button>Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 {% if breadcrumbs %}
     <div class="breadcrumbs text-sm px-10">
-      <ul>
-          {% for b in breadcrumbs %}
-              <li><a href="{{ b.path }}">{{ b.label }}</a></li>
-          {% endfor %}
-      </ul>
+        <ul>
+            {% for b in breadcrumbs %}
+                <li><a href="{{ b.path }}">{{ b.label }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 {% endif %}
 
 <div class="mx-auto px-2 my-12>">
-    {%  block content %}
-    {%  endblock %}
+    {% block content %}
+    {% endblock %}
 </div>
 </body>
 </html>

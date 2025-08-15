@@ -62,9 +62,11 @@
                 </tr>
                 </tbody>
             </table>
+        {% if user.is_authenticated and user.is_superuser %}
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
+        {% endif %}
         </form>
     </div>
 </div>

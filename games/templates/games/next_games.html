@@ -6,49 +6,53 @@
 
 {% block content %}
     <form method="post">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Week</th>
-            <th>Date</th>
-            {#            <th>Players</th>#}
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for game in games %}
+        <table class="table">
+            <thead>
             <tr>
-                <td>{{ game.when|date:'W' }}</td>
-                <td>{{ game.when|date:'d M Y' }}</td>
-                {#                <td>#}
-                {#                    {%  if game.number_of_occupied_slots == 10 %}#}
-                {#                        <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-                {#                    {%  endif %}#}
-                {#                    {%  if game.number_of_occupied_slots == 9 %}#}
-                {#                        <div class="radial-progress text-green-200" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-                {#                    {%  endif %}                    #}
-                {#                    {%  if game.number_of_occupied_slots == 8 %}#}
-                {#                        <div class="radial-progress text-warning" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-                {#                    {%  endif %}                    #}
-                {#                    {%  if game.number_of_occupied_slots <= 7 %}#}
-                {#                        <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-                {#                    {%  endif %}#}
-                {#                </td>#}
-                <td>{{ game.status }}</td>
-                <td>
-                    <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">Details</a>
-                    <a href="{% url 'game_remove_url' game_id=game.id %}"
-                       class="btn btn-error btn-outline ml-2 ms-3"
-                       title="Remove game"
-                       onclick="return confirm('Are you sure you want to remove this game?');">
-                        Remove
-                    </a>
-                </td>
+                <th>Week</th>
+                <th>Date</th>
+                {#            <th>Players</th>#}
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</form>
+            </thead>
+            <tbody>
+            {% for game in games %}
+                <tr>
+                    <td>{{ game.when|date:'W' }}</td>
+                    <td>{{ game.when|date:'d M Y' }}</td>
+                    {#                <td>#}
+                    {#                    {%  if game.number_of_occupied_slots == 10 %}#}
+                    {#                        <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
+                    {#                    {%  endif %}#}
+                    {#                    {%  if game.number_of_occupied_slots == 9 %}#}
+                    {#                        <div class="radial-progress text-green-200" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
+                    {#                    {%  endif %}                    #}
+                    {#                    {%  if game.number_of_occupied_slots == 8 %}#}
+                    {#                        <div class="radial-progress text-warning" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
+                    {#                    {%  endif %}                    #}
+                    {#                    {%  if game.number_of_occupied_slots <= 7 %}#}
+                    {#                        <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
+                    {#                    {%  endif %}#}
+                    {#                </td>#}
+                    <td>{{ game.status }}</td>
+                    <td>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">Details</a>
+                        {% endif %}
+                        {% if user.is_authenticated and user.is_superuser %}
+                            <a href="{% url 'game_remove_url' game_id=game.id %}"
+                               class="btn btn-error btn-outline ml-2 ms-3"
+                               title="Remove game"
+                               onclick="return confirm('Are you sure you want to remove this game?');">
+                                Remove
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 {% endblock content %}
 
