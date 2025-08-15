@@ -88,6 +88,20 @@ def game_details(request, game_id):
             Breadcrumb(reverse('game_details_url', args=[found_game.id]), found_game.when),
         ],
     })
+
+
+@login_required
+def game_remove(request, game_id):
+    found_game = get_object_or_404(Game, id=game_id)
+
+    if request.method == 'POST':
+        found_game.delete()
+        messages.success(request, "Game was successfully removed.")
+        return redirect('next_games_url')
+
+    # GET - wyświetl stronę potwierdzenia usunięcia
+    return render(request, 'games/game_confirm_remove.html', {'game': found_game})
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):

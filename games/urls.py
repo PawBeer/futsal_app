@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.next_games, name='next_games_url'),
     path('past/', views.past_games, name='past_games_url'),
     path('game/<game_id>/', views.game_details, name='game_details_url'),
+    path('game/<game_id>/remove', views.game_remove, name='game_remove_url'),
     path('game/<int:game_id>/update-status/', views.game_status_update, name='game_status_update_url'),
     path('game/<int:game_id>/update-player-status/', views.game_player_status_update, name='game_player_status_update_url'),
     path('players/', views.all_players, name='all_players_url'),

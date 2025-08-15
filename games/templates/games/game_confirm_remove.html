@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Add Game
+{% endblock %}
+
+{% block content %}
+    <div class="w-full flex items-center justify-center bg-base-100">
+        <div class="card card-border bg-base-100">
+            <form class="w-full" method="post">
+                {% csrf_token %}
+                <h2>Are you sure you want to remove the game from {{ game.when }}</h2>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-error">Yes, remove</button>
+                    <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
