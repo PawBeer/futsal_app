@@ -61,10 +61,14 @@
                         <span class="badge">New</span>
                     </a>
                 </li>
-                <li><a>Log in</a></li>
+                <li>
+                    <a href="{% url 'login_url' %}">
+                        <button>Login</button>
+                    </a>
+                </li>
                 <li>
                 </li>
-                <li><a>Settings</a></li>
+{#                <li><a>Settings</a></li>#}
                 <li>
                     <form method="post" action="{% url 'logout_url' %}">
                         {% csrf_token %}

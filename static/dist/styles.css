@@ -1581,9 +1581,6 @@
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
-  .min-h-screen {
-    min-height: 100vh;
-  }
   .w-15 {
     width: calc(var(--spacing) * 15);
   }
