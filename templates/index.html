@@ -55,26 +55,33 @@
                     tabindex="0"
                     class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                 <li>{{ user.get_username }}</li>
-                <li>
-                    <a class="justify-between">
-                        Profile
-                        <span class="badge">New</span>
-                    </a>
-                </li>
+{#                <li>#}
+{#                    <a class="justify-between">#}
+{#                        Profile#}
+{#                        <span class="badge">New</span>#}
+{#                    </a>#}
+{#                </li>#}
+            {% if not user.is_authenticated %}
                 <li>
                     <a href="{% url 'login_url' %}">
                         <button>Login</button>
                     </a>
                 </li>
                 <li>
+                    <a href="{% url 'register_url' %}">
+                        <button>Sign up</button>
+                    </a>
                 </li>
+            {% endif %}
 {#                <li><a>Settings</a></li>#}
+                {% if user.is_authenticated %}
                 <li>
                     <form method="post" action="{% url 'logout_url' %}">
                         {% csrf_token %}
                         <button>Logout</button>
                     </form>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </div>
