@@ -22,12 +22,14 @@ class Breadcrumb:
 
 # Create your views here.
 def next_games(request):
-    found_games = Game.objects.filter(when__gte=datetime.today()).order_by('when').all()
+    found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
 
 
 def past_games(request):
-    found_games = Game.objects.filter(when__lt=datetime.today()).order_by('-when').all()
+    found_games = Game.objects.filter(
+        Q(when__lt=datetime.today()) | Q(status='Played')
+    ).order_by('-when').all()
     return render(request, 'games/past_games.html', {'games': found_games})
 
 
