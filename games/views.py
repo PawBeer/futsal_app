@@ -101,7 +101,6 @@ def game_remove(request, game_id):
         messages.success(request, "Game was successfully removed.")
         return redirect('next_games_url')
 
-    # GET - wyświetl stronę potwierdzenia usunięcia
     return render(request, 'games/game_confirm_remove.html', {'game': found_game})
 
 @login_required
@@ -118,52 +117,48 @@ def game_status_update(request, game_id):
     game.save()
     return redirect('game_details_url', game_id=game_id)
 
-
 @login_required
 @require_POST
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
 
     player_status_planned = PlayerStatus.objects.get(player_status='planned')
     player_status_cancelled = PlayerStatus.objects.get(player_status='cancelled')
     player_status_reserved = PlayerStatus.objects.get(player_status='reserved')
     player_status_confirmed = PlayerStatus.objects.get(player_status='confirmed')
 
-    latest_bookings = {
-        player.pk: player.get_latest_booking_for_game(found_game)
-        for player in players_for_game
-    }
+    play_slot_keys = [key for key in request.POST if key.startswith('play_slot_')]
+    if not play_slot_keys:
+        return redirect('game_details_url', game_id=game_id)
 
-    for player in players_for_game:
-        checkbox_name = f'play_slot_{player.pk}'
-        current_booking = latest_bookings.get(player.pk)
-        current_status = current_booking.player_status if current_booking else None
+    changed_key = play_slot_keys[0]
+    player_pk = int(changed_key.replace('play_slot_', ''))
 
-        checkbox_is_checked = checkbox_name in request.POST
+    values = request.POST.getlist(changed_key)
+    checked = 'on' in values
 
-        if current_status == player_status_planned:
-            new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
+    player = get_object_or_404(Player, pk=player_pk)
+    current_booking = player.get_latest_booking_for_game(found_game)
+    current_status = current_booking.player_status if current_booking else None
 
-        elif current_status == player_status_cancelled:
-            new_status = player_status_planned if checkbox_is_checked else player_status_cancelled
+    if current_status == player_status_planned:
+        new_status = player_status_planned if checked else player_status_cancelled
+    elif current_status == player_status_cancelled:
+        new_status = player_status_planned if checked else player_status_cancelled
+    elif current_status == player_status_reserved:
+        new_status = player_status_confirmed if checked else player_status_reserved
+    elif current_status == player_status_confirmed:
+        new_status = player_status_confirmed if checked else player_status_reserved
+    else:
+        new_status = current_status
 
-        elif current_status == player_status_reserved:
-            new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
-
-        elif current_status == player_status_confirmed:
-            new_status = player_status_confirmed if checkbox_is_checked else player_status_reserved
-
-        else:
-            new_status = current_status
-
-        if current_status != new_status:
-            BookingHistoryForGame.objects.create(
-                player=player,
-                game=found_game,
-                player_status=new_status,
-                creation_date=timezone.now(),
-            )
+    if current_status != new_status:
+        BookingHistoryForGame.objects.create(
+            player=player,
+            game=found_game,
+            player_status=new_status,
+            creation_date=timezone.now(),
+        )
 
     return redirect('game_details_url', game_id=game_id)
 
@@ -192,7 +187,6 @@ def all_players(request):
     elif status == 'inactive':
         players = players.filter(role='Inactive')
 
-    # Pass both stat_counts and players to the template
     return render(request, 'games/all_players.html', {
         'filter': filter_name,
         'players': players,

@@ -65,136 +65,127 @@
         </div>
 
         <div class="p-4">
-            <form method="post"
-                  action="{% url 'game_player_status_update_url' game_id=game.id %}"
-                  class="bg-base-100 p-6 rounded-lg text-gray-100">
-                {% csrf_token %}
+
+            <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
+                Permanent players
+            </div>
+            <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
+                <span class="w-28 text-center">Play</span>
+                <span class="w-48 text-center">Player</span>
+                <span class="w-48 text-center">Substitute Player</span>
+            </div>
+            <div class="divide-y divide-gray-600 rounded-b">
+
+                {% for planned_player in planned_players_for_game %}
+                <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                    {% csrf_token %}
+                    <div class="flex items-center py-2">
+                        <label for="play_slot_{{ planned_player.pk }}" class="flex justify-center w-28">
+                            {% if user.is_superuser or planned_player.user.username == user.username %}
+
+                            <input type="hidden" name="play_slot_{{ planned_player.pk }}" value="off">
+                            <input type="checkbox"
+                                   name="play_slot_{{ planned_player.pk }}"
+                                   value="on"
+                                   id="play_slot_{{ planned_player.pk }}"
+                                   class="toggle toggle-primary"
+                                   checked
+                                   onchange="this.form.submit()">
+                            {% else %}
+                                <div style="width: 64px; height: 24px;"></div>
+                            {% endif %}
+                        </label>
+                        <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
+                        <span class="w-48 flex justify-center"></span>
+                    </div>
+                </form>
+            {% endfor %}
+                {% for cancelled_player, substitute in cancelled_with_substitutes %}
+                <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                    {% csrf_token %}
+                    <div class="flex items-center py-2">
+                        <label for="play_slot_{{ cancelled_player.pk }}" class="flex justify-center w-28">
+                            {% if user.is_superuser or cancelled_player.user.username == user.username %}
+
+                            <input type="hidden" name="play_slot_{{ cancelled_player.pk }}" value="off">
+                            <input type="checkbox"
+                                   name="play_slot_{{ cancelled_player.pk }}"
+                                   value="on"
+                                   id="play_slot_{{ cancelled_player.pk }}"
+                                   class="toggle toggle-primary"
+                                   {% if cancelled_player in confirmed_players_for_game %}checked{% endif %}
+                                   onchange="this.form.submit()">
+                        {% else %}
+                                <div style="width: 64px; height: 24px;"></div>
+                            {% endif %}
+                        </label>
+                        <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
+                        <span class="w-48 flex justify-center">
+                            {% if substitute %}
+                                <span class="badge badge-success">{{ substitute.user.username }}</span>
+                            {% else %}
+                                <span class="badge badge-error text-error-content">free slot</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </form>
+            {% endfor %}
+
                 <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
-                    Permanent players
+                    Reserved players
                 </div>
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                     <span class="w-28 text-center">Play</span>
                     <span class="w-48 text-center">Player</span>
-                    <span class="w-48 text-center">Substitute Player</span>
+                    {#                    <span class="w-48 text-center">Temporarily for Player</span>#}
                 </div>
-                <div class="divide-y divide-gray-600 rounded-b">
 
-                    {% for planned_player in planned_players_for_game %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ planned_player }}" class="flex justify-center w-28">
-                                <input type="checkbox"
-                                       name="play_slot_{{ planned_player.pk }}"
-                                       id="play_slot_{{ planned_player.pk }}"
-                                       class="toggle toggle-primary"
-                                       checked
-                                       onchange="this.form.submit()">
-                            </label>
-                            <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
-                            <span class="w-48 flex justify-center">
-                            </span>
-                        </div>
-                    {% endfor %}
-                    {% for cancelled_player, substitute in cancelled_with_substitutes %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ cancelled_player.pk }}" class="flex justify-center w-28">
-                                <input type="checkbox"
-                                       name="play_slot_{{ cancelled_player.pk }}"
-                                       id="play_slot_{{ cancelled_player.pk }}"
-                                       class="toggle toggle-primary"
-                                       onchange="this.form.submit()">
-                            </label>
-                            <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
-                            <span class="w-48 flex justify-center">
-            {% if substitute %}
-                <span class="badge badge-success">{{ substitute.user.username }}</span>
-            {% else %}
-                <span class="badge badge-error text-error-content">free slot</span>
-            {% endif %}
-        </span>
-                        </div>
-                    {% endfor %}
-                    <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
-                        Reserved players
-                    </div>
-                    <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
-                        <span class="w-28 text-center">Play</span>
-                        <span class="w-48 text-center">Player</span>
-                        {#                    <span class="w-48 text-center">Temporarily for Player</span>#}
-                    </div>
-
-                    {% for confirmed_player in confirmed_players_for_game %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ confirmed_player }}" class="flex justify-center w-28">
+                {% for confirmed_player in confirmed_players_for_game %}
+                <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                    {% csrf_token %}
+                    <div class="flex items-center py-2">
+                        <label for="play_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
+                            {% if user.is_superuser or confirmed_player.user.username == user.username %}
+                                <input type="hidden" name="play_slot_{{ confirmed_player.pk }}" value="off">
                                 <input type="checkbox"
                                        name="play_slot_{{ confirmed_player.pk }}"
+                                       value="on"
                                        id="play_slot_{{ confirmed_player.pk }}"
                                        class="toggle toggle-primary"
                                        checked
                                        onchange="this.form.submit()">
-                            </label>
-                            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
-                            {#                            <span class="w-48 flex justify-center">#}
-                            {#                                <select name="slot_{{ confirmed_player.pk }}"#}
-                            {#                                        id="slot_select_{{ confirmed_player.pk }}"#}
-                            {#                                        class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100">#}
-                            {#                                        <option value="">---</option>#}
-                            {#                                    {% for available_player in players %}#}
-                            {#                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
-                            {#                                    {% endfor %}#}
-                            {#                                </select>#}
-                            {#                            </span>#}
-                        </div>
-                    {% endfor %}
-                    {% for reserved_player in reserved_players_for_game %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
+                            {% else %}
+                                <div style="width: 64px; height: 24px;"></div>
+                            {% endif %}
+                        </label>
+                        <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+                    </div>
+                </form>
+            {% endfor %}
+                {% for reserved_player in reserved_players_for_game %}
+                <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                    {% csrf_token %}
+                    <div class="flex items-center py-2">
+                        <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
+                            {% if user.is_superuser or reserved_player.user.username == user.username %}
+                                <input type="hidden" name="play_slot_{{ reserved_player.pk }}" value="off">
                                 <input type="checkbox"
                                        name="play_slot_{{ reserved_player.pk }}"
+                                       value="on"
                                        id="play_slot_{{ reserved_player.pk }}"
                                        class="toggle toggle-primary"
+                                       {% if reserved_player in confirmed_players_for_game %}checked{% endif %}
                                        onchange="this.form.submit()">
-                            </label>
-                            <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
-                            {#                            <span class="w-48 flex justify-center">#}
-                            {#              <select name="slot_{{ reserved_player.pk }}"#}
-                            {#                      id="slot_select_{{ reserved_player.pk }}"#}
-                            {#                      class="select select-bordered select-sm w-full max-w-xs bg-gray-700 text-gray-100"#}
-                            {#                      style="display: none;">#}
-                            {#>                  <option value="">---</option>#}
-                            {#                  {% for available_player in players %}#}
-                            {#                                        <option value="{{ available_player.pk }}">{{ available_player.user.username }}</option>#}
-                            {#                                    {% endfor %}#}
-                            {#              </select>#}
-                            {#            </span>#}
-                        </div>
-                    {% endfor %}
-                </div>
-                
-            </form>
-
-            {#            <script>#}
-            {#                function toggleSelect(slotPk) {#}
-            {#                    const checkbox = document.getElementById('play_slot_' + slotPk);#}
-            {#                    const select = document.getElementById('slot_select_' + slotPk);#}
-            {#                    if (checkbox && select) {#}
-            {#                        if (checkbox.checked) {#}
-            {#                            select.style.display = '';#}
-            {#                        } else {#}
-            {#                            select.style.display = 'none';#}
-            {#                            select.selectedIndex = 0;#}
-            {#                        }#}
-            {#                    }#}
-            {#                }#}
-            {##}
-            {#                document.addEventListener('DOMContentLoaded', () => {#}
-            {#                    {% for confirmed_player in confirmed_players_for_game %}#}
-            {#                        toggleSelect({{ confirmed_player.pk }});#}
-            {#                    {% endfor %}#}
-            {#                    {% for cancelled_player in cancelled_players_for_game %}#}
-            {#                        toggleSelect({{ cancelled_player.pk }});#}
-            {#                    {% endfor %}#}
-            {#                });#}
-            {#            </script>#}
+                            {% else %}
+                                <div style="width: 64px; height: 24px;"></div>
+                            {% endif %}
+                        </label>
+                        <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
+                    </div>
+                </form>
+            {% endfor %}
+            </div>
+        
         </div>
 
         <div class="p-4 flex flex-col gap-4">

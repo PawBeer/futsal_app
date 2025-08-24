@@ -55,4 +55,4 @@
    - game_id (FK: GAME)
    - player_id (FK: PLAYER)
    - status (FK: PLAYER_STATUS)
-   - when : datetime 
+   - when : datetime
