@@ -103,6 +103,7 @@ def game_remove(request, game_id):
 
     return render(request, 'games/game_confirm_remove.html', {'game': found_game})
 
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
@@ -116,6 +117,7 @@ def game_status_update(request, game_id):
         game.description = description
     game.save()
     return redirect('game_details_url', game_id=game_id)
+
 
 @login_required
 @require_POST
@@ -161,6 +163,7 @@ def game_player_status_update(request, game_id):
         )
 
     return redirect('game_details_url', game_id=game_id)
+
 
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
@@ -209,7 +212,7 @@ def player_details(request, player_id):
         player.role = request.POST.get('role', '')
         player.save()
 
-        return redirect('player_details_url', player_id=player.id)
+        return redirect('all_players_url')
 
     return render(request, 'games/player_details.html', {
         "player": player,
@@ -256,6 +259,7 @@ def add_player(request):
             except Exception as e:
                 messages.error(request, f"An unexpected error has occurred: {e}")
 
+        return redirect('all_players_url')
     context = {
         'role_choices': Player.ROLE_CHOICES,
     }
@@ -266,6 +270,7 @@ def add_player(request):
 @user_passes_test(lambda u: u.is_superuser)
 def add_player_with_form(request):
     return render(request, 'games/add_player_with_form.html')
+
 
 @login_required()
 def booking_history(request):
@@ -310,9 +315,9 @@ class AddGameView(View):
 def add_game(request):
     if request.method == 'POST':
         game = Game.objects.create(
-            when=datetime.strptime(request.POST.get('when',''), '%Y-%m-%d'),
+            when=datetime.strptime(request.POST.get('when', ''), '%Y-%m-%d'),
             status=request.POST.get('status', 'Planned'),
-            description = request.POST.get('description', ''),
+            description=request.POST.get('description', ''),
         )
         if request.POST.get('set_players'):
             planned_status = PlayerStatus.objects.get(player_status='planned')
@@ -337,5 +342,5 @@ def add_game(request):
         return redirect('next_games_url')
 
     return render(request, 'games/add_game.html', {
-            'role_choices': Game.STATUS_CHOICES,
-        })
+        'role_choices': Game.STATUS_CHOICES,
+    })
