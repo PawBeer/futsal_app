@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+  futsal:
+    build:
+      context: .
+    image: futsal
+    container_name: futsal
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/usr/src/app  # Mounts the current directory to the container
+
