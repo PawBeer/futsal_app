@@ -2,6 +2,8 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
+
+from games.mailer import send_game_update_email, send_player_status_update_email, send_welcome_email
 from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
@@ -157,6 +159,7 @@ def game_player_status_update(request, game_id):
             player_status=new_status,
             creation_date=timezone.now(),
         )
+        send_player_status_update_email(player, found_game, new_status.player_status)
 
     return redirect('game_details_url', game_id=game_id)
 
