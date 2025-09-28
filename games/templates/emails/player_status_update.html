@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Futsal Player Status Has Been Updated</title>
+</head>
+<body>
+    <h3>Your Futsal Player Status Has Been Updated</h3>
+
+    <p>Hello {{ user.username }},</p>
+
+    <p>Game Details:<br>
+    - Date: {{ game.when|date:"l, F j, Y" }}</p>
+
+    <p>We wanted to let you know that your player status for the game has been updated.</p>
+
+
+    {% if status == "planned" %}
+        <p>New Status: <span style="color: green;">{{ status }}</span></p>
+        <p>You are confirmed to play in this game. Please arrive on time and notify us if your plans change.</p>
+    {% elif status == "reserved" %}
+        <p>New Status: <span style="color: orange;">{{ status }}</span></p>
+        <p>You are currently on the reserved list. We will notify you if a slot becomes available.</p>
+    {% elif status == "cancelled" %}
+        <p>New Status: <span style="color: red;">{{ status }}</span></p>
+        <p>Your participation has been cancelled. If this is a mistake, please contact the admin.</p>
+    {% endif %}
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>
+

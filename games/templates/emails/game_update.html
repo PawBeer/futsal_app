@@ -1,0 +1,66 @@
+{% comment %}
+HTML email template for game update notifications.
+Assumes context variables:
+- game: Game instance (with date, time, location, etc.)
+- updated_fields: List of fields that were changed
+- player_list: List of players for the game
+- game_url: Absolute URL to the game details page
+{% endcomment %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Game Update Notification</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #222; }
+        .container { max-width: 600px; margin: 0 auto; padding: 24px; background: #f9f9f9; border-radius: 8px; }
+        h2 { color: #1a73e8; }
+        .details { margin: 16px 0; }
+        .field-list { margin: 8px 0 16px 0; padding-left: 20px; }
+        .players { margin-top: 16px; }
+        .button {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #1a73e8;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Game Updated</h2>
+        <p>Hello,</p>
+        <p>The following futsal game has been updated:</p>
+        <div class="details">
+            <strong>When:</strong> {{ game.when }}<br>
+            <strong>Status:</strong> {{ game.status }}<br>
+            <strong>Description:</strong> {{ game.description }}<br>
+        </div>
+        {% if updated_fields %}
+            <p><strong>Updated fields:</strong></p>
+            <ul class="field-list">
+                {% for field in updated_fields %}
+                    <li>{{ field|capfirst }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="players">
+            <strong>Players:</strong>
+            <ul>
+                {% for player in player_list %}
+                    <li>{{ player }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <a href="{{ game_url }}" class="button">View Game Details</a>
+        <p style="margin-top:32px; color:#888; font-size:13px;">
+            You are receiving this email because you are registered for this game.<br>
+            Please do not reply to this message.
+        </p>
+    </div>
+</body>
+</html>
