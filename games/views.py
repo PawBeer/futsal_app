@@ -36,7 +36,6 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    all_players = Player.objects.all()
     players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
 
     player_status_planned = PlayerStatus.objects.get(player_status='planned')
@@ -73,11 +72,8 @@ def game_details(request, game_id):
 
     return render(request, 'games/game_details.html', {
         "game": found_game,
-        "all_players": all_players,
         "players": players_for_game,
-        "latest_bookings": latest_bookings,
         "planned_players_for_game": planned_players_for_game,
-        "cancelled_players_for_game": cancelled_players_for_game,
         "reserved_players_for_game": reserved_players_for_game,
         "confirmed_players_for_game": confirmed_players_for_game,
         "number_of_confirmed_players": number_of_confirmed_players,
