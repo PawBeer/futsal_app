@@ -20,12 +20,12 @@ class Breadcrumb:
         self.label = label
 
 
-# Create your views here.
+@login_required
 def next_games(request):
     found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
 
-
+@login_required
 def past_games(request):
     found_games = Game.objects.filter(
         Q(when__lt=datetime.today()) | Q(status='Played')
@@ -164,7 +164,7 @@ def game_player_status_update(request, game_id):
 
     return redirect('game_details_url', game_id=game_id)
 
-
+@login_required
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
     status = request.GET.get('status')
