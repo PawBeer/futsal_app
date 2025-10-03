@@ -29,14 +29,16 @@
                             Details
                         </a>
                     </td>
-                    <td class="px-2">
-                        {% if user.is_authenticated and user.is_superuser %}
+
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <td class="px-2">
                             <a href="{% url 'game_remove_url' game_id=game.id %}"
                                class="btn btn-error btn-outline btn-sm px-2 ml-1">
                                 Remove
                             </a>
-                        {% endif %}
-                    </td>
+                        </td>
+                    {% endif %}
+
                 </tr>
             {% endfor %}
 
