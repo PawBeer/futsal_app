@@ -137,6 +137,7 @@
                                            id="play_slot_{{ cancelled_player.pk }}"
                                            class="toggle toggle-primary"
                                            {% if cancelled_player in confirmed_players_for_game %}checked{% endif %}
+                                           {% if number_of_confirmed_players >= 10 and cancelled_player not in confirmed_players_for_game %}disabled title="There is no free slots in the squad" {% endif %}
                                            onchange="this.form.submit()">
                                 {% else %}
                                     <div style="width: 64px; height: 24px;"></div>
