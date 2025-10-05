@@ -18,5 +18,6 @@ urlpatterns = [
     path('booking_history/', views.booking_history, name='booking_history_url'),
     path('logout/', LogoutView.as_view(next_page='/members/login'), name='logout_url'),
     path('login/', LoginView.as_view(next_page='next_games_url'), name='login_url'),
+    path('ajax/check_username/', views.check_username, name='check_username'),
 
 ]

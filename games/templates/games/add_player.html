@@ -63,6 +63,47 @@
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">Add Player</button>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const input = document.querySelector('input[name="username"]');
+                        const form = input.closest('form');
+                        const errorDiv = document.createElement('div');
+                        errorDiv.style.color = 'red';
+                        input.parentNode.appendChild(errorDiv);
+
+                        const checkUsernameUrl = "{% url 'check_username' %}";
+
+                        let timeout;
+
+                        input.addEventListener('input', () => {
+                            clearTimeout(timeout);
+                            const val = input.value.trim();
+                            if (!val) {
+                                errorDiv.textContent = '';
+                                return;
+                            }
+                            timeout = setTimeout(() => {
+                                fetch(`${checkUsernameUrl}?username=${encodeURIComponent(val)}`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.exists) {
+                                            errorDiv.textContent = 'A user with that name already exists.';
+                                        } else {
+                                            errorDiv.textContent = '';
+                                        }
+                                    });
+                            }, 500);
+                        });
+
+                        form.addEventListener('submit', (e) => {
+                            if (errorDiv.textContent) {
+                                e.preventDefault();
+                                alert('Please provide a unique username.');
+                            }
+                        });
+                    });
+                </script>
+
             </form>
         </div>
     </div>
