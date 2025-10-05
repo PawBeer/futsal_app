@@ -263,11 +263,19 @@ def add_player(request):
         'role_choices': Player.ROLE_CHOICES,
     }
     return render(request, 'games/add_player.html', context)
+
 @login_required
 def check_username(request):
     username = request.GET.get('username')
-    exists = User.objects.filter(username=username).exists()
-    return JsonResponse({'exists': exists})
+    email = request.GET.get('email')
+
+    username_exists = User.objects.filter(username=username).exists() if username else False
+    email_exists = User.objects.filter(email=email).exists() if email else False
+
+    return JsonResponse({
+        'username_exists': username_exists,
+        'email_exists': email_exists,
+    })
 
 
 @login_required
