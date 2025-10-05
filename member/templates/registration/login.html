@@ -1,15 +1,14 @@
-{% load static %}
+{% extends 'index.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sign in</title>
-    <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'dist/main.css' %}">
-</head>
-<body>
-{%  include 'common/tailwind-form.html' with form=form button_name='Sign in' %}
-<div>Don't have an account? <a href="{% url 'register_url' %}">Sign up</a> </div>
-</body>
-</html>
+{% block page_title %}
+    Sign in
+{% endblock %}
+
+{% block content %}
+    <div class="w-full flex items-center justify-center bg-base-70">
+        <div class="card card-border bg-base-70">
+            {% include 'common/tailwind-form.html' with form=form button_name='Sign in' %}
+            <div class="text-center mt-4">Don't have an account? <a href="{% url 'register_url' %}">Sign up</a></div>
+        </div>
+    </div>
+{% endblock %}
