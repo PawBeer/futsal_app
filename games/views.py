@@ -265,48 +265,42 @@ def add_player(request):
     return render(request, 'games/add_player.html', context)
 
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-def add_player_with_form(request):
-    return render(request, 'games/add_player_with_form.html')
-
-
 @login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
 
 
-class AddPlayerView(View):
-    def get(self, request):
-        form = PlayerForm()
-        return render(request, 'games/add_player_with_form.html', {
-            'form': form
-        })
-
-    @user_passes_test(lambda u: u.is_superuser)
-    def post(self, request):
-        pass
-
-
-class AddGameView(View):
-    def get(self, request):
-        form = GameForm()
-        return render(request, 'games/add_game_with_form.html', {
-            'form': form
-        })
-
-    @user_passes_test(lambda u: u.is_superuser)
-    def post(self, request):
-        form = GameForm(request.POST)
-        logged_user = request.user
-        if form.is_valid():
-            game = form.save(commit=False)
-            game.when = datetime.today()
-            game.save()
-            form.save_m2m()
-
-            return redirect('game_details_url', game.id)
+# class AddPlayerView(View):
+#     def get(self, request):
+#         form = PlayerForm()
+#         return render(request, 'games/add_player_with_form.html', {
+#             'form': form
+#         })
+#
+#     @user_passes_test(lambda u: u.is_superuser)
+#     def post(self, request):
+#         pass
+#
+#
+# class AddGameView(View):
+#     def get(self, request):
+#         form = GameForm()
+#         return render(request, 'games/add_game_with_form.html', {
+#             'form': form
+#         })
+#
+#     @user_passes_test(lambda u: u.is_superuser)
+#     def post(self, request):
+#         form = GameForm(request.POST)
+#         logged_user = request.user
+#         if form.is_valid():
+#             game = form.save(commit=False)
+#             game.when = datetime.today()
+#             game.save()
+#             form.save_m2m()
+#
+#             return redirect('game_details_url', game.id)
 
 
 @login_required
