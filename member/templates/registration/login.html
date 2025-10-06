@@ -8,7 +8,6 @@
     <div class="w-full flex items-center justify-center bg-base-70">
         <div class="card card-border bg-base-70">
             {% include 'common/tailwind-form.html' with form=form button_name='Sign in' %}
-            <div class="text-center mt-4">Don't have an account? <a href="{% url 'register_url' %}">Sign up</a></div>
         </div>
     </div>
 {% endblock %}

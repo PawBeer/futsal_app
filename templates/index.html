@@ -38,7 +38,6 @@
         <li>{{ user.get_username }}</li>
         {% if not user.is_authenticated %}
           <li><a href="{% url 'login_url' %}"><button>Log in</button></a></li>
-          <li><a href="{% url 'register_url' %}"><button>Sign up</button></a></li>
         {% endif %}
         {% if user.is_authenticated %}
           <li>
@@ -96,7 +95,6 @@
         <li>{{ user.get_username }}</li>
         {% if not user.is_authenticated %}
           <li><a href="{% url 'login_url' %}"><button>Log in</button></a></li>
-          <li><a href="{% url 'register_url' %}"><button>Sign up</button></a></li>
         {% endif %}
         {% if user.is_authenticated %}
           <li>
