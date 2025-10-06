@@ -202,6 +202,12 @@ def player_details(request, player_id):
     player = get_object_or_404(Player, id=player_id)
     user = player.user
     if request.method == 'POST':
+        new_username = request.POST.get('username')
+        if User.objects.filter(username=new_username).exclude(id=player.user.id).exists():
+            messages.error(request, "This login already exists.")
+            return render(request, 'games/player_details.html', {'player': player, 'form': ..., 'error': True})
+
+        user.username = new_username
         user.first_name = request.POST.get('first_name', '')
         user.last_name = request.POST.get('last_name', '')
         user.email = request.POST.get('email', '')
