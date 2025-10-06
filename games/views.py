@@ -2,6 +2,8 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
+
+from games.mailer import send_game_update_email, send_player_status_update_email, send_welcome_email
 from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
@@ -20,12 +22,12 @@ class Breadcrumb:
         self.label = label
 
 
-# Create your views here.
+@login_required
 def next_games(request):
     found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
 
-
+@login_required
 def past_games(request):
     found_games = Game.objects.filter(
         Q(when__lt=datetime.today()) | Q(status='Played')
@@ -36,7 +38,6 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    all_players = Player.objects.all()
     players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
 
     player_status_planned = PlayerStatus.objects.get(player_status='planned')
@@ -73,11 +74,8 @@ def game_details(request, game_id):
 
     return render(request, 'games/game_details.html', {
         "game": found_game,
-        "all_players": all_players,
         "players": players_for_game,
-        "latest_bookings": latest_bookings,
         "planned_players_for_game": planned_players_for_game,
-        "cancelled_players_for_game": cancelled_players_for_game,
         "reserved_players_for_game": reserved_players_for_game,
         "confirmed_players_for_game": confirmed_players_for_game,
         "number_of_confirmed_players": number_of_confirmed_players,
@@ -161,10 +159,11 @@ def game_player_status_update(request, game_id):
             player_status=new_status,
             creation_date=timezone.now(),
         )
+        send_player_status_update_email(player, found_game, new_status.player_status)
 
     return redirect('game_details_url', game_id=game_id)
 
-
+@login_required
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
     status = request.GET.get('status')
