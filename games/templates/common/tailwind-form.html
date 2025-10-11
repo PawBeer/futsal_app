@@ -1,23 +1,23 @@
-    <form class="w-[400px] flex flex-col gap-2" method="POST">
-        {% csrf_token %}
+<form class="w-[400px] flex flex-col gap-2" method="POST">
+    {% csrf_token %}
 
-        {% for field in form %}
-            {% if field.widget_type == 'textarea' %}
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">{{ field.label_tag }}</legend>
-                    {{ field }}
-                </fieldset>
-            {% else %}
-                <label class="input w-full">
-                    {{ field.label_tag }}
-                    {{ field }}
-                </label>
-            {% endif %}
-            <div class="tex-error text-sm">
-                {{ field.errors }}
-            </div>
-        {% endfor %}
-        <button class="btn btn-primary w-full" type="submit">
-            {{ button_name }}
-        </button>
-    </form>
+    {% for field in form %}
+        {% if field.widget_type == 'textarea' %}
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">{{ field.label_tag }}</legend>
+                {{ field }}
+            </fieldset>
+        {% else %}
+            <label class="input w-full">
+                {{ field.label_tag }}
+                {{ field }}
+            </label>
+        {% endif %}
+        <div class="tex-error text-sm">
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+    <button class="btn btn-primary w-full" type="submit">
+        {{ button_name }}
+    </button>
+</form>
