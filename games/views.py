@@ -16,6 +16,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 
+
 class Breadcrumb:
     def __init__(self, path, label):
         self.path = path
@@ -26,6 +27,7 @@ class Breadcrumb:
 def next_games(request):
     found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
+
 
 @login_required
 def past_games(request):
@@ -163,6 +165,7 @@ def game_player_status_update(request, game_id):
 
     return redirect('game_details_url', game_id=game_id)
 
+
 @login_required
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
@@ -269,6 +272,7 @@ def add_player(request):
         'role_choices': Player.ROLE_CHOICES,
     }
     return render(request, 'games/add_player.html', context)
+
 
 @login_required
 def check_username_and_email(request):
