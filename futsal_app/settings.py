@@ -132,3 +132,16 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 LOGIN_REDIRECT_URL = '/games'
 LOGOUT_REDIRECT_URL = '/members/login'
 LOGIN_URL = '/members/login'
+
+
+# settings.py
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #production
+EMAIL_HOST = "tronel.pl"      
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "futsal.noreply@tronel.pl"
+EMAIL_HOST_PASSWORD = "PASSWORD_GOES_HERE_DONT_COMMIT"  
+DEFAULT_FROM_EMAIL = "Futsal App <futsal.noreply@tronel.pl>"
+
