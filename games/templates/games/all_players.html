@@ -7,12 +7,12 @@
 {% block content %}
     {% with active_status=request.GET.status %}
 
-        <div class="grid grid-cols-4 gap-6 mb-8 mr-10">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mr-10">
 
             <a href="{% url 'all_players_url' %}" style="text-decoration: none;">
                 <div class="card shadow-xl bg-players-purple cursor-pointer
             {% if not active_status %} ring-4 ring-primary ring-offset-2 {% endif %}">
-                    <div class="card-body">
+                    <div class="card-body p-2">
                         <div class="text-xl font-semibold">{{ details.total_players }}</div>
                         <p class="text-sm">Total players</p>
                     </div>
@@ -22,7 +22,7 @@
             <a href="{% url 'all_players_url' %}?status=permanent" style="text-decoration: none;">
                 <div class="card shadow-xl bg-players-green cursor-pointer
             {% if active_status == 'permanent' %} ring-4 ring-primary ring-offset-2 {% endif %}">
-                    <div class="card-body">
+                    <div class="card-body p-2">
                         <div class="text-xl font-semibold">{{ details.permanent_players }}</div>
                         <p class="text-sm">Permanent players</p>
                     </div>
@@ -32,7 +32,7 @@
             <a href="{% url 'all_players_url' %}?status=active" style="text-decoration: none">
                 <div class="card shadow-xl bg-players-blue cursor-pointer
             {% if active_status == 'active' %} ring-4 ring-primary ring-offset-2 {% endif %}">
-                    <div class="card-body">
+                    <div class="card-body p-2">
                         <div class="text-xl font-semibold">{{ details.active_players }}</div>
                         <p class="text-sm">Active players</p>
                     </div>
@@ -42,7 +42,7 @@
             <a href="{% url 'all_players_url' %}?status=inactive" style="text-decoration: none">
                 <div class="card shadow-xl bg-players-red cursor-pointer
             {% if active_status == 'inactive' %} ring-4 ring-primary ring-offset-2 {% endif %}">
-                    <div class="card-body">
+                    <div class="card-body p-2">
                         <div class="text-xl font-semibold">{{ details.inactive_players }}</div>
                         <p class="text-sm">Inactive players</p>
                     </div>
