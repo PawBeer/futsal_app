@@ -8,8 +8,6 @@ from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
-from django.views import View
-from .forms import PlayerForm, GameForm
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -26,6 +24,7 @@ class Breadcrumb:
 def next_games(request):
     found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
+
 
 @login_required
 def past_games(request):
@@ -163,6 +162,7 @@ def game_player_status_update(request, game_id):
 
     return redirect('game_details_url', game_id=game_id)
 
+
 @login_required
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
@@ -244,7 +244,6 @@ def add_player(request):
                 user.save()
 
                 player = Player(user=user, mobile_number=mobile_number, role=role)
-                # player.full_clean()
                 player.save()
 
                 messages.success(request, f"Player '{username}' It has been added successfully.")
@@ -269,38 +268,6 @@ def add_player(request):
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
-
-
-# class AddPlayerView(View):
-#     def get(self, request):
-#         form = PlayerForm()
-#         return render(request, 'games/add_player_with_form.html', {
-#             'form': form
-#         })
-#
-#     @user_passes_test(lambda u: u.is_superuser)
-#     def post(self, request):
-#         pass
-#
-#
-# class AddGameView(View):
-#     def get(self, request):
-#         form = GameForm()
-#         return render(request, 'games/add_game_with_form.html', {
-#             'form': form
-#         })
-#
-#     @user_passes_test(lambda u: u.is_superuser)
-#     def post(self, request):
-#         form = GameForm(request.POST)
-#         logged_user = request.user
-#         if form.is_valid():
-#             game = form.save(commit=False)
-#             game.when = datetime.today()
-#             game.save()
-#             form.save_m2m()
-#
-#             return redirect('game_details_url', game.id)
 
 
 @login_required
