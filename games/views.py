@@ -265,7 +265,7 @@ def add_player(request):
     return render(request, 'games/add_player.html', context)
 
 @login_required
-def check_username(request):
+def check_username_and_email(request):
     username = request.GET.get('username')
     email = request.GET.get('email')
 
