@@ -2,19 +2,17 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
-
 from games.mailer import send_game_update_email, send_player_status_update_email, send_welcome_email
 from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
-from django.views import View
-from .forms import PlayerForm, GameForm
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-
+from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 class Breadcrumb:
     def __init__(self, path, label):
@@ -26,6 +24,7 @@ class Breadcrumb:
 def next_games(request):
     found_games = Game.objects.filter(when__gte=datetime.today()).exclude(status='Played').order_by('when').all()
     return render(request, 'games/next_games.html', {'games': found_games})
+
 
 @login_required
 def past_games(request):
@@ -163,6 +162,7 @@ def game_player_status_update(request, game_id):
 
     return redirect('game_details_url', game_id=game_id)
 
+
 @login_required
 def all_players(request):
     filter_name = request.GET.get('name', '').strip()
@@ -250,11 +250,10 @@ def add_player(request):
                 user.save()
 
                 player = Player(user=user, mobile_number=mobile_number, role=role)
-                # player.full_clean()
                 player.save()
 
                 messages.success(request, f"Player '{username}' It has been added successfully.")
-                return redirect('all_players')
+                return redirect('all_players_url')
 
             except IntegrityError:
                 messages.error(request, "A user with that name already exists.")
@@ -270,49 +269,24 @@ def add_player(request):
     }
     return render(request, 'games/add_player.html', context)
 
-
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
-def add_player_with_form(request):
-    return render(request, 'games/add_player_with_form.html')
+def check_username_and_email(request):
+    username = request.GET.get('username')
+    email = request.GET.get('email')
+
+    username_exists = User.objects.filter(username=username).exists() if username else False
+    email_exists = User.objects.filter(email=email).exists() if email else False
+
+    return JsonResponse({
+        'username_exists': username_exists,
+        'email_exists': email_exists,
+    })
 
 
 @login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all()
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
-
-
-class AddPlayerView(View):
-    def get(self, request):
-        form = PlayerForm()
-        return render(request, 'games/add_player_with_form.html', {
-            'form': form
-        })
-
-    @user_passes_test(lambda u: u.is_superuser)
-    def post(self, request):
-        pass
-
-
-class AddGameView(View):
-    def get(self, request):
-        form = GameForm()
-        return render(request, 'games/add_game_with_form.html', {
-            'form': form
-        })
-
-    @user_passes_test(lambda u: u.is_superuser)
-    def post(self, request):
-        form = GameForm(request.POST)
-        logged_user = request.user
-        if form.is_valid():
-            game = form.save(commit=False)
-            game.when = datetime.today()
-            game.save()
-            form.save_m2m()
-
-            return redirect('game_details_url', game.id)
 
 
 @login_required
