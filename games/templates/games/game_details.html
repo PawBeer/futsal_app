@@ -118,7 +118,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=planned_player.pk %}" >{{ planned_player.user.username }}</a></span>
                             <span class="w-48 flex justify-center"></span>
                         </div>
                     </form>
@@ -143,7 +143,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=cancelled_player.pk %}" >{{ cancelled_player.user.username }}</a></span>
                             <span class="w-48 flex justify-center">
                             {% if substitute %}
                                 <span class="badge badge-success">{{ substitute.user.username }}</span>
@@ -161,7 +161,6 @@
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                     <span class="w-28 text-center">Play</span>
                     <span class="w-48 text-center">Player</span>
-                    {#                    <span class="w-48 text-center">Temporarily for Player</span>#}
                 </div>
 
                 {% for confirmed_player in confirmed_players_for_game %}
@@ -182,7 +181,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=confirmed_player.pk %}" >{{ confirmed_player.user.username }}</a></span>
                         </div>
                     </form>
                 {% endfor %}
@@ -204,7 +203,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=reserved_player.pk %}" >{{ reserved_player.user.username }}</a></span>
                         </div>
                     </form>
                 {% endfor %}

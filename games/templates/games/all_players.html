@@ -60,20 +60,19 @@
         <tr>
             <th>Player</th>
             <th>Player role</th>
-            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for player in players %}
             <tr>
                 {% if player.user.username != 'N/A' %}
-                    <td>{{ player.user.username }}</td>
+                    <td>
+                        <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player.user.username }}</a>
+                    </td>
                 {% else %}
                     <td>{{ player.name }} {{ player.surname }}</td>
                 {% endif %}
                 <td>{{ player.role }}</td>
-                <td><a href="{% url 'player_details_url' player_id=player.id %}" class="btn btn-outline">Details</a>
-                </td>
             </tr>
         {% endfor %}
         </tbody>
