@@ -14,6 +14,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 
+
 class Breadcrumb:
     def __init__(self, path, label):
         self.path = path
@@ -268,6 +269,7 @@ def add_player(request):
         'role_choices': Player.ROLE_CHOICES,
     }
     return render(request, 'games/add_player.html', context)
+
 
 @login_required
 def check_username_and_email(request):
