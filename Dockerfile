@@ -11,6 +11,11 @@ RUN apt-get update \
     && apt autoremove -y && apt clean \
 	&& rm -rf /var/lib/apt/lists/*
 
+# Skopiuj resztę aplikacji
+COPY . .
+
+# Utwórz katalog dla collectstatic (WhiteNoise użyje STATIC_ROOT)
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver",  "0.0.0.0:8000"]
