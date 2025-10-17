@@ -323,3 +323,37 @@ def add_game(request):
     return render(request, 'games/add_game.html', {
         'role_choices': Game.STATUS_CHOICES,
     })
+
+@login_required
+def add_absence(request):
+    if request.method == 'POST':
+        game = Game.objects.create(
+            when=datetime.strptime(request.POST.get('when', ''), '%Y-%m-%d'),
+            status=request.POST.get('status', 'Planned'),
+            description=request.POST.get('description', ''),
+        )
+        if request.POST.get('set_players'):
+            planned_status = PlayerStatus.objects.get(player_status='planned')
+            reserved_status = PlayerStatus.objects.get(player_status='reserved')
+
+            permanent_players = Player.objects.filter(role='Permanent')
+            active_players = Player.objects.filter(role='Active')
+
+            for player in permanent_players:
+                BookingHistoryForGame.objects.create(
+                    game=game,
+                    player=player,
+                    player_status=planned_status
+                )
+
+            for player in active_players:
+                BookingHistoryForGame.objects.create(
+                    game=game,
+                    player=player,
+                    player_status=reserved_status
+                )
+        return redirect('next_games_url')
+
+    return render(request, 'games/add_absence.html', {
+        'role_choices': Game.STATUS_CHOICES,
+    })
