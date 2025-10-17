@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from games.mailer import send_game_update_email, send_player_status_update_email, send_welcome_email
-from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
+from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus, PlayerStatusManager
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
@@ -364,35 +364,41 @@ def add_game(request):
     })
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
 def add_absence(request):
+    players = Player.objects.all()
+    status_choices = PlayerStatus.objects.values_list('player_status', 'player_status')
+
     if request.method == 'POST':
-        game = Game.objects.create(
-            when=datetime.strptime(request.POST.get('when', ''), '%Y-%m-%d'),
-            status=request.POST.get('status', 'Planned'),
-            description=request.POST.get('description', ''),
-        )
-        if request.POST.get('set_players'):
-            planned_status = PlayerStatus.objects.get(player_status='planned')
-            reserved_status = PlayerStatus.objects.get(player_status='reserved')
+        player_id = request.POST.get('player')
+        date_start_str = request.POST.get('date_start')
+        date_end_str = request.POST.get('date_end')
+        player_status_key = request.POST.get('status')
+        description = request.POST.get('description', '').strip()
 
-            permanent_players = Player.objects.filter(role='Permanent')
-            active_players = Player.objects.filter(role='Active')
+        try:
+            player = Player.objects.get(pk=player_id)
+            player_status = PlayerStatus.objects.get(player_status=player_status_key)
+            date_start = datetime.strptime(date_start_str, '%Y-%m-%d')
+            date_end = datetime.strptime(date_end_str, '%Y-%m-%d')
 
-            for player in permanent_players:
-                BookingHistoryForGame.objects.create(
-                    game=game,
-                    player=player,
-                    player_status=planned_status
-                )
+            PlayerStatusManager.objects.create(
+                player=player,
+                date_start=date_start,
+                date_end=date_end,
+                player_status=player_status,
+                description=description,
+            )
 
-            for player in active_players:
-                BookingHistoryForGame.objects.create(
-                    game=game,
-                    player=player,
-                    player_status=reserved_status
-                )
-        return redirect('next_games_url')
+            messages.success(request, f"Absence for {player.user.username} has been added.")
+            return redirect('next_games_url')
+
+        except Player.DoesNotExist:
+            messages.error(request, "Selected player does not exist.")
+        except Exception as e:
+            messages.error(request, f"Error while adding absence: {e}")
 
     return render(request, 'games/add_absence.html', {
-        'role_choices': Game.STATUS_CHOICES,
+        'players': players,
+        'status_choices': status_choices,
     })

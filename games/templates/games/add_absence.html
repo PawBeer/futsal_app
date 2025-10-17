@@ -5,55 +5,62 @@
 {% endblock %}
 
 {% block content %}
-    <div class="w-full flex items-center justify-center bg-base-100">
-        <div class="card card-border bg-base-100">
-            <form class="w-full" method="post">
-                {% csrf_token %}
-                <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
-                    <thead>
+<div class="w-full flex items-center justify-center bg-base-100">
+    <div class="card card-border bg-base-100 max-w-lg px-6 py-4">
+        <form method="post" class="w-full">
+            {% csrf_token %}
+            <table class="table w-full border border-neutral shadow-md bg-base-100 text-base-content">
+                <thead>
                     <tr class="border-b border-neutral">
-                        <th colspan="2" class="text-lg font-semibold text-center">Add New Game</th>
+                        <th colspan="2" class="text-lg font-semibold text-center">Add Absence</th>
                     </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">When</td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Player</td>
                         <td class="py-2 px-4">
-                            <input type="date" name="when" class="input w-full" value="" required>
+                            <select name="player" class="select select-bordered w-full" required>
+                                <option value="">Select player</option>
+                                {% for player in players %}
+                                    <option value="{{ player.id }}">{{ player.user.first_name }} {{ player.user.last_name }} ({{ player.user.username }})</option>
+                                {% endfor %}
+                            </select>
                         </td>
                     </tr>
                     <tr>
-                        <td class="font-semibold py-2 px-4">Status of game</td>
+                        <td class="font-semibold py-2 px-4">Start date</td>
                         <td class="py-2 px-4">
-                            <select name="role" class="input w-full" required>
-                                {% for val, label in role_choices %}
-                                    <option value="{{ val }}"
-                                            {% if val == 'Planned' %}selected{% endif %}>{{ label }}</option>
+                            <input type="date" name="date_start" class="input w-full" required>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">End date</td>
+                        <td class="py-2 px-4">
+                            <input type="date" name="date_end" class="input w-full" required>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Status</td>
+                        <td class="py-2 px-4">
+                            <select name="status" class="select select-bordered w-full" required>
+                                {% for key, label in status_choices %}
+                                    <option value="{{ key }}">{{ label }}</option>
                                 {% endfor %}
                             </select>
-
                         </td>
                     </tr>
-                    <tr class="border-b border-neutral">
+                    <tr>
                         <td class="font-semibold py-2 px-4">Description</td>
                         <td class="py-2 px-4">
-                            <textarea name="description" class="input w-full" rows="3"></textarea>
+                            <textarea name="description" class="textarea textarea-bordered w-full" rows="3"></textarea>
                         </td>
                     </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">
-                            Set players for the game based on their current player status
-                        </td>
-                        <td class="py-2 px-4">
-                            <input type="checkbox" name="set_players" class="checkbox" checked>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Add Game</button>
-                </div>
-            </form>
-        </div>
+                </tbody>
+            </table>
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">Add Absence</button>
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}
