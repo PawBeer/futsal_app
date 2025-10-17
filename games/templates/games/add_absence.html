@@ -5,24 +5,26 @@
 {% endblock %}
 
 {% block content %}
-<div class="w-full flex items-center justify-center bg-base-100">
-    <div class="card card-border bg-base-100 max-w-lg px-6 py-4">
-        <form method="post" class="w-full">
-            {% csrf_token %}
-            <table class="table w-full border border-neutral shadow-md bg-base-100 text-base-content">
-                <thead>
+    <div class="w-full flex items-center justify-center bg-base-100">
+        <div class="card card-border bg-base-100 max-w-lg px-6 py-4">
+            <form method="post" class="w-full">
+                {% csrf_token %}
+                <table class="table w-full border border-neutral shadow-md bg-base-100 text-base-content">
+                    <thead>
                     <tr class="border-b border-neutral">
                         <th colspan="2" class="text-lg font-semibold text-center">Add Absence</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <tr>
                         <td class="font-semibold py-2 px-4">Player</td>
                         <td class="py-2 px-4">
                             <select name="player" class="select select-bordered w-full" required>
                                 <option value="">Select player</option>
                                 {% for player in players %}
-                                    <option value="{{ player.id }}">{{ player.user.first_name }} {{ player.user.last_name }} ({{ player.user.username }})</option>
+                                    <option value="{{ player.id }}">{{ player.user.first_name }} {{ player.user.last_name }}
+                                        ({{ player.user.username }})
+                                    </option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -30,13 +32,26 @@
                     <tr>
                         <td class="font-semibold py-2 px-4">Start date</td>
                         <td class="py-2 px-4">
-                            <input type="date" name="date_start" class="input w-full" required>
+                            <input type="date" id="date_start" name="date_start" class="input w-full" required>
                         </td>
                     </tr>
+
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Longer break?</td>
+                        <td class="py-2 px-4 flex items-center">
+                            <input type="checkbox" id="longer_break" name="longer_break" class="checkbox">
+                            <label for="longer_break" class="ml-2">I need a longer break</label>
+                        </td>
+                    </tr>
+
                     <tr>
                         <td class="font-semibold py-2 px-4">End date</td>
                         <td class="py-2 px-4">
-                            <input type="date" name="date_end" class="input w-full" required>
+                            <input type="date"
+                                   id="date_end"
+                                   name="date_end"
+                                   class="input w-full bg-gray-200 text-gray-500 cursor-not-allowed"
+                                   disabled>
                         </td>
                     </tr>
                     <tr>
@@ -55,12 +70,33 @@
                             <textarea name="description" class="textarea textarea-bordered w-full" rows="3"></textarea>
                         </td>
                     </tr>
-                </tbody>
-            </table>
-            <div class="mt-4 text-center">
-                <button type="submit" class="btn btn-primary">Add Absence</button>
-            </div>
-        </form>
+                    </tbody>
+                </table>
+                <div class="mt-4 text-center">
+                    <button type="submit" class="btn btn-primary">Add Absence</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+    <script>
+        const longerBreakCheckbox = document.getElementById('longer_break');
+        const startDateInput = document.getElementById('date_start');
+        const endDateInput = document.getElementById('date_end');
+
+        startDateInput.addEventListener('change', () => {
+            endDateInput.value = startDateInput.value;
+        });
+
+        longerBreakCheckbox.addEventListener('change', () => {
+            if (longerBreakCheckbox.checked) {
+                endDateInput.disabled = false;
+                endDateInput.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+            } else {
+                endDateInput.disabled = true;
+                endDateInput.value = startDateInput.value;
+                endDateInput.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+            }
+        });
+    </script>
+
 {% endblock %}
