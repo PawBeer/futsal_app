@@ -19,19 +19,31 @@
                     <tr>
                         <td class="font-semibold py-2 px-4">Player</td>
                         <td class="py-2 px-4">
-                            <select name="player" class="select select-bordered w-full" required>
-                                <option value="">Select player</option>
+                            {% if user.is_superuser %}
+                                <select name="player" class="select select-bordered w-full" required>
+                                    <option value="">Select player</option>
+                                    {% for player in players %}
+                                        <option value="{{ player.id }}"
+                                                {% if player.user.username == user.get_username %}
+                                                selected
+                                                {% endif %}
+                                        >
+                                            {{ player.user.username }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
                                 {% for player in players %}
-                                    <option value="{{ player.id }}"
-                                            {% if player.user.username == user.get_username %}
-                                            selected
-                                            {% endif %}
-                                    >
-                                        {{ player.user.username }}
-                                    </option>
+                                    {% if player.user.username == user.get_username %}
+                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                                            {{ player.user.username }}
+                                        </div>
+                                        <input type="hidden" name="player" value="{{ player.id }}">
+                                    {% endif %}
                                 {% endfor %}
-                            </select>
+                            {% endif %}
                         </td>
+
                     </tr>
                     <tr>
                         <td class="font-semibold py-2 px-4">Start date</td>
@@ -62,13 +74,25 @@
                     <tr>
                         <td class="font-semibold py-2 px-4">Status</td>
                         <td class="py-2 px-4">
-                            <select name="status" class="select select-bordered w-full" required>
+                            {% if user.is_superuser %}
+                                <select name="status" class="select select-bordered w-full" required>
+                                    {% for key, label in status_choices %}
+                                        <option value="{{ key }}"
+                                                {% if forloop.last %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
                                 {% for key, label in status_choices %}
-                                    <option value="{{ key }}"
-                                            {% if forloop.last %}selected{% endif %}>{{ label }}</option>
+                                    {% if forloop.last %}
+                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                                            {{ label }}
+                                        </div>
+                                        <input type="hidden" name="status" value="{{ key }}">
+                                    {% endif %}
                                 {% endfor %}
-                            </select>
+                            {% endif %}
                         </td>
+
                     </tr>
                     <tr>
                         <td class="font-semibold py-2 px-4">Description</td>

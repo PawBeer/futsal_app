@@ -364,7 +364,6 @@ def add_game(request):
     })
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
 def add_absence(request):
     players = Player.objects.all()
     status_choices = PlayerStatus.objects.values_list('player_status', 'player_status')
