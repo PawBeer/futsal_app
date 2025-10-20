@@ -48,10 +48,11 @@
                         <td class="font-semibold py-2 px-4">End date</td>
                         <td class="py-2 px-4">
                             <input type="date"
-                                   id="date_end"
+                                   id="date_end_display"
                                    name="date_end"
                                    class="input w-full bg-gray-200 text-gray-500 cursor-not-allowed"
                                    disabled>
+                            <input type="hidden" id="date_end" name="date_end">
                         </td>
                     </tr>
                     <tr>
@@ -59,7 +60,8 @@
                         <td class="py-2 px-4">
                             <select name="status" class="select select-bordered w-full" required>
                                 {% for key, label in status_choices %}
-                                    <option value="{{ key }}">{{ label }}</option>
+                                    <option value="{{ key }}"
+                                            {% if forloop.last %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -79,23 +81,39 @@
         </div>
     </div>
     <script>
-        const longerBreakCheckbox = document.getElementById('longer_break');
-        const startDateInput = document.getElementById('date_start');
-        const endDateInput = document.getElementById('date_end');
+        document.addEventListener('DOMContentLoaded', function () {
+            const longerBreakCheckbox = document.getElementById('longer_break');
+            const startDateInput = document.getElementById('date_start');
+            const endDateDisplay = document.getElementById('date_end_display');
+            const endDateHidden = document.getElementById('date_end');
 
-        startDateInput.addEventListener('change', () => {
-            endDateInput.value = startDateInput.value;
-        });
-
-        longerBreakCheckbox.addEventListener('change', () => {
-            if (longerBreakCheckbox.checked) {
-                endDateInput.disabled = false;
-                endDateInput.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
-            } else {
-                endDateInput.disabled = true;
-                endDateInput.value = startDateInput.value;
-                endDateInput.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+            function syncEndDate(value) {
+                endDateDisplay.value = value;
+                endDateHidden.value = value;
             }
+
+            startDateInput.addEventListener('change', () => {
+                if (!longerBreakCheckbox.checked) {
+                    syncEndDate(startDateInput.value);
+                }
+            });
+
+            longerBreakCheckbox.addEventListener('change', () => {
+                if (longerBreakCheckbox.checked) {
+                    endDateDisplay.disabled = false;
+                    endDateDisplay.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                } else {
+                    endDateDisplay.disabled = true;
+                    endDateDisplay.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                    syncEndDate(startDateInput.value);
+                }
+            });
+
+            endDateDisplay.addEventListener('change', () => {
+                endDateHidden.value = endDateDisplay.value;
+            });
+
+            syncEndDate(startDateInput.value);
         });
     </script>
 
