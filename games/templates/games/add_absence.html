@@ -22,8 +22,12 @@
                             <select name="player" class="select select-bordered w-full" required>
                                 <option value="">Select player</option>
                                 {% for player in players %}
-                                    <option value="{{ player.id }}">{{ player.user.first_name }} {{ player.user.last_name }}
-                                        ({{ player.user.username }})
+                                    <option value="{{ player.id }}"
+                                            {% if player.user.username == user.get_username %}
+                                            selected
+                                            {% endif %}
+                                    >
+                                        {{ player.user.username }}
                                     </option>
                                 {% endfor %}
                             </select>
