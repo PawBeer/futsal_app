@@ -45,6 +45,10 @@
               {% csrf_token %}
               <button>Log out</button>
             </form>
+            <form method="post" action="{% url 'password_change' %}">
+              {% csrf_token %}
+              <button>Change Password</button>
+            </form>            
           </li>
         {% endif %}
       </ul>
@@ -102,6 +106,10 @@
               {% csrf_token %}
               <button>Log out</button>
             </form>
+            <form method="post" action="{% url 'password_change' %}">
+              {% csrf_token %}
+              <button>Change Password</button>
+            </form>   
           </li>
         {% endif %}
       </ul>
