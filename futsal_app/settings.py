@@ -136,6 +136,8 @@ LOGIN_URL = '/members/login'
 
 # settings.py
 
+DISPLAY_NAME_MODE = "full_name"  # Options: "username" or "full_name"
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 #EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #production
 EMAIL_HOST = "tronel.pl"      
