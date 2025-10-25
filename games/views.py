@@ -13,6 +13,8 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
+
 
 class Breadcrumb:
     def __init__(self, path, label):
@@ -247,6 +249,7 @@ def add_player(request):
                 user.first_name = first_name
                 user.last_name = last_name
                 user.full_clean()
+                user.set_password(get_random_string(12))
                 user.save()
 
                 player = Player(user=user, mobile_number=mobile_number, role=role)
@@ -268,6 +271,7 @@ def add_player(request):
         'role_choices': Player.ROLE_CHOICES,
     }
     return render(request, 'games/add_player.html', context)
+
 
 @login_required
 def check_username_and_email(request):

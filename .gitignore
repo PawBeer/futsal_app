@@ -7,3 +7,4 @@ __pycache__/
 .Python
 db.sqlite3
 staticfiles/
+.vscode

@@ -90,7 +90,7 @@
         <div class="p-4">
 
             <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
-                Permanent players
+                Planned for the game
             </div>
             <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                 <span class="w-28 text-center">Play</span>
@@ -118,7 +118,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ planned_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=planned_player.pk %}" >{{ planned_player.get_display_name }}</a></span>
                             <span class="w-48 flex justify-center"></span>
                         </div>
                     </form>
@@ -143,10 +143,10 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ cancelled_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=cancelled_player.pk %}" >{{ cancelled_player.get_display_name }}</a></span>
                             <span class="w-48 flex justify-center">
                             {% if substitute %}
-                                <span class="badge badge-success">{{ substitute.user.username }}</span>
+                                <span class="badge badge-success">{{ substitute.get_display_name }}</span>
                             {% else %}
                                 <span class="badge badge-error text-error-content">free slot</span>
                             {% endif %}
@@ -161,7 +161,6 @@
                 <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                     <span class="w-28 text-center">Play</span>
                     <span class="w-48 text-center">Player</span>
-                    {#                    <span class="w-48 text-center">Temporarily for Player</span>#}
                 </div>
 
                 {% for confirmed_player in confirmed_players_for_game %}
@@ -182,7 +181,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ confirmed_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=confirmed_player.pk %}" >{{ confirmed_player.get_display_name }}</a></span>
                         </div>
                     </form>
                 {% endfor %}
@@ -204,7 +203,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300">{{ reserved_player.user.username }}</span>
+                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=reserved_player.pk %}" >{{ reserved_player.get_display_name }}</a></span>
                         </div>
                     </form>
                 {% endfor %}
@@ -227,11 +226,7 @@
                 <tbody>
                 {% for record in booking_history %}
                     <tr>
-                        {% if record.player.user.username != 'N/A' %}
-                            <td>{{ record.player.user.username }}</td>
-                        {% else %}
-                            <td>{{ record.player.name }} {{ record.player.surname }}</td>
-                        {% endif %}
+                        <td>{{ record.player.get_display_name }}</td>                
                         <td>{{ record.player_status.player_status }}</td>
                         <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
                     </tr>
