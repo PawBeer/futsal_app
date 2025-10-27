@@ -9,6 +9,7 @@
         <div class="card card-border bg-base-100">
             <form class="w-full" method="post">
                 {% csrf_token %}
+                <input type="hidden" name="form_type" value="profile">
                 <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
                     <thead>
                     <tr class="border-b border-neutral">
@@ -71,6 +72,18 @@
                 {% if user.is_authenticated and user.is_superuser %}
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                {% endif %}
+            </form>
+            
+            <!-- Send welcome email form -->
+            <form class="w-full mt-6" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="welcome_email">
+                {% if user.is_authenticated and user.is_superuser %}
+                    <div class="card card-border bg-base-100 p-4">
+                        <h2 class="text-lg font-semibold mb-4">Welcome email</h2>
+                        <button type="submit" class="btn btn-secondary">Send welcome email</button>
                     </div>
                 {% endif %}
             </form>
