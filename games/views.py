@@ -260,7 +260,7 @@ def player_details(request, player_id):
                     try:
                         profile_form.save()
                         messages.success(request, "Profile updated successfully.")
-                        return redirect("all_players_url")
+                        return redirect("player_details_url", player_id=player.id)
                     except IntegrityError:
                         messages.error(
                             request, "An error occurred while saving the profile."
@@ -274,7 +274,7 @@ def player_details(request, player_id):
 
         elif form_type == "welcome_email":
             # build a sensible activation link (fallback to next_games)
-            activation_link = request.build_absolute_uri(reverse("next_games_url"))
+            activation_link = request.build_absolute_uri(reverse("password_reset"))
             send_welcome_email(player.user, activation_link)
             messages.success(request, "Welcome email has been sent.")
             return redirect("player_details_url", player_id=player.id)
