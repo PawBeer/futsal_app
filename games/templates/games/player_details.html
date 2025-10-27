@@ -76,17 +76,31 @@
                 {% endif %}
             </form>
             
+            {% if user.is_authenticated and user.is_superuser %}
             <!-- Send welcome email form -->
             <form class="w-full mt-6" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="welcome_email">
-                {% if user.is_authenticated and user.is_superuser %}
+
                     <div class="card card-border bg-base-100 p-4">
+                        <table class="table w-full mb-4">
+                            <tbody>
+                                <tr class="border-b border-neutral">
+                                    <td class="font-semibold py-2 px-4">Date joined</td>
+                                    <td class="py-2 px-4">{{ player.user.date_joined|date:"d M Y, H:i" }}</td>
+                                </tr>
+                                <tr class="border-b border-neutral">
+                                    <td class="font-semibold py-2 px-4">Last login</td>
+                                    <td class="py-2 px-4">{{ player.user.last_login|date:"d M Y, H:i" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <h2 class="text-lg font-semibold mb-4">Welcome email</h2>
                         <button type="submit" class="btn btn-secondary">Send welcome email</button>
                     </div>
-                {% endif %}
+                
             </form>
+            {% endif %}
         </div>
     </div>
 
