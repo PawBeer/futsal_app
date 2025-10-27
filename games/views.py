@@ -318,6 +318,42 @@ def add_game(request):
                     player=player,
                     player_status=reserved_status
                 )
+
+            psm_list = PlayerStatusManager.objects.all().order_by('date_start')
+            game_date = game.when.date() if hasattr(game.when, 'date') else game.when
+
+            for psm in psm_list:
+                if psm.date_start <= game_date <= psm.date_end:
+                    if psm.player_status.player_status == 'resting':
+                        games_in_range = Game.objects.filter(when__gte=psm.date_start, when__lte=psm.date_end)
+                        for game_in_range in games_in_range:
+                            latest_booking = BookingHistoryForGame.objects.filter(
+                                player=psm.player, game=game_in_range
+                            ).order_by('-creation_date').first()
+
+                            if latest_booking:
+                                current_status_key = latest_booking.player_status.player_status
+                                if current_status_key in ['planned', 'cancelled']:
+                                    new_status = PlayerStatus.objects.get(player_status='cancelled')
+                                elif current_status_key in ['confirmed', 'reserved']:
+                                    new_status = PlayerStatus.objects.get(player_status='reserved')
+                                else:
+                                    new_status = psm.player_status
+                            else:
+                                new_status = psm.player_status
+
+                            BookingHistoryForGame.objects.create(
+                                game=game_in_range,
+                                player=psm.player,
+                                player_status=new_status
+                            )
+                    else:
+                        BookingHistoryForGame.objects.create(
+                            game=game,
+                            player=psm.player,
+                            player_status=psm.player_status
+                        )
+
         return redirect('next_games_url')
 
     return render(request, 'games/add_game.html', {
