@@ -57,6 +57,7 @@
     <a href="{% url 'all_players_url' %}" class="block py-2 border-b">Players</a>
   {% endif %}
   <a href="{% url 'past_games_url' %}" class="block py-2 border-b">Past games</a>
+  <a href="{% url 'add_absence_url' %}" class="block py-2 border-b">Add absence</a>
   {% if user.is_authenticated and user.is_superuser %}
     <a href="{% url 'booking_history_url' %}" class="block py-2 border-b">Booking history</a>
     <a href="{% url 'add_game_url' %}" class="block py-2 border-b">Add game</a>
@@ -74,9 +75,10 @@
     <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next games</a>
     {% if user.is_authenticated %}
       <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
-    {% endif %}
     <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past games</a>
-    {% if user.is_authenticated and user.is_superuser %}
+    <a href="{% url 'add_absence_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_absence_url' %}btn-active border-accent-content{% endif %}">Add absence</a>
+        {% endif %}
+{% if user.is_authenticated and user.is_superuser %}
       <a href="{% url 'booking_history_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active border-accent-content{% endif %}">Booking history</a>
     {% endif %}
   </div>

@@ -5,14 +5,14 @@
 {% endblock %}
 
 {% block content %}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 max-w-full bg-base-100 rounded-lg shadow-lg">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-2 max-w-full bg-base-100 rounded-lg shadow-lg">
 
-        <div class="flex flex-col items-center space-y-6 p-4">
+        <div class="flex flex-col items-center space-y-4 p-0">
             <form method="post"
                   action="{% url 'game_status_update_url' game_id=game.id %}"
-                  class="bg-base-100 p-6 rounded-lg text-gray-100">
+                  class="bg-base-100 p-1 rounded-lg text-gray-100">
                 {% csrf_token %}
-                <div class="text-xl font-bold m-3 w-full">
+                <div class="text-xl font-bold m-2 w-full">
                     Week {{ game.when|date:'W - d M Y ' }}
                     <div class="flex justify-center w-full mt-10 mb-10">
                         {% if number_of_confirmed_players > 10 %}
@@ -219,7 +219,7 @@
                 <thead>
                 <tr>
                     <th>Player</th>
-                    <th>Status for Player</th>
+                    <th>Status</th>
                     <th>Created</th>
                 </tr>
                 </thead>

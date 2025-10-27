@@ -56,3 +56,14 @@ class BookingHistoryForGame(models.Model):
 
     def __str__(self):
         return f"{self.player} - {self.player_status} on {self.game}"
+
+
+class PlayerStatusManager(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    date_start = models.DateField()
+    date_end = models.DateField()
+    player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
+    description = models.TextField(null=True, blank = True)
+
+    def __str__(self):
+        return f"{self.player} from {self.date_start} to {self.date_end} - {self.player_status}"

@@ -13,6 +13,7 @@ urlpatterns = [
     path('players/<player_id>/', views.player_details, name='player_details_url'),
     path('add_player', views.add_player, name='add_player_url'),
     path('add_game', views.add_game, name='add_game_url'),
+    path('add_absence', views.add_absence, name='add_absence_url'),
     path('add_player_with_form', views.AddPlayerView.as_view(), name='add_player_with_form_url'),
     path('add_game_with_form', views.AddGameView.as_view(), name='add_game_with_form_url'),
     path('booking_history/', views.booking_history, name='booking_history_url'),
