@@ -292,7 +292,7 @@ def add_player_with_form(request):
 
 @login_required()
 def booking_history(request):
-    found_booking_history = BookingHistoryForGame.objects.all()
+    found_booking_history = BookingHistoryForGame.objects.all().order_by('-creation_date')
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
 
 
@@ -402,7 +402,14 @@ def add_game(request):
 @login_required
 def add_absence(request):
     players = Player.objects.all()
-    status_choices = PlayerStatus.objects.values_list('player_status', 'player_status')
+    status_choices = [
+        ('planned', 'planned'),
+        ('cancelled', 'cancelled'),
+        ('confirmed', 'confirmed'),
+        ('reserved', 'reserved'),
+        ('resting', 'resting'),
+    ]
+    player_status_manager = PlayerStatusManager.objects.all()
 
     if request.method == 'POST':
         player_id = request.POST.get('player')
@@ -427,38 +434,42 @@ def add_absence(request):
 
             games_in_range = Game.objects.filter(when__gte=date_start, when__lte=date_end)
 
+            resting_status_key = 'resting'
+
             for game in games_in_range:
-                resting_status_key = 'resting'
+                latest_booking = BookingHistoryForGame.objects.filter(player=player, game=game).order_by(
+                    '-creation_date').first()
 
-                for game in games_in_range:
-                    latest_booking = BookingHistoryForGame.objects.filter(player=player, game=game).order_by(
-                        '-creation_date').first()
-
-                    if player_status_key == resting_status_key and latest_booking:
-                        current_status_key = latest_booking.player_status.player_status
-                        if current_status_key in ['planned', 'cancelled']:
-                            new_status = PlayerStatus.objects.get(player_status='cancelled')
-                        elif current_status_key in ['confirmed', 'reserved']:
-                            new_status = PlayerStatus.objects.get(player_status='reserved')
-                        else:
-                            new_status = player_status
+                if player_status_key == resting_status_key and latest_booking:
+                    current_status_key = latest_booking.player_status.player_status
+                    if current_status_key in ['planned', 'cancelled']:
+                        new_status = PlayerStatus.objects.get(player_status='cancelled')
+                    elif current_status_key in ['confirmed', 'reserved']:
+                        new_status = PlayerStatus.objects.get(player_status='reserved')
                     else:
                         new_status = player_status
+                else:
+                    new_status = player_status
+
                 BookingHistoryForGame.objects.create(
                     player=player,
                     game=game,
                     player_status=new_status,
                     creation_date=timezone.now(),
                 )
+
             messages.success(request, f"Absence for {player.user.username} has been added.")
             return redirect('next_games_url')
 
         except Player.DoesNotExist:
             messages.error(request, "Selected player does not exist.")
+        except PlayerStatus.DoesNotExist:
+            messages.error(request, "Selected status does not exist.")
         except Exception as e:
             messages.error(request, f"Error while adding absence: {e}")
 
     return render(request, 'games/add_absence.html', {
         'players': players,
         'status_choices': status_choices,
+        'player_status_manager': player_status_manager,
     })
