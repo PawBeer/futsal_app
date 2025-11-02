@@ -108,6 +108,32 @@
             </form>
         </div>
     </div>
+    {% if user.is_superuser %}
+        <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Player</th>
+                <th>Date_start</th>
+                <th>Date end</th>
+                <th>Player status</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for record in player_status_manager %}
+                <tr>
+                    <td>{{ record.player.user.username }}</td>
+                    <td>{{ record.date_start }}</td>
+                    <td>{{ record.date_end }}</td>
+                    <td>{{ record.player_status.player_status }}</td>
+                    <td>{{ record.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% endif %}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const longerBreakCheckbox = document.getElementById('longer_break');
