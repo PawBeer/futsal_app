@@ -17,11 +17,15 @@ phone_validator = RegexValidator(
 
 
 class Player(models.Model):
+    ROLE_ACTIVE = "Active"
+    ROLE_INACTIVE = "Inactive"
+    ROLE_PERMANENT = "Permanent"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     ROLE_CHOICES = [
-        ("Active", "Active"),
-        ("Inactive", "Inactive"),
-        ("Permanent", "Permanent"),
+        (ROLE_ACTIVE, ROLE_ACTIVE),
+        (ROLE_INACTIVE, ROLE_INACTIVE),
+        (ROLE_PERMANENT, ROLE_PERMANENT),
     ]
     mobile_number = models.CharField(
         max_length=9,
@@ -31,7 +35,7 @@ class Player(models.Model):
             )
         ],
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="Active")
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=ROLE_ACTIVE)
 
     def get_display_name(self):
         display_mode = getattr(settings, "DISPLAY_NAME_MODE", "username")
@@ -61,13 +65,17 @@ class PlayerStatus(models.Model):
 
 
 class Game(models.Model):
+    PLANNED = "Planned"
+    PLAYED = "Played"
+    CANCELLED = "Cancelled"
+
     STATUS_CHOICES = [
-        ("Planned", "Planned"),
-        ("Played", "Played"),
-        ("Cancelled", "Cancelled"),
+        (PLANNED, PLANNED),
+        (PLAYED, PLAYED),
+        (CANCELLED, CANCELLED),
     ]
     when = models.DateField()
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="Planned")
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default=PLANNED)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
