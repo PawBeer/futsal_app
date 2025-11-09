@@ -363,7 +363,7 @@ def add_game(request):
 @login_required
 def add_absence(request):
     players = Player.objects.all()
-    status_choices = PlayerStatus.objects.values_list('player_status', 'player_status')
+    player_status_manager = PlayerStatusManager.objects.all().order_by('-id')
 
     if request.method == 'POST':
         player_id = request.POST.get('player')
@@ -421,5 +421,6 @@ def add_absence(request):
 
     return render(request, 'games/add_absence.html', {
         'players': players,
-        'status_choices': status_choices,
+        'status_choices': PlayerStatus.STATUS_CHOICES,
+        'player_status_manager': player_status_manager,
     })

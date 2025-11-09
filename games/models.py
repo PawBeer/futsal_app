@@ -58,7 +58,20 @@ class Player(models.Model):
 
 
 class PlayerStatus(models.Model):
-    player_status = models.CharField(max_length=50, unique=True)
+    PLANNED = "planned"
+    CANCELLED = "cancelled"
+    CONFIRMED = "confirmed"
+    RESERVED = "reserved"
+    RESTING = "resting"
+
+    STATUS_CHOICES = [
+        (PLANNED, PLANNED),
+        (CANCELLED, CANCELLED),
+        (CONFIRMED, CONFIRMED),
+        (RESERVED, RESERVED),
+        (RESTING, RESTING),
+    ]
+    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
 
     def __str__(self):
         return self.player_status
