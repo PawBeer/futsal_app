@@ -38,8 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'games',
-    'member.apps.MemberConfig'
-]
+ ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -130,11 +129,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 3000
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 LOGIN_REDIRECT_URL = '/games'
-LOGOUT_REDIRECT_URL = '/members/login'
-LOGIN_URL = '/members/login'
-
 
 # settings.py
+
+DISPLAY_NAME_MODE = "full_name"  # Options: "username" or "full_name"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 #EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #production
