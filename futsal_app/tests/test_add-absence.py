@@ -29,4 +29,6 @@ class SimpleAddAbsenceTest(BaseTestCase):
         self.assertEqual(response.status_code, 302)
 
         self.assertTrue(PlayerStatusManager.objects.filter(player=player).exists())
+        self.assertEqual(PlayerStatusManager.objects.filter(player=player), 'resting')
         self.assertTrue(BookingHistoryForGame.objects.filter(player=player, game=game).exists())
+        self.assertEqual(game.player_status.player_status, 'cancelled')
