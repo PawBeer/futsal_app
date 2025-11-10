@@ -388,23 +388,23 @@ def add_absence(request):
 
             games_in_range = Game.objects.filter(when__gte=date_start, when__lte=date_end)
 
+            resting_status_key = 'resting'
+
             for game in games_in_range:
-                resting_status_key = 'resting'
+                latest_booking = BookingHistoryForGame.objects.filter(player=player, game=game).order_by(
+                    '-creation_date').first()
 
-                for game in games_in_range:
-                    latest_booking = BookingHistoryForGame.objects.filter(player=player, game=game).order_by(
-                        '-creation_date').first()
-
-                    if player_status_key == resting_status_key and latest_booking:
-                        current_status_key = latest_booking.player_status.player_status
-                        if current_status_key in ['planned', 'cancelled']:
-                            new_status = PlayerStatus.objects.get(player_status='cancelled')
-                        elif current_status_key in ['confirmed', 'reserved']:
-                            new_status = PlayerStatus.objects.get(player_status='reserved')
-                        else:
-                            new_status = player_status
+                if player_status_key == resting_status_key and latest_booking:
+                    current_status_key = latest_booking.player_status.player_status
+                    if current_status_key in ['planned', 'cancelled']:
+                        new_status = PlayerStatus.objects.get(player_status='cancelled')
+                    elif current_status_key in ['confirmed', 'reserved']:
+                        new_status = PlayerStatus.objects.get(player_status='reserved')
                     else:
                         new_status = player_status
+                else:
+                    new_status = player_status
+
                 BookingHistoryForGame.objects.create(
                     player=player,
                     game=game,
