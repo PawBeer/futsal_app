@@ -285,7 +285,7 @@ def check_username_and_email(request):
 
 @login_required()
 def booking_history(request):
-    found_booking_history = BookingHistoryForGame.objects.all()
+    found_booking_history = BookingHistoryForGame.objects.all().order_by('-id')
     return render(request, 'games/booking_history.html', {'booking_history': found_booking_history})
 
 
