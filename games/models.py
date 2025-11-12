@@ -45,7 +45,7 @@ class Player(models.Model):
             full_name = f"{self.user.first_name} {self.user.last_name}".strip()
             return full_name if full_name else self.user.username
         return "Unknown Player"
-    
+
     def __str__(self):
         return self.user.username if self.user else "(No user)"
 

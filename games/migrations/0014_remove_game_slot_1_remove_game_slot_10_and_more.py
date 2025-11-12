@@ -6,48 +6,48 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0013_alter_game_slot_1_alter_game_slot_2_and_more'),
+        ("games", "0013_alter_game_slot_1_alter_game_slot_2_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='game',
-            name='slot_1',
+            model_name="game",
+            name="slot_1",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_10',
+            model_name="game",
+            name="slot_10",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_2',
+            model_name="game",
+            name="slot_2",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_3',
+            model_name="game",
+            name="slot_3",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_4',
+            model_name="game",
+            name="slot_4",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_5',
+            model_name="game",
+            name="slot_5",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_6',
+            model_name="game",
+            name="slot_6",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_7',
+            model_name="game",
+            name="slot_7",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_8',
+            model_name="game",
+            name="slot_8",
         ),
         migrations.RemoveField(
-            model_name='game',
-            name='slot_9',
+            model_name="game",
+            name="slot_9",
         ),
     ]

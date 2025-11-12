@@ -7,27 +7,34 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Game',
+            name="Game",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('when', models.DateField()),
-                ('status', models.CharField(max_length=100)),
-                ('description', models.TextField(null=True)),
-                ('slot_1', models.IntegerField(null=True)),
-                ('slot_2', models.IntegerField(null=True)),
-                ('slot_3', models.IntegerField(null=True)),
-                ('slot_4', models.IntegerField(null=True)),
-                ('slot_5', models.IntegerField(null=True)),
-                ('slot_6', models.IntegerField(null=True)),
-                ('slot_7', models.IntegerField(null=True)),
-                ('slot_8', models.IntegerField(null=True)),
-                ('slot_9', models.IntegerField(null=True)),
-                ('slot_10', models.IntegerField(null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("when", models.DateField()),
+                ("status", models.CharField(max_length=100)),
+                ("description", models.TextField(null=True)),
+                ("slot_1", models.IntegerField(null=True)),
+                ("slot_2", models.IntegerField(null=True)),
+                ("slot_3", models.IntegerField(null=True)),
+                ("slot_4", models.IntegerField(null=True)),
+                ("slot_5", models.IntegerField(null=True)),
+                ("slot_6", models.IntegerField(null=True)),
+                ("slot_7", models.IntegerField(null=True)),
+                ("slot_8", models.IntegerField(null=True)),
+                ("slot_9", models.IntegerField(null=True)),
+                ("slot_10", models.IntegerField(null=True)),
             ],
         ),
     ]

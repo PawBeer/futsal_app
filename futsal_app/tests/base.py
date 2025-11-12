@@ -13,15 +13,9 @@ class BaseTestCase(TestCase):
             username="admin", email="admin@example.com", password="password123"
         )
 
-        self.user_1_per = User.objects.create_user(
-            username="bolek", password="pass_1"
-        )
-        self.user_2_per = User.objects.create_user(
-            username="lolek", password="pass_2"
-        )
-        self.user_3_per = User.objects.create_user(
-            username="tola", password="pass_3"
-        )
+        self.user_1_per = User.objects.create_user(username="bolek", password="pass_1")
+        self.user_2_per = User.objects.create_user(username="lolek", password="pass_2")
+        self.user_3_per = User.objects.create_user(username="tola", password="pass_3")
         self.user_4_act = User.objects.create_user(username="reksio", password="pass_4")
 
         player_1 = Player.objects.create(
