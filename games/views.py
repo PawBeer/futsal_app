@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from games.mailer import send_game_update_email, send_player_status_update_email, send_welcome_email
-from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus, PlayerStatusManager
+from .models import Game, BookingHistoryForGame, User, Player, PlayerStatusManager
 from django.urls import reverse
 from .models import Player
 from django.db.models import Avg, Min, Max, Count, Q
@@ -39,10 +39,10 @@ def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
     players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
 
-    player_status_planned = PlayerStatus.objects.get(player_status='planned')
-    player_status_cancelled = PlayerStatus.objects.get(player_status='cancelled')
-    player_status_reserved = PlayerStatus.objects.get(player_status='reserved')
-    player_status_confirmed = PlayerStatus.objects.get(player_status='confirmed')
+    player_status_planned = 'planned'
+    player_status_cancelled = 'cancelled'
+    player_status_reserved = 'reserved'
+    player_status_confirmed = 'confirmed'
 
     latest_bookings = {
         player.pk: player.get_latest_booking_for_game(found_game)
@@ -121,10 +121,10 @@ def game_status_update(request, game_id):
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
 
-    player_status_planned = PlayerStatus.objects.get(player_status='planned')
-    player_status_cancelled = PlayerStatus.objects.get(player_status='cancelled')
-    player_status_reserved = PlayerStatus.objects.get(player_status='reserved')
-    player_status_confirmed = PlayerStatus.objects.get(player_status='confirmed')
+    player_status_planned = 'planned'
+    player_status_cancelled = 'cancelled'
+    player_status_reserved = 'reserved'
+    player_status_confirmed = 'confirmed'
 
     play_slot_keys = [key for key in request.POST if key.startswith('play_slot_')]
     if not play_slot_keys:
@@ -299,8 +299,8 @@ def add_game(request):
             description=request.POST.get('description', ''),
         )
         if request.POST.get('set_players'):
-            planned_status = PlayerStatus.objects.get(player_status='planned')
-            reserved_status = PlayerStatus.objects.get(player_status='reserved')
+            planned_status = 'planned'
+            reserved_status = 'reserved'
 
             permanent_players = Player.objects.filter(role='Permanent')
             active_players = Player.objects.filter(role='Active')
@@ -334,9 +334,9 @@ def add_game(request):
                             if latest_booking:
                                 current_status_key = latest_booking.player_status.player_status
                                 if current_status_key in ['planned', 'cancelled']:
-                                    new_status = PlayerStatus.objects.get(player_status='cancelled')
+                                    new_status = 'cancelled'
                                 elif current_status_key in ['confirmed', 'reserved']:
-                                    new_status = PlayerStatus.objects.get(player_status='reserved')
+                                    new_status = 'reserved'
                                 else:
                                     new_status = psm.player_status
                             else:
@@ -369,12 +369,12 @@ def add_absence(request):
         player_id = request.POST.get('player')
         date_start_str = request.POST.get('date_start')
         date_end_str = request.POST.get('date_end')
-        player_status_key = request.POST.get('status')
+        player_status = request.POST.get('status')
         description = request.POST.get('description', '').strip()
 
         try:
             player = Player.objects.get(pk=player_id)
-            player_status = PlayerStatus.objects.get(player_status=player_status_key)
+            player_status = player_status
             date_start = datetime.strptime(date_start_str, '%Y-%m-%d')
             date_end = datetime.strptime(date_end_str, '%Y-%m-%d')
 
@@ -394,12 +394,12 @@ def add_absence(request):
                 latest_booking = BookingHistoryForGame.objects.filter(player=player, game=game).order_by(
                     '-creation_date').first()
 
-                if player_status_key == resting_status_key and latest_booking:
+                if player_status == resting_status_key and latest_booking:
                     current_status_key = latest_booking.player_status.player_status
                     if current_status_key in ['planned', 'cancelled']:
-                        new_status = PlayerStatus.objects.get(player_status='cancelled')
+                        new_status = 'cancelled'
                     elif current_status_key in ['confirmed', 'reserved']:
-                        new_status = PlayerStatus.objects.get(player_status='reserved')
+                        new_status = 'reserved'
                     else:
                         new_status = player_status
                 else:
@@ -421,6 +421,6 @@ def add_absence(request):
 
     return render(request, 'games/add_absence.html', {
         'players': players,
-        'status_choices': PlayerStatus.STATUS_CHOICES,
+        'status_choices': PlayerStatusManager.STATUS_CHOICES,
         'player_status_manager': player_status_manager,
     })

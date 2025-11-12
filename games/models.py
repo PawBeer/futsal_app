@@ -1,10 +1,4 @@
 from django.db import models
-from django.core.validators import (
-    MinLengthValidator,
-    MaxLengthValidator,
-    MinValueValidator,
-    MaxValueValidator,
-)
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -45,7 +39,7 @@ class Player(models.Model):
             full_name = f"{self.user.first_name} {self.user.last_name}".strip()
             return full_name if full_name else self.user.username
         return "Unknown Player"
-    
+
     def __str__(self):
         return self.user.username if self.user else "(No user)"
 
@@ -55,26 +49,6 @@ class Player(models.Model):
             .order_by("-creation_date")
             .first()
         )
-
-
-class PlayerStatus(models.Model):
-    PLANNED = "planned"
-    CANCELLED = "cancelled"
-    CONFIRMED = "confirmed"
-    RESERVED = "reserved"
-    RESTING = "resting"
-
-    STATUS_CHOICES = [
-        (PLANNED, PLANNED),
-        (CANCELLED, CANCELLED),
-        (CONFIRMED, CONFIRMED),
-        (RESERVED, RESERVED),
-        (RESTING, RESTING),
-    ]
-    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
-
-    def __str__(self):
-        return self.player_status
 
 
 class Game(models.Model):
@@ -96,11 +70,25 @@ class Game(models.Model):
 
 
 class BookingHistoryForGame(models.Model):
+    PLANNED = "planned"
+    CANCELLED = "cancelled"
+    CONFIRMED = "confirmed"
+    RESERVED = "reserved"
+    RESTING = "resting"
+
+    STATUS_CHOICES = [
+        (PLANNED, PLANNED),
+        (CANCELLED, CANCELLED),
+        (CONFIRMED, CONFIRMED),
+        (RESERVED, RESERVED),
+        (RESTING, RESTING),
+    ]
+
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(
         Player, on_delete=models.CASCADE, related_name="status_history"
     )
-    player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
+    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -108,11 +96,24 @@ class BookingHistoryForGame(models.Model):
 
 
 class PlayerStatusManager(models.Model):
+    PLANNED = "planned"
+    CANCELLED = "cancelled"
+    CONFIRMED = "confirmed"
+    RESERVED = "reserved"
+    RESTING = "resting"
+
+    STATUS_CHOICES = [
+        (PLANNED, PLANNED),
+        (CANCELLED, CANCELLED),
+        (CONFIRMED, CONFIRMED),
+        (RESERVED, RESERVED),
+        (RESTING, RESTING),
+    ]
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     date_start = models.DateField()
     date_end = models.DateField()
-    player_status = models.ForeignKey(PlayerStatus, on_delete=models.CASCADE)
-    description = models.TextField(null=True, blank = True)
+    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.player} from {self.date_start} to {self.date_end} - {self.player_status}"
