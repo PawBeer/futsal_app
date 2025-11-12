@@ -1,13 +1,12 @@
 from django.contrib.auth.models import User
-from django.test import RequestFactory, TestCase
+from django.test import Client, TestCase
 
 from games.models import Player
 
 
 class BaseTestCase(TestCase):
     def setUp(self):
-
-        self.factory = RequestFactory()
+        self.client = Client()
 
         self.superuser = User.objects.create_superuser(
             username="admin", email="admin@example.com", password="password123"
