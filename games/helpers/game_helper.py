@@ -1,7 +1,6 @@
 from django.db.models import OuterRef, Subquery
 
-from games.models import Game
-from games.models import BookingHistoryForGame, Player
+from games.models import BookingHistoryForGame, Game, Player
 
 
 def get_total_players_for_game(game: Game) -> int:

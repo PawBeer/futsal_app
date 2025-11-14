@@ -1,4 +1,5 @@
 from django import template
+
 from games.helpers import player_helper
 
 register = template.Library()

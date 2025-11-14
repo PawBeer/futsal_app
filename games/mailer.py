@@ -1,12 +1,12 @@
-from django.core.mail import send_mail
-
-from futsal_app import settings
+from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.contrib.auth.models import User
 
+from futsal_app import settings
 from games.helpers import game_helper, player_helper
 from games.models import Game, Player
+
+User = get_user_model()
 
 
 def send_welcome_email(user, activation_link):
@@ -24,9 +24,7 @@ def send_welcome_email(user, activation_link):
     )
 
     # Fallback plain text version
-    text_content = "Hello {}, welcome! Visit this link to activate: {}".format(
-        user.username, activation_link
-    )
+    text_content = f"Hello {user.username}, welcome! Visit this link to activate: {activation_link}"
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, to)
     msg.attach_alternative(html_content, "text/html")
