@@ -1,6 +1,6 @@
-from .base import BaseTestCase
-
 from games.models import Player
+
+from .base import BaseTestCase
 
 
 class PlayerModelTests(BaseTestCase):

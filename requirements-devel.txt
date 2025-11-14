@@ -1,0 +1,3 @@
+black==25.11.0
+pylint-django==3.3.9
+autoflake==2.3.1

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The player status has changes</title>
+</head>
+<body>
+    <h3>he player status has changes</h3>
+    <p>Hello Admin,</p>
+
+    <p>The change datails:<br>
+    - Date: {{ game.when|date:"l, F j, Y" }}</p>
+
+    <p>The status for the player {{player_display_name}} for the game has changed to: {{ status }}.</p>
+
+    <p>Current number of players for this game: {{ no_players }}.</p>
+
+    <p>Regards,<br>
+    Futsal App Team</p>
+</body>
+</html>
+
