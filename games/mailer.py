@@ -5,15 +5,6 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 
-def test_email(address):
-    send_mail(
-        subject="Hello from Django",
-        message="This is a test email.",
-        recipient_list=[address],
-        fail_silently=False,
-    )
-
-
 def send_welcome_email(user, activation_link):
     subject = "Welcome to our site!"
     from_email = settings.DEFAULT_FROM_EMAIL
