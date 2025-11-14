@@ -37,24 +37,8 @@ class Player(models.Model):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=ROLE_ACTIVE)
 
-    def get_display_name(self):
-        display_mode = getattr(settings, "DISPLAY_NAME_MODE", "username")
-        if display_mode == "username" and self.user:
-            return self.user.username
-        elif display_mode == "full_name" and self.user:
-            full_name = f"{self.user.first_name} {self.user.last_name}".strip()
-            return full_name if full_name else self.user.username
-        return "Unknown Player"
-
     def __str__(self):
         return self.user.username if self.user else "(No user)"
-
-    def get_latest_booking_for_game(self, game):
-        return (
-            BookingHistoryForGame.objects.filter(player=self, game=game)
-            .order_by("-creation_date")
-            .first()
-        )
 
 
 class PlayerStatus(models.Model):
