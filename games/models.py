@@ -88,14 +88,14 @@ class BookingHistoryForGame(models.Model):
     player = models.ForeignKey(
         Player, on_delete=models.CASCADE, related_name="status_history"
     )
-    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.player} - {self.player_status} on {self.game}"
+        return f"{self.player} - {self.status} on {self.game}"
 
 
-class PlayerStatusManager(models.Model):
+class PlayerStatus(models.Model):
     PLANNED = "planned"
     CANCELLED = "cancelled"
     CONFIRMED = "confirmed"
@@ -112,8 +112,8 @@ class PlayerStatusManager(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     date_start = models.DateField()
     date_end = models.DateField()
-    player_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.player} from {self.date_start} to {self.date_end} - {self.player_status}"
+        return f"{self.player} from {self.date_start} to {self.date_end} - {self.status}"

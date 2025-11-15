@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.test import Client, TestCase
 from django.utils import timezone
-from games.models import PlayerStatusManager, Game, BookingHistoryForGame, Player
+from games.models import PlayerStatus, Game, BookingHistoryForGame, Player
 from games import views
 from .base import BaseTestCase
 from django.urls import reverse
@@ -31,10 +31,10 @@ class SimpleAddAbsenceTest(BaseTestCase):
 
         self.assertEqual(response.status_code, 302)
 
-        self.assertTrue(PlayerStatusManager.objects.filter(player=player).exists())
-        status_obj = PlayerStatusManager.objects.get(player=player)
-        self.assertEqual(status_obj.player_status, 'resting')
+        self.assertTrue(PlayerStatus.objects.filter(player=player).exists())
+        status_obj = PlayerStatus.objects.get(player=player)
+        self.assertEqual(status_obj.status, 'resting')
 
         booking_obj = BookingHistoryForGame.objects.filter(player=player, game=game).last()
         self.assertIsNotNone(booking_obj)
-        self.assertEqual(booking_obj.player_status, 'cancelled')
+        self.assertEqual(booking_obj.status, 'cancelled')
