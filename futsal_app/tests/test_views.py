@@ -28,13 +28,13 @@ class AddGameViewTests(BaseTestCase):
 
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, player_status="planned"
+                game=game, status="planned"
             ).count(),
             3,
         )
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, player_status="reserved"
+                game=game, status="reserved"
             ).count(),
             1,
         )

@@ -16,7 +16,7 @@ class SimpleAddAbsenceTest(BaseTestCase):
 
         game = Game.objects.create(when=datetime(2025, 11, 16), description="Game for absence test")
 
-        booking_set_user_1_per = BookingHistoryForGame.objects.create(game=game, player=player, player_status='planned')
+        booking_set_user_1_per = BookingHistoryForGame.objects.create(game=game, player=player, status='planned')
 
         data = {
             'player': player.pk,
