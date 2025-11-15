@@ -25,7 +25,7 @@
 - **Game slots:** Players are divided into permanent and reserved slots per game; logic in `games/models.py` and `games/views.py`.
 - **Admin management:** Only superusers can add/edit players and games.
 - **Email notifications:** (If implemented) likely handled in `games/views.py` or via Django signals.
-- **Templates:** Use app-specific subfolders in `templates/` (e.g., `templates/games/`, `templates/members/`).
+- **Templates:** Use app-specific subfolders in `templates/` (e.g., `games/templates/`).
 
 ## Conventions & Integration
 - **App structure:** Follows Django best practices for apps, migrations, and templates.

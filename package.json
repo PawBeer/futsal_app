@@ -21,11 +21,9 @@
     "url": "https://github.com/PawBeer/futsal_app/issues"
   },
   "homepage": "https://github.com/PawBeer/futsal_app#readme",
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "tailwindcss": "^4.1.11"
-  },
   "devDependencies": {
-    "daisyui": "^5.0.46"
+    "@tailwindcss/cli": "^4.1.16",
+    "daisyui": "^5.3.10",
+    "tailwindcss": "^4.1.16"
   }
 }

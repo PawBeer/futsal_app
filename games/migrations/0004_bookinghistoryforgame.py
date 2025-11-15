@@ -7,20 +7,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0003_player_status'),
+        ("games", "0003_player_status"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BookingHistoryForGame',
+            name="BookingHistoryForGame",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='games.game')),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='status_history', to='games.player')),
-                ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='games.status')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "game",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="games.game"
+                    ),
+                ),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="status_history",
+                        to="games.player",
+                    ),
+                ),
+                (
+                    "status",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="games.status"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('player', 'game')},
+                "unique_together": {("player", "game")},
             },
         ),
     ]

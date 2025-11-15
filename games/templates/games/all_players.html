@@ -65,13 +65,11 @@
         <tbody>
         {% for player in players %}
             <tr>
-                {% if player.user.username != 'N/A' %}
+
                     <td>
-                        <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player.user.username }}</a>
+                        <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player.get_display_name }}</a>
                     </td>
-                {% else %}
-                    <td>{{ player.name }} {{ player.surname }}</td>
-                {% endif %}
+ 
                 <td>{{ player.role }}</td>
             </tr>
         {% endfor %}

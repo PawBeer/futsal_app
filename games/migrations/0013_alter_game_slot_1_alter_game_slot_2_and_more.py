@@ -7,28 +7,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0012_remove_player_nickname_alter_game_slot_1_and_more'),
+        ("games", "0012_remove_player_nickname_alter_game_slot_1_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='slot_1',
-            field=models.ForeignKey(blank=True, default=1, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='slot_1_games', to='games.player'),
+            model_name="game",
+            name="slot_1",
+            field=models.ForeignKey(
+                blank=True,
+                default=1,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="slot_1_games",
+                to="games.player",
+            ),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='slot_2',
-            field=models.ForeignKey(blank=True, default=2, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='slot_2_games', to='games.player'),
+            model_name="game",
+            name="slot_2",
+            field=models.ForeignKey(
+                blank=True,
+                default=2,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="slot_2_games",
+                to="games.player",
+            ),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='slot_3',
-            field=models.ForeignKey(blank=True, default=3, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='slot_3_games', to='games.player'),
+            model_name="game",
+            name="slot_3",
+            field=models.ForeignKey(
+                blank=True,
+                default=3,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="slot_3_games",
+                to="games.player",
+            ),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='slot_4',
-            field=models.ForeignKey(blank=True, default=4, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='slot_4_games', to='games.player'),
+            model_name="game",
+            name="slot_4",
+            field=models.ForeignKey(
+                blank=True,
+                default=4,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="slot_4_games",
+                to="games.player",
+            ),
         ),
     ]

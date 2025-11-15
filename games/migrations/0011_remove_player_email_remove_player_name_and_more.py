@@ -8,26 +8,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0010_alter_player_nickname'),
+        ("games", "0010_alter_player_nickname"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='player',
-            name='email',
+            model_name="player",
+            name="email",
         ),
         migrations.RemoveField(
-            model_name='player',
-            name='name',
+            model_name="player",
+            name="name",
         ),
         migrations.RemoveField(
-            model_name='player',
-            name='surname',
+            model_name="player",
+            name="surname",
         ),
         migrations.AddField(
-            model_name='player',
-            name='user',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="player",
+            name="user",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

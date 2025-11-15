@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+  Sign in
+{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-center h-32 mb-4">
+    <label class="text-gray-700 text-xl font-semibold">Sign in to your account</label>
+  </div>
+
+  <div class="w-full flex items-center justify-center bg-base-70">
+    <div class="card card-border bg-base-70">
+      {% include 'common/tailwind-form.html' with form=form button_name='Sign in' %}
+    </div>
+  </div>
+{% endblock %}

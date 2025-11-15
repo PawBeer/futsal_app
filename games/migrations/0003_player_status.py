@@ -7,26 +7,78 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0002_alter_game_status'),
+        ("games", "0002_alter_game_status"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Player',
+            name="Player",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, validators=[django.core.validators.MinLengthValidator(3)])),
-                ('surname', models.CharField(max_length=255, validators=[django.core.validators.MinLengthValidator(3)])),
-                ('email', models.EmailField(max_length=255, validators=[django.core.validators.MinLengthValidator(3)])),
-                ('mobile_number', models.CharField(max_length=9, validators=[django.core.validators.RegexValidator(message='Mobile number must contain exactly 9 digits', regex='^\\d{9}$')])),
-                ('nickname', models.CharField(default='N/A', max_length=255, validators=[django.core.validators.MinLengthValidator(3)])),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=255,
+                        validators=[django.core.validators.MinLengthValidator(3)],
+                    ),
+                ),
+                (
+                    "surname",
+                    models.CharField(
+                        max_length=255,
+                        validators=[django.core.validators.MinLengthValidator(3)],
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        max_length=255,
+                        validators=[django.core.validators.MinLengthValidator(3)],
+                    ),
+                ),
+                (
+                    "mobile_number",
+                    models.CharField(
+                        max_length=9,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Mobile number must contain exactly 9 digits",
+                                regex="^\\d{9}$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "nickname",
+                    models.CharField(
+                        default="N/A",
+                        max_length=255,
+                        validators=[django.core.validators.MinLengthValidator(3)],
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Status',
+            name="Status",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
             ],
         ),
     ]
