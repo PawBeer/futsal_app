@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0007_bookinghistoryforgame_creation_date_and_more'),
+        ("games", "0007_bookinghistoryforgame_creation_date_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='bookinghistoryforgame',
-            name='updated_date',
+            model_name="bookinghistoryforgame",
+            name="updated_date",
         ),
         migrations.AlterField(
-            model_name='bookinghistoryforgame',
-            name='creation_date',
+            model_name="bookinghistoryforgame",
+            name="creation_date",
             field=models.DateTimeField(auto_now_add=True),
         ),
     ]

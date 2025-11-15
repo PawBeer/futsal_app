@@ -6,13 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0005_rename_status_playerstatus_and_more'),
+        ("games", "0005_rename_status_playerstatus_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='role',
-            field=models.CharField(choices=[('Active', 'Active'), ('Inactive', 'Inactive'), ('Permanent', 'Permanent')], default='Active', max_length=10),
+            model_name="player",
+            name="role",
+            field=models.CharField(
+                choices=[
+                    ("Active", "Active"),
+                    ("Inactive", "Inactive"),
+                    ("Permanent", "Permanent"),
+                ],
+                default="Active",
+                max_length=10,
+            ),
         ),
     ]

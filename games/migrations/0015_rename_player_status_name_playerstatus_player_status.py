@@ -7,21 +7,21 @@ from games.models import Player
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0014_remove_game_slot_1_remove_game_slot_10_and_more'),
+        ("games", "0014_remove_game_slot_1_remove_game_slot_10_and_more"),
     ]
 
     def add_initial_data(apps, schema_editor):
-        my_model = apps.get_model('games', 'PlayerStatus')
-        my_model.objects.create(player_status='planned')
-        my_model.objects.create(player_status='cancelled')
-        my_model.objects.create(player_status='reserved')
-        my_model.objects.create(player_status='confirmed')
+        my_model = apps.get_model("games", "PlayerStatus")
+        my_model.objects.create(player_status="planned")
+        my_model.objects.create(player_status="cancelled")
+        my_model.objects.create(player_status="reserved")
+        my_model.objects.create(player_status="confirmed")
 
     operations = [
         migrations.RenameField(
-            model_name='playerstatus',
-            old_name='player_status_name',
-            new_name='player_status',
+            model_name="playerstatus",
+            old_name="player_status_name",
+            new_name="player_status",
         ),
         migrations.RunPython(add_initial_data),
     ]
