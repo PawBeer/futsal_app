@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.test import TestCase
 from django.utils import timezone
-from games.models import PlayerStatusManager, PlayerStatus, Game, BookingHistoryForGame, Player
+from games.models import PlayerStatusManager, Game, BookingHistoryForGame, Player
 from games import views
 from .base import BaseTestCase
 
@@ -11,7 +11,6 @@ class SimpleAddAbsenceTest(BaseTestCase):
     def test_add_absence_creates_records(self):
         player = Player.objects.get(user=self.user_1_per)
 
-        PlayerStatus.objects.create(player_status='resting')
         game = Game.objects.create(when=datetime(2025, 4, 10), description="Game for absence test")
 
         data = {
