@@ -324,7 +324,7 @@ def add_game(request):
 
             for psm in psm_list:
                 if psm.date_start <= game_date <= psm.date_end:
-                    if psm.player_status.player_status == 'resting':
+                    if psm.player_status == 'resting':
                         games_in_range = Game.objects.filter(when__gte=psm.date_start, when__lte=psm.date_end)
                         for game_in_range in games_in_range:
                             latest_booking = BookingHistoryForGame.objects.filter(
@@ -332,7 +332,7 @@ def add_game(request):
                             ).order_by('-creation_date').first()
 
                             if latest_booking:
-                                current_status_key = latest_booking.player_status.player_status
+                                current_status_key = latest_booking.player_status
                                 if current_status_key in ['planned', 'cancelled']:
                                     new_status = 'cancelled'
                                 elif current_status_key in ['confirmed', 'reserved']:
@@ -395,7 +395,7 @@ def add_absence(request):
                     '-creation_date').first()
 
                 if player_status == resting_status_key and latest_booking:
-                    current_status_key = latest_booking.player_status.player_status
+                    current_status_key = latest_booking.player_status
                     if current_status_key in ['planned', 'cancelled']:
                         new_status = 'cancelled'
                     elif current_status_key in ['confirmed', 'reserved']:
