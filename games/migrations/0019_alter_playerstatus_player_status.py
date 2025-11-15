@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0018_merge_20251109_1845'),
+        ("games", "0018_merge_20251109_1845"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='playerstatus',
-            name='player_status',
-            field=models.CharField(choices=[('Planned', 'Planned'), ('Cancelled', 'Cancelled'), ('Confirmed', 'Confirmed'), ('Reserved', 'Reserved'), ('Resting', 'Resting')], default='Resting', max_length=50),
+            model_name="playerstatus",
+            name="player_status",
+            field=models.CharField(
+                choices=[
+                    ("Planned", "Planned"),
+                    ("Cancelled", "Cancelled"),
+                    ("Confirmed", "Confirmed"),
+                    ("Reserved", "Reserved"),
+                    ("Resting", "Resting"),
+                ],
+                default="Resting",
+                max_length=50,
+            ),
         ),
     ]

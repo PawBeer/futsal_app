@@ -7,24 +7,51 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0016_alter_bookinghistoryforgame_unique_together'),
+        ("games", "0016_alter_bookinghistoryforgame_unique_together"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='status',
-            field=models.CharField(choices=[('Planned', 'Planned'), ('Played', 'Played'), ('Cancelled', 'Cancelled')], default='Planned', max_length=100),
+            model_name="game",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("Planned", "Planned"),
+                    ("Played", "Played"),
+                    ("Cancelled", "Cancelled"),
+                ],
+                default="Planned",
+                max_length=100,
+            ),
         ),
         migrations.CreateModel(
-            name='PlayerStatusManager',
+            name="PlayerStatusManager",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_start', models.DateField()),
-                ('date_end', models.DateField()),
-                ('description', models.TextField(blank=True, null=True)),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='games.player')),
-                ('player_status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='games.playerstatus')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date_start", models.DateField()),
+                ("date_end", models.DateField()),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="games.player"
+                    ),
+                ),
+                (
+                    "player_status",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="games.playerstatus",
+                    ),
+                ),
             ],
         ),
     ]

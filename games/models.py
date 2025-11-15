@@ -116,4 +116,6 @@ class PlayerStatus(models.Model):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.player} from {self.date_start} to {self.date_end} - {self.status}"
+        return (
+            f"{self.player} from {self.date_start} to {self.date_end} - {self.status}"
+        )

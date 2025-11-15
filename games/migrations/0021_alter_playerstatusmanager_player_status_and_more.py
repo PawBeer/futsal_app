@@ -6,21 +6,41 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0020_alter_playerstatus_player_status'),
+        ("games", "0020_alter_playerstatus_player_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='playerstatusmanager',
-            name='player_status',
-            field=models.CharField(choices=[('planned', 'planned'), ('cancelled', 'cancelled'), ('confirmed', 'confirmed'), ('reserved', 'reserved'), ('resting', 'resting')], default='resting', max_length=50),
+            model_name="playerstatusmanager",
+            name="player_status",
+            field=models.CharField(
+                choices=[
+                    ("planned", "planned"),
+                    ("cancelled", "cancelled"),
+                    ("confirmed", "confirmed"),
+                    ("reserved", "reserved"),
+                    ("resting", "resting"),
+                ],
+                default="resting",
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
-            model_name='bookinghistoryforgame',
-            name='player_status',
-            field=models.CharField(choices=[('planned', 'planned'), ('cancelled', 'cancelled'), ('confirmed', 'confirmed'), ('reserved', 'reserved'), ('resting', 'resting')], default='resting', max_length=50),
+            model_name="bookinghistoryforgame",
+            name="player_status",
+            field=models.CharField(
+                choices=[
+                    ("planned", "planned"),
+                    ("cancelled", "cancelled"),
+                    ("confirmed", "confirmed"),
+                    ("reserved", "reserved"),
+                    ("resting", "resting"),
+                ],
+                default="resting",
+                max_length=50,
+            ),
         ),
         migrations.DeleteModel(
-            name='PlayerStatus',
+            name="PlayerStatus",
         ),
     ]

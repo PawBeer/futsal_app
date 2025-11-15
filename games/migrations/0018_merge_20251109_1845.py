@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0017_alter_game_status'),
-        ('games', '0017_alter_game_status_playerstatusmanager'),
+        ("games", "0017_alter_game_status"),
+        ("games", "0017_alter_game_status_playerstatusmanager"),
     ]
 
-    operations = [
-    ]
+    operations = []
