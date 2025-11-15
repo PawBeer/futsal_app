@@ -20,10 +20,13 @@ def send_welcome_email(user, activation_link):
     to = [user.email]
 
     # Render the template with context
-    html_content = render_to_string("emails/welcome.html", {
-        "user": user,
-        "activation_link": activation_link,
-    })
+    html_content = render_to_string(
+        "emails/welcome.html",
+        {
+            "user": user,
+            "activation_link": activation_link,
+        },
+    )
 
     # Fallback plain text version
     text_content = "Hello {}, welcome! Visit this link to activate: {}".format(
@@ -34,17 +37,21 @@ def send_welcome_email(user, activation_link):
     msg.attach_alternative(html_content, "text/html")
     msg.send()
 
+
 def send_game_update_email(user, game, update_type):
     subject = f"Update on Game {game.id}"
     from_email = settings.DEFAULT_FROM_EMAIL
     to = [user.email]
 
     # Render the template with context
-    html_content = render_to_string("emails/game_update.html", {
-        "user": user,
-        "game": game,
-        "update_type": update_type,
-    })
+    html_content = render_to_string(
+        "emails/game_update.html",
+        {
+            "user": user,
+            "game": game,
+            "update_type": update_type,
+        },
+    )
 
     # Fallback plain text version
     text_content = f"Hello {user.username}, there is an update regarding Game {game.id}. Please check your account for details."
@@ -52,6 +59,7 @@ def send_game_update_email(user, game, update_type):
     msg = EmailMultiAlternatives(subject, text_content, from_email, to)
     msg.attach_alternative(html_content, "text/html")
     msg.send()
+
 
 def send_player_status_update_email(player, game, status):
     subject = "Your Futsal Player Status Has Been Updated"
@@ -62,11 +70,14 @@ def send_player_status_update_email(player, game, status):
     text_content = f"Hello {player.user.username}, there is an update regarding Game on {game.when}. Please check your account for details."
 
     # Render the template with context
-    html_content = render_to_string("emails/player_status_update.html", {
-        "user": player.user,
-        "game": game,
-        "status": status,
-    })
+    html_content = render_to_string(
+        "emails/player_status_update.html",
+        {
+            "user": player.user,
+            "game": game,
+            "status": status,
+        },
+    )
 
     msg = EmailMultiAlternatives(subject, text_content, from_email, to)
     msg.attach_alternative(html_content, "text/html")
