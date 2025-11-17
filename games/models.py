@@ -1,13 +1,9 @@
-from django.db import models
-from django.core.validators import (
-    MinLengthValidator,
-    MaxLengthValidator,
-    MinValueValidator,
-    MaxValueValidator,
-)
-from django.core.validators import RegexValidator
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.validators import (
+    RegexValidator,
+)
+from django.db import models
 
 # Create your models here.
 
@@ -45,7 +41,7 @@ class Player(models.Model):
             full_name = f"{self.user.first_name} {self.user.last_name}".strip()
             return full_name if full_name else self.user.username
         return "Unknown Player"
-    
+
     def __str__(self):
         return self.user.username if self.user else "(No user)"
 

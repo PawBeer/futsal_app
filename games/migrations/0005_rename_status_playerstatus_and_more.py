@@ -6,22 +6,22 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0004_bookinghistoryforgame'),
+        ("games", "0004_bookinghistoryforgame"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Status',
-            new_name='PlayerStatus',
+            old_name="Status",
+            new_name="PlayerStatus",
         ),
         migrations.RenameField(
-            model_name='bookinghistoryforgame',
-            old_name='status',
-            new_name='player_status',
+            model_name="bookinghistoryforgame",
+            old_name="status",
+            new_name="player_status",
         ),
         migrations.RenameField(
-            model_name='playerstatus',
-            old_name='name',
-            new_name='player_status_name',
+            model_name="playerstatus",
+            old_name="name",
+            new_name="player_status_name",
         ),
     ]

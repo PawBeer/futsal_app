@@ -1,24 +1,25 @@
 from datetime import datetime
-from django.utils import timezone
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from django.db.models import Count, Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+from django.views.decorators.http import require_POST
+
 from games.mailer import (
-    send_game_update_email,
     send_player_status_update_email,
     send_welcome_email,
 )
-from .models import Game, BookingHistoryForGame, User, Player, PlayerStatus
-from django.urls import reverse
-from .models import Player
-from django.db.models import Avg, Min, Max, Count, Q
-from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.http import JsonResponse
-from django.contrib.auth.models import User
-from django.utils.crypto import get_random_string
+
 from .forms import PlayerProfileForm
+from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
 
 
 class Breadcrumb:
