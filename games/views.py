@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Count, Q
@@ -13,13 +13,17 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_POST
 
+from games.helpers import player_helper
 from games.mailer import (
     send_player_status_update_email,
+    send_player_status_update_email_to_admins,
     send_welcome_email,
 )
 
 from .forms import PlayerProfileForm
 from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
+
+User = get_user_model()
 
 
 class Breadcrumb:
@@ -60,7 +64,7 @@ def game_details(request, game_id):
     player_status_confirmed = PlayerStatus.objects.get(player_status="confirmed")
 
     latest_bookings = {
-        player.pk: player.get_latest_booking_for_game(found_game)
+        player.pk: player_helper.get_latest_booking_for_game(player, found_game)
         for player in players_for_game
     }
 
@@ -175,7 +179,7 @@ def game_player_status_update(request, game_id):
     checked = "on" in values
 
     player = get_object_or_404(Player, pk=player_pk)
-    current_booking = player.get_latest_booking_for_game(found_game)
+    current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.player_status if current_booking else None
 
     if current_status == player_status_planned:
@@ -197,6 +201,9 @@ def game_player_status_update(request, game_id):
             creation_date=timezone.now(),
         )
         send_player_status_update_email(player, found_game, new_status.player_status)
+        send_player_status_update_email_to_admins(
+            player, found_game, new_status.player_status
+        )
 
     return redirect("game_details_url", game_id=game_id)
 

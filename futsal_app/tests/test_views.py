@@ -1,4 +1,4 @@
-from games.models import BookingHistoryForGame, Game, Player
+from games.models import BookingHistoryForGame, Game
 
 from .base import BaseTestCase
 
