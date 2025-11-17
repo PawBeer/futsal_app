@@ -1,8 +1,7 @@
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
+from django.template.loader import render_to_string
 
 from futsal_app import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 
 
 def test_email(address):
