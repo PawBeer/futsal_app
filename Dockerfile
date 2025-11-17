@@ -21,9 +21,6 @@ RUN npm install
 # Build production CSS
 RUN npm run build:css
 
-# Collect Django static files (includes ./static/dist)
-RUN python manage.py collectstatic --noinput
-
 # Run Gunicorn
 CMD ["gunicorn", "futsal_app.wsgi:application", "--bind", "0.0.0.0:8000"]
 
