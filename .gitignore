@@ -10,3 +10,4 @@ staticfiles/
 .vscode
 node_modules/
 static/dist/
+.env
