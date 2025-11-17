@@ -11,22 +11,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=vk#xftbcl)ic@8!iryzwav@u66rv@4d4k_2(nfh09l5)^q3=s'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[]) 
 
 # Application definition
 
@@ -115,10 +111,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'         # katalog docelowy dla collectstatic
 STATICFILES_DIRS = [
-    BASE_DIR / 'static'
+    BASE_DIR / "static",
 ]
 
 # Default primary key field type
@@ -130,16 +126,13 @@ SESSION_COOKIE_AGE = 3000
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 LOGIN_REDIRECT_URL = '/games'
 
-# settings.py
-
 DISPLAY_NAME_MODE = "full_name"  # Options: "username" or "full_name"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #production
-EMAIL_HOST = "tronel.pl"      
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "futsal.noreply@tronel.pl"
-EMAIL_HOST_PASSWORD = "PASSWORD_GOES_HERE_DONT_COMMIT"  
-DEFAULT_FROM_EMAIL = "Futsal App <futsal.noreply@tronel.pl>"
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env.int("EMAIL_PORT")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 

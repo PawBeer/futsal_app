@@ -1,20 +1,29 @@
-from python:3.12-slim-bullseye
+FROM python:3.12-slim
 
+WORKDIR /app
 
-WORKDIR /usr/src/app
-COPY requirements.txt ./
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-    sqlite3 \
-    && pip install -r requirements.txt \
-    && apt autoremove -y && apt clean \
-	&& rm -rf /var/lib/apt/lists/*
+# Install Node.js (needed to build Tailwind CSS)
+RUN apt-get update && apt-get install -y curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm
 
+# Copy project files
 COPY . .
 
-# copies/generates all the static file to the folder STATIC_ROOT from settings.py
+# Install Node dependencies
+RUN npm install
+
+# Build production CSS
+RUN npm run build:css
+
+# Collect Django static files (includes ./static/dist)
 RUN python manage.py collectstatic --noinput
 
-EXPOSE 8000
-CMD ["python", "manage.py", "runserver",  "0.0.0.0:8000"]
+# Run Gunicorn
+CMD ["gunicorn", "futsal_app.wsgi:application", "--bind", "0.0.0.0:8000"]
+
