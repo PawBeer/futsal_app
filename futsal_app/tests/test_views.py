@@ -1,4 +1,3 @@
-from games import views
 from games.models import BookingHistoryForGame, Game, Player
 
 from .base import BaseTestCase
@@ -14,10 +13,9 @@ class AddGameViewTests(BaseTestCase):
             "set_players": "on",
         }
 
-        request = self.factory.post("/games/add/", data)
-        request.user = self.superuser
-
-        response = views.add_game(request)
+        # Login as superuser and make POST using test client
+        self.client.force_login(self.superuser)
+        response = self.client.post("/games/add_game", data)
 
         # view should redirect after successful POST
         self.assertEqual(response.status_code, 302)
@@ -49,10 +47,10 @@ class AddGameViewTests(BaseTestCase):
             "description": "Test game without players",
             # no "set_players" key
         }
-        request = self.factory.post("/games/add/", data)
-        request.user = self.superuser
 
-        response = views.add_game(request)
+        # Login as superuser and make POST using test client
+        self.client.force_login(self.superuser)
+        response = self.client.post("/games/add_game", data)
 
         self.assertEqual(response.status_code, 302)
 
