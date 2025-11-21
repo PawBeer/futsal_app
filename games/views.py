@@ -153,7 +153,7 @@ def game_status_update(request, game_id):
 
 @login_required
 @require_POST
-def game_status_update(request, game_id):
+def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
 
     status_planned = "planned"

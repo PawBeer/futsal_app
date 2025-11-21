@@ -14,7 +14,7 @@ urlpatterns = [
     ),
     path(
         "game/<int:game_id>/update-player-status/",
-        views.game_status_update,
+        views.game_player_status_update,
         name="game_player_status_update_url",
     ),
     path("players/", views.all_players, name="all_players_url"),
