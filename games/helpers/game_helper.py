@@ -2,6 +2,7 @@ from django.db.models import OuterRef, Subquery
 
 from games.models import BookingHistoryForGame, Game, Player
 
+
 # @todo refactor status strings into constants somewhere central
 # #todo try to simplify the queries below
 def get_total_players_for_game(game: Game) -> int:

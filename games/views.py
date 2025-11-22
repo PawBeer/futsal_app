@@ -189,9 +189,7 @@ def game_player_status_update(request, game_id):
             creation_date=timezone.now(),
         )
         send_player_status_update_email(player, found_game, new_status)
-        send_player_status_update_email_to_admins(
-            player, found_game, new_status
-        )
+        send_player_status_update_email_to_admins(player, found_game, new_status)
 
     return redirect("game_details_url", game_id=game_id)
 
@@ -391,9 +389,15 @@ def add_game(request):
 
                             if latest_booking:
                                 current_status_key = latest_booking.status
-                                if current_status_key in [PlayerStatus.PLANNED, PlayerStatus.CANCELLED]:
+                                if current_status_key in [
+                                    PlayerStatus.PLANNED,
+                                    PlayerStatus.CANCELLED,
+                                ]:
                                     new_status = PlayerStatus.CANCELLED
-                                elif current_status_key in [PlayerStatus.CONFIRMED, PlayerStatus.RESERVED]:
+                                elif current_status_key in [
+                                    PlayerStatus.CONFIRMED,
+                                    PlayerStatus.RESERVED,
+                                ]:
                                     new_status = PlayerStatus.RESERVED
                                 else:
                                     new_status = psm.status
@@ -460,9 +464,15 @@ def add_absence(request):
 
                 if status == resting_status_key and latest_booking:
                     current_status_key = latest_booking.status
-                    if current_status_key in [PlayerStatus.PLANNED, PlayerStatus.CANCELLED]:
+                    if current_status_key in [
+                        PlayerStatus.PLANNED,
+                        PlayerStatus.CANCELLED,
+                    ]:
                         new_status = PlayerStatus.CANCELLED
-                    elif current_status_key in [PlayerStatus.CONFIRMED, PlayerStatus.RESERVED]:
+                    elif current_status_key in [
+                        PlayerStatus.CONFIRMED,
+                        PlayerStatus.RESERVED,
+                    ]:
                         new_status = PlayerStatus.RESERVED
                     else:
                         new_status = status
