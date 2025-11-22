@@ -56,7 +56,7 @@ class BookingModelTests(BaseTestCase):
         game = Game.objects.create(
             when="2024-08-01", description="booking test game", status=Game.PLANNED
         )
-        player_status = "planned"
+        player_status = PlayerStatus.PLANNED
         booking = BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_1_per.player,

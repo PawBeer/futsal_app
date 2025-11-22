@@ -18,7 +18,7 @@ class SimpleAddAbsenceTest(BaseTestCase):
             when=datetime(2025, 11, 16), description="Game for absence test"
         )
 
-        BookingHistoryForGame.objects.create(game=game, player=player, status="planned")
+        BookingHistoryForGame.objects.create(game=game, player=player, status=PlayerStatus.PLANNED)
 
         data = {
             "player": player.pk,
@@ -35,10 +35,10 @@ class SimpleAddAbsenceTest(BaseTestCase):
 
         self.assertTrue(PlayerStatus.objects.filter(player=player).exists())
         status_obj = PlayerStatus.objects.get(player=player)
-        self.assertEqual(status_obj.status, "resting")
+        self.assertEqual(status_obj.status, PlayerStatus.RESTING)
 
         booking_obj = BookingHistoryForGame.objects.filter(
             player=player, game=game
         ).last()
         self.assertIsNotNone(booking_obj)
-        self.assertEqual(booking_obj.status, "cancelled")
+        self.assertEqual(booking_obj.status, PlayerStatus.CANCELLED)
