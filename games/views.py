@@ -10,17 +10,14 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django.views.decorators.http import require_POST
 
 from games.helpers import player_helper
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
-    send_welcome_email,
 )
 
-from .forms import PlayerProfileForm
 from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
 
 User = get_user_model()
@@ -437,7 +434,6 @@ def add_absence(request):
 
         try:
             player = Player.objects.get(pk=player_id)
-            status = status
             date_start = datetime.strptime(date_start_str, "%Y-%m-%d")
             date_end = datetime.strptime(date_end_str, "%Y-%m-%d")
 

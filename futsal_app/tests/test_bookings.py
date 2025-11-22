@@ -35,8 +35,6 @@ class BookingModelTests(BaseTestCase):
     - Tests use Django ORM model factories/fixtures available on self (e.g.
       self.user_1_per.player, self.user_2_per.player, self.user_3_per.player,
       self.user_4_act.player).
-    - PlayerStatus objects for keys "planned", "confirmed", "reserved", and
-      "cancelled" exist in the test database.
     - Game.PLANNED is a valid status constant.
     - The "latest" booking is determined by creation order/timestamp as relied on by
       player_helper.get_latest_booking_for_game.

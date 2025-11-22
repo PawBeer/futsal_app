@@ -1,6 +1,7 @@
 from django.db.models import OuterRef, Subquery
 
 from games.models import BookingHistoryForGame, Game, Player
+from games.models import PlayerStatus
 
 
 # @todo refactor status strings into constants somewhere central
@@ -22,7 +23,7 @@ def get_total_players_for_game(game: Game) -> int:
     return (
         Player.objects.filter(status_history__game=game)
         .annotate(latest_status=Subquery(latest_status_sq))
-        .filter(latest_status__in=["confirmed", "planned"])
+        .filter(latest_status__in=[PlayerStatus.CONFIRMED, PlayerStatus.PLANNED])
         .distinct()
         .count()
     )
