@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-
+{% load player_extras %}
 {% block page_title %}
     Game Details {{ game.when }}
 {% endblock %}
@@ -118,7 +118,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=planned_player.pk %}" >{{ planned_player.user.username }}</a></span>
+                            <span class="w-48 text-center dark:text-gray-300"><a href="{% url 'player_details_url' player_id=planned_player.pk %}" >{{ planned_player|get_display_name }}</a></span>
                             <span class="w-48 flex justify-center"></span>
                         </div>
                     </form>
@@ -143,10 +143,10 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=cancelled_player.pk %}" >{{ cancelled_player.user.username }}</a></span>
+                            <span class="w-48 text-center dark:text-gray-300"><a href="{% url 'player_details_url' player_id=cancelled_player.pk %}" >{{ cancelled_player|get_display_name }}</a></span>
                             <span class="w-48 flex justify-center">
                             {% if substitute %}
-                                <span class="badge badge-success">{{ substitute.user.username }}</span>
+                                <span class="badge badge-success">{{ substitute|get_display_name }}</span>
                             {% else %}
                                 <span class="badge badge-error text-error-content">free slot</span>
                             {% endif %}
@@ -181,7 +181,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=confirmed_player.pk %}" >{{ confirmed_player.user.username }}</a></span>
+                            <span class="w-48 text-center dark:text-gray-300"><a href="{% url 'player_details_url' player_id=confirmed_player.pk %}" >{{ confirmed_player|get_display_name }}</a></span>
                         </div>
                     </form>
                 {% endfor %}
@@ -203,7 +203,7 @@
                                     <div style="width: 64px; height: 24px;"></div>
                                 {% endif %}
                             </label>
-                            <span class="w-48 text-center text-gray-300"><a href="{% url 'player_details_url' player_id=reserved_player.pk %}" >{{ reserved_player.user.username }}</a></span>
+                            <span class="w-48 text-center dark:text-gray-300"><a href="{% url 'player_details_url' player_id=reserved_player.pk %}" >{{ reserved_player|get_display_name }}</a></span>
                         </div>
                     </form>
                 {% endfor %}
@@ -226,11 +226,7 @@
                 <tbody>
                 {% for record in booking_history %}
                     <tr>
-                        {% if record.player.user.username != 'N/A' %}
-                            <td>{{ record.player.user.username }}</td>
-                        {% else %}
-                            <td>{{ record.player.name }} {{ record.player.surname }}</td>
-                        {% endif %}
+                        <td>{{ record.player|get_display_name }}</td>                
                         <td>{{ record.status }}</td>
                         <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
                     </tr>

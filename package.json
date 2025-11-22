@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "watch:css": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/dist/styles.css --watch"
+    "watch:css": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/dist/styles.css --watch",
+    "build:css": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/dist/styles.css --minify"
   },
   "repository": {
     "type": "git",

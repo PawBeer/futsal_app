@@ -1,6 +1,7 @@
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
+
 from . import views
-from django.contrib.auth.views import LogoutView, LoginView
 
 urlpatterns = [
     path("", views.next_games, name="next_games_url"),
@@ -14,7 +15,7 @@ urlpatterns = [
     ),
     path(
         "game/<int:game_id>/update-player-status/",
-        views.game_status_update,
+        views.game_player_status_update,
         name="game_player_status_update_url",
     ),
     path("players/", views.all_players, name="all_players_url"),
