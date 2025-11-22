@@ -1,4 +1,4 @@
-from games.models import BookingHistoryForGame, Game
+from games.models import BookingHistoryForGame, Game, PlayerStatus
 
 from .base import BaseTestCase
 
@@ -29,13 +29,13 @@ class AddGameViewTests(BaseTestCase):
 
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, player_status__player_status="planned"
+                game=game, status=PlayerStatus.PLANNED
             ).count(),
             3,
         )
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, player_status__player_status="reserved"
+                game=game, status=PlayerStatus.RESERVED
             ).count(),
             1,
         )

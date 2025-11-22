@@ -22,6 +22,7 @@ urlpatterns = [
     path("players/<player_id>/", views.player_details, name="player_details_url"),
     path("add_player", views.add_player, name="add_player_url"),
     path("add_game", views.add_game, name="add_game_url"),
+    path("add_absence", views.add_absence, name="add_absence_url"),
     path("booking_history/", views.booking_history, name="booking_history_url"),
     path("logout/", LogoutView.as_view(next_page="/accounts/login"), name="logout_url"),
     path("login/", LoginView.as_view(next_page="next_games_url"), name="login_url"),

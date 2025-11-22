@@ -35,8 +35,6 @@ class BookingModelTests(BaseTestCase):
     - Tests use Django ORM model factories/fixtures available on self (e.g.
       self.user_1_per.player, self.user_2_per.player, self.user_3_per.player,
       self.user_4_act.player).
-    - PlayerStatus objects for keys "planned", "confirmed", "reserved", and
-      "cancelled" exist in the test database.
     - Game.PLANNED is a valid status constant.
     - The "latest" booking is determined by creation order/timestamp as relied on by
       player_helper.get_latest_booking_for_game.
@@ -56,16 +54,16 @@ class BookingModelTests(BaseTestCase):
         game = Game.objects.create(
             when="2024-08-01", description="booking test game", status=Game.PLANNED
         )
-        player_status = PlayerStatus.objects.get(player_status="planned")
+        player_status = PlayerStatus.PLANNED
         booking = BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_1_per.player,
-            player_status=player_status,
+            status=player_status,
         )
         self.assertEqual(BookingHistoryForGame.objects.count(), 1)
         self.assertEqual(booking.player, self.user_1_per.player)
         self.assertEqual(booking.game, game)
-        self.assertEqual(booking.player_status, player_status)
+        self.assertEqual(booking.status, player_status)
 
     def test_get_latest_booking_for_game(self):
         game = Game.objects.create(
@@ -73,19 +71,17 @@ class BookingModelTests(BaseTestCase):
             description="latest booking test game",
             status=Game.PLANNED,
         )
-        player_status_planned = PlayerStatus.objects.get(player_status="planned")
-        player_status_confirmed = PlayerStatus.objects.get(player_status="confirmed")
 
         # Create two bookings for the same player and game
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_2_per.player,
-            player_status=player_status_planned,
+            status=PlayerStatus.PLANNED,
         )
         booking2 = BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_2_per.player,
-            player_status=player_status_confirmed,
+            status=PlayerStatus.CONFIRMED,
         )
 
         latest_booking = player_helper.get_latest_booking_for_game(
@@ -93,7 +89,7 @@ class BookingModelTests(BaseTestCase):
         )
         self.assertIsNotNone(latest_booking)
         self.assertEqual(latest_booking, booking2)
-        self.assertEqual(latest_booking.player_status, player_status_confirmed)
+        self.assertEqual(latest_booking.status, PlayerStatus.CONFIRMED)
 
     def test_get_total_players_for_game(self):
         game = Game.objects.create(
@@ -101,30 +97,27 @@ class BookingModelTests(BaseTestCase):
             description="total players test game",
             status=Game.PLANNED,
         )
-        player_status_confirmed = PlayerStatus.objects.get(player_status="confirmed")
-        player_status_planned = PlayerStatus.objects.get(player_status="planned")
-        player_status_reserved = PlayerStatus.objects.get(player_status="reserved")
 
         # Create bookings for different players
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_1_per.player,
-            player_status=player_status_confirmed,
+            status=PlayerStatus.CONFIRMED,
         )
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_2_per.player,
-            player_status=player_status_planned,
+            status=PlayerStatus.PLANNED,
         )
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_3_per.player,
-            player_status=player_status_reserved,
+            status=PlayerStatus.RESERVED,
         )
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_4_act.player,
-            player_status=player_status_reserved,
+            status=PlayerStatus.RESERVED,
         )
 
         total_players = game_helper.get_total_players_for_game(game)
@@ -135,7 +128,7 @@ class BookingModelTests(BaseTestCase):
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_2_per.player,
-            player_status=PlayerStatus.objects.get(player_status="cancelled"),
+            status=PlayerStatus.CANCELLED,  # @fixme
         )
 
         # Now total players should be 1 (only user_1_per.player is confirmed)

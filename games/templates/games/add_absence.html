@@ -1,0 +1,174 @@
+{% extends 'index.html' %}
+
+{% block page_title %}
+    Add Absence
+{% endblock %}
+
+{% block content %}
+    <div class="w-full flex items-center justify-center bg-base-100">
+        <div class="card card-border bg-base-100 max-w-lg px-6 py-4">
+            <form method="post" class="w-full">
+                {% csrf_token %}
+                <table class="table w-full border border-neutral shadow-md bg-base-100 text-base-content">
+                    <thead>
+                    <tr class="border-b border-neutral">
+                        <th colspan="2" class="text-lg font-semibold text-center">Add Absence</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Player</td>
+                        <td class="py-2 px-4">
+                            {% if user.is_superuser %}
+                                <select name="player" class="select select-bordered w-full" required>
+                                    <option value="">Select player</option>
+                                    {% for player in players %}
+                                        <option value="{{ player.id }}"
+                                                {% if player.user.username == user.get_username %}
+                                                selected
+                                                {% endif %}
+                                        >
+                                            {{ player.user.username }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                {% for player in players %}
+                                    {% if player.user.username == user.get_username %}
+                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                                            {{ player.user.username }}
+                                        </div>
+                                        <input type="hidden" name="player" value="{{ player.id }}">
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Start date</td>
+                        <td class="py-2 px-4">
+                            <input type="date" id="date_start" name="date_start" class="input w-full" required>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Longer break?</td>
+                        <td class="py-2 px-4 flex items-center">
+                            <input type="checkbox" id="longer_break" name="longer_break" class="checkbox">
+                            <label for="longer_break" class="ml-2">I need a longer break</label>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="font-semibold py-2 px-4">End date</td>
+                        <td class="py-2 px-4">
+                            <input type="date"
+                                   id="date_end_display"
+                                   name="date_end"
+                                   class="input w-full bg-gray-200 text-gray-500 cursor-not-allowed"
+                                   disabled>
+                            <input type="hidden" id="date_end" name="date_end">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Status</td>
+                        <td class="py-2 px-4">
+                            {% if user.is_superuser %}
+                                <select name="status" class="select select-bordered w-full" required>
+                                    {% for key, label in status_choices %}
+                                        <option value="{{ key }}"
+                                                {% if forloop.last %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                {% for key, label in status_choices %}
+                                    {% if forloop.last %}
+                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                                            {{ label }}
+                                        </div>
+                                        <input type="hidden" name="status" value="{{ key }}">
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="font-semibold py-2 px-4">Description</td>
+                        <td class="py-2 px-4">
+                            <textarea name="description" class="textarea textarea-bordered w-full" rows="3"></textarea>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="mt-4 text-center">
+                    <button type="submit" class="btn btn-primary">Add Absence</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if user.is_superuser %}
+        <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Player</th>
+                <th>Date_start</th>
+                <th>Date end</th>
+                <th>Player status</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for record in status %}
+                <tr>
+                    <td>{{ record.player.user.username }}</td>
+                    <td>{{ record.date_start }}</td>
+                    <td>{{ record.date_end }}</td>
+                    <td>{{ record.status }}</td>
+                    <td>{{ record.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const longerBreakCheckbox = document.getElementById('longer_break');
+            const startDateInput = document.getElementById('date_start');
+            const endDateDisplay = document.getElementById('date_end_display');
+            const endDateHidden = document.getElementById('date_end');
+
+            function syncEndDate(value) {
+                endDateDisplay.value = value;
+                endDateHidden.value = value;
+            }
+
+            startDateInput.addEventListener('change', () => {
+                if (!longerBreakCheckbox.checked) {
+                    syncEndDate(startDateInput.value);
+                }
+            });
+
+            longerBreakCheckbox.addEventListener('change', () => {
+                if (longerBreakCheckbox.checked) {
+                    endDateDisplay.disabled = false;
+                    endDateDisplay.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                } else {
+                    endDateDisplay.disabled = true;
+                    endDateDisplay.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+                    syncEndDate(startDateInput.value);
+                }
+            });
+
+            endDateDisplay.addEventListener('change', () => {
+                endDateHidden.value = endDateDisplay.value;
+            });
+
+            syncEndDate(startDateInput.value);
+        });
+    </script>
+
+{% endblock %}
