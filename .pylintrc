@@ -1,0 +1,13 @@
+[MASTER]
+load-plugins=
+    pylint_django
+django-settings-module=futsal_app.settings
+ignore=migrations,static,.venv
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        R0801,  # duplicate-code
+        C0301,  # line-too-long
+        C0103,  # invalid-name
