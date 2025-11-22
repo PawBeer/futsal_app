@@ -10,7 +10,6 @@ from django.urls import reverse
 class SimpleAddAbsenceTest(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.client = Client()
 
     def test_add_absence_creates_records(self):
         player = Player.objects.get(user=self.user_1_per)
@@ -19,7 +18,7 @@ class SimpleAddAbsenceTest(BaseTestCase):
             when=datetime(2025, 11, 16), description="Game for absence test"
         )
 
-        booking_set_user_1_per = BookingHistoryForGame.objects.create(
+        BookingHistoryForGame.objects.create(
             game=game, player=player, status="planned"
         )
 
