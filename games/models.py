@@ -4,10 +4,6 @@ from django.db import models
 
 User = get_user_model()
 
-phone_validator = RegexValidator(
-    regex=r"^(\d{9})$", message="Mobile number must contain exactly 9 digits"
-)
-
 
 class Player(models.Model):
     ROLE_ACTIVE = "Active"

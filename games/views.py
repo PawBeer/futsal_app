@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from games.helpers import player_helper
+from games.helpers import game_helper, player_helper
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
@@ -53,33 +53,18 @@ def past_games(request):
 @login_required
 def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    players_for_game = Player.objects.filter(status_history__game=found_game).distinct()
-    latest_bookings = {
-        player.pk: player_helper.get_latest_booking_for_game(player, found_game)
-        for player in players_for_game
-    }
 
-    def get_players_by_status(players_for_game, latest_bookings, status):
-        players_and_dates = [
-            (player, latest_bookings[player.pk].creation_date)
-            for player in players_for_game
-            if latest_bookings[player.pk]
-            and latest_bookings[player.pk].status == status
-        ]
-        players_and_dates.sort(key=lambda x: x[1])
-        return [player for player, date in players_and_dates]
-
-    planned_players_for_game = get_players_by_status(
-        players_for_game, latest_bookings, PlayerStatus.PLANNED
+    planned_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.PLANNED], found_game
     )
-    cancelled_players_for_game = get_players_by_status(
-        players_for_game, latest_bookings, PlayerStatus.CANCELLED
+    cancelled_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.CANCELLED], found_game
     )
-    reserved_players_for_game = get_players_by_status(
-        players_for_game, latest_bookings, PlayerStatus.RESERVED
+    reserved_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.RESERVED], found_game
     )
-    confirmed_players_for_game = get_players_by_status(
-        players_for_game, latest_bookings, PlayerStatus.CONFIRMED
+    confirmed_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.CONFIRMED], found_game
     )
     number_of_confirmed_players = len(planned_players_for_game) + len(
         confirmed_players_for_game
@@ -103,7 +88,6 @@ def game_details(request, game_id):
         "games/game_details.html",
         {
             "game": found_game,
-            "players": players_for_game,
             "planned_players_for_game": planned_players_for_game,
             "reserved_players_for_game": reserved_players_for_game,
             "confirmed_players_for_game": confirmed_players_for_game,
