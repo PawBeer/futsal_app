@@ -1,15 +1,13 @@
 from datetime import datetime
-from django.test import Client, TestCase
-from django.utils import timezone
-from games.models import PlayerStatus, Game, BookingHistoryForGame, Player
-from games import views
-from .base import BaseTestCase
+
 from django.urls import reverse
+
+from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
+
+from .base import BaseTestCase
 
 
 class SimpleAddAbsenceTest(BaseTestCase):
-    def setUp(self):
-        super().setUp()
 
     def test_add_absence_creates_records(self):
         player = Player.objects.get(user=self.user_1_per)
