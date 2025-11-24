@@ -12,7 +12,6 @@
                 <th class="px-2">Week</th>
                 <th class="px-2">Date</th>
                 <th class="px-2">Status</th>
-                <th class="px-2">Actions</th>
                 {% if user.is_authenticated and user.is_superuser %}
                     <th class="px-2">Actions</th>
                 {% endif %}
@@ -27,11 +26,6 @@
                         </a>
                     </td>
                     <td class="px-2">{{ game.status }}</td>
-                    <td class="px-2">
-                        <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline btn-sm px-2 py-1">
-                            Details
-                        </a>
-                    </td>
 
                     {% if user.is_authenticated and user.is_superuser %}
                         <td class="px-2">
