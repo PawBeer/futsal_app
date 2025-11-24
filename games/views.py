@@ -12,10 +12,12 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from games.forms import PlayerProfileForm
 from games.helpers import game_helper, player_helper
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
+    send_welcome_email,
 )
 
 from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
@@ -213,33 +215,43 @@ def all_players(request):
 @login_required
 def player_details(request, player_id):
     player = get_object_or_404(Player, id=player_id)
-    user = player.user
+    # bind the profile form (template uses plain input names that match the form fields)
+    profile_form = PlayerProfileForm(request.POST or None, instance=player)
+
     if request.method == "POST":
-        new_username = request.POST.get("username")
-        if (
-            User.objects.filter(username=new_username)
-            .exclude(id=player.user.id)
-            .exists()
-        ):
-            messages.error(request, "This login already exists.")
-            return render(
-                request,
-                "games/player_details.html",
-                {"player": player, "form": ..., "error": True},
-            )
+        form_type = request.POST.get("form_type")
 
-        user.username = new_username
-        user.first_name = request.POST.get("first_name", "")
-        user.last_name = request.POST.get("last_name", "")
-        user.email = request.POST.get("email", "")
-        user.save()
+        if form_type == "profile":
+            if profile_form.is_valid():
+                new_username = profile_form.cleaned_data.get("username")
+                if (
+                    User.objects.filter(username=new_username)
+                    .exclude(id=player.user.id)
+                    .exists()
+                ):
+                    messages.error(request, "This username already exists.")
+                else:
+                    try:
+                        profile_form.save()
+                        messages.success(request, "Profile updated successfully.")
+                        return redirect("player_details_url", player_id=player.id)
+                    except IntegrityError:
+                        messages.error(
+                            request, "An error occurred while saving the profile."
+                        )
+            else:
+                # collect form errors and show them as a message so template (which uses raw inputs) can display
+                errors = []
+                for field, field_errors in profile_form.errors.items():
+                    errors.extend([f"{field}: {e}" for e in field_errors])
+                messages.error(request, "Invalid data: " + "; ".join(errors))
 
-        player.mobile_number = request.POST.get("mobile_number", "")
-        player.role = request.POST.get("role", "")
-        player.save()
-
-        return redirect("all_players_url")
-
+        elif form_type == "welcome_email":
+            # build a sensible activation link (fallback to next_games)
+            activation_link = request.build_absolute_uri(reverse("password_reset"))
+            send_welcome_email(player.user, activation_link)
+            messages.success(request, "Welcome email has been sent.")
+            return redirect("player_details_url", player_id=player.id)
     return render(
         request,
         "games/player_details.html",
