@@ -8,19 +8,19 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Date</th>
-            <th>Status</th>
+            <th class="px-1 text-center">Date</th>
+            <th class="px-1 text-center">Status</th>
         </tr>
         </thead>
         <tbody>
         {% for game in games %}
             <tr>
-                <td><a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}</a></td>
-                <td>{{ game.status }}</td>
+                <td class="px-1 text-center"><a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}</a></td>
+                <td class="px-1 text-center">{{ game.status }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    
+
 {% endblock content %}
 
