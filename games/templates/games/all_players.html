@@ -58,19 +58,19 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Player</th>
-            <th>Player role</th>
+            <th class="px-1 text-center">Player</th>
+            <th class="px-1 text-center">Player role</th>
         </tr>
         </thead>
         <tbody>
         {% for player in players %}
             <tr>
 
-                    <td>
+                    <td class="px-1 text-center">
                         <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player|get_display_name }}</a>
                     </td>
  
-                <td>{{ player.role }}</td>
+                <td class="px-1 text-center">{{ player.role }}</td>
             </tr>
         {% endfor %}
         </tbody>
