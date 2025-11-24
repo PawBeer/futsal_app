@@ -9,7 +9,6 @@
         <table class="table">
             <thead>
             <tr>
-                <th class="px-2">Week</th>
                 <th class="px-2">Date</th>
                 <th class="px-2">Status</th>
                 {% if user.is_authenticated and user.is_superuser %}
@@ -20,7 +19,6 @@
             <tbody>
             {% for game in games %}
                 <tr>
-                    <td class="px-2">{{ game.when|date:'W' }}</td>
                     <td class="px-2">
                         <a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}
                         </a>
