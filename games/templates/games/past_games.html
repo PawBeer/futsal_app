@@ -8,34 +8,15 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Week</th>
             <th>Date</th>
-{#            <th>Players</th>#}
             <th>Status</th>
-            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for game in games %}
             <tr>
-                <td>{{ game.when|date:'W' }}</td>
-                <td>{{ game.when|date:'d M Y' }}</td>
-{#                <td>#}
-{#                    {%  if game.number_of_occupied_slots == 10 %}#}
-{#                        <div class="radial-progress text-success" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-{#                    {%  endif %}#}
-{#                    {%  if game.number_of_occupied_slots == 9 %}#}
-{#                        <div class="radial-progress text-green-200" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-{#                    {%  endif %}                    #}
-{#                    {%  if game.number_of_occupied_slots == 8 %}#}
-{#                        <div class="radial-progress text-warning" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-{#                    {%  endif %}                    #}
-{#                    {%  if game.number_of_occupied_slots <= 7 %}#}
-{#                        <div class="radial-progress text-error" style="--size:45px; --thickness: 0.4rem; --value:{{ game.number_of_occupied_slots }}*10;" aria-valuenow="{{ game.number_of_occupied_slots }}" role="progressbar">{{ game.number_of_occupied_slots }}</div>#}
-{#                    {%  endif %}#}
-{#                </td>#}
+                <td><a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}</a></td>
                 <td>{{ game.status }}</td>
-                <td><a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline">Details</a></td>
             </tr>
         {% endfor %}
         </tbody>
