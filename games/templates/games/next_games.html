@@ -22,7 +22,10 @@
             {% for game in games %}
                 <tr>
                     <td class="px-2">{{ game.when|date:'W' }}</td>
-                    <td class="px-2">{{ game.when|date:'d M Y' }}</td>
+                    <td class="px-2">
+                        <a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}
+                        </a>
+                    </td>
                     <td class="px-2">{{ game.status }}</td>
                     <td class="px-2">
                         <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-outline btn-sm px-2 py-1">
