@@ -3,7 +3,6 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -271,40 +270,27 @@ def player_details(request, player_id):
 @user_passes_test(lambda u: u.is_superuser)
 def add_player(request):
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        first_name = request.POST.get("first_name", "").strip()
-        last_name = request.POST.get("last_name", "").strip()
-        email = request.POST.get("email", "").strip()
-        mobile_number = request.POST.get("mobile_number", "").strip()
-        role = request.POST.get("role", Player.ROLE_ACTIVE)
-
-        if not username or not email or not mobile_number:
-            messages.error(request, "Username, email and mobile number are required.")
+        profile_form = PlayerProfileForm(request.POST)
+        if profile_form.is_valid():
+            new_username = profile_form.cleaned_data.get("username")
+            if User.objects.filter(username=new_username).exists():
+                messages.error(request, "This username already exists.")
+            else:
+                try:
+                    profile_form.save()
+                    messages.success(request, "Player added successfully.")
+                    return redirect("all_players_url")
+                except IntegrityError:
+                    messages.error(
+                        request, "An error occurred while saving the player."
+                    )
         else:
-            try:
-                user = User.objects.create_user(username=username, email=email)
-                user.first_name = first_name
-                user.last_name = last_name
-                user.full_clean()
-                user.save()
+            # collect form errors and show them as a message so template (which uses raw inputs) can display
+            errors = []
+            for field, field_errors in profile_form.errors.items():
+                errors.extend([f"{field}: {e}" for e in field_errors])
+            messages.error(request, "Invalid data: " + "; ".join(errors))
 
-                player = Player(user=user, mobile_number=mobile_number, role=role)
-                player.save()
-
-                messages.success(
-                    request, f"Player '{username}' It has been added successfully."
-                )
-                return redirect("all_players_url")
-
-            except IntegrityError:
-                messages.error(request, "A user with that name already exists.")
-            except ValidationError as e:
-                errors = "; ".join([str(err) for err in e.messages])
-                messages.error(request, f"Error in the form: {errors}")
-            except Exception as e:
-                messages.error(request, f"An unexpected error has occurred: {e}")
-
-        return redirect("all_players_url")
     context = {
         "role_choices": Player.ROLE_CHOICES,
     }

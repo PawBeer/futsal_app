@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+
 from futsal_app import settings
 from games.helpers import game_helper, player_helper
 from games.models import Game, Player

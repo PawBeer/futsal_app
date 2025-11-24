@@ -1,7 +1,6 @@
 from django.db.models import OuterRef, Subquery
 
-from games.models import BookingHistoryForGame, Game, Player
-from games.models import PlayerStatus
+from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 
 def get_players_by_status(statuses: list[str], game: Game) -> list[Player]:
