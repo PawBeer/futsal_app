@@ -5,103 +5,110 @@
 {% endblock %}
 
 {% block content %}
-    <div class="w-full flex items-center justify-center bg-base-100">
-        <div class="card card-border bg-base-100">
-            <form class="w-full" method="post">
+<div class="w-full flex flex-col items-center justify-center bg-base-100 py-12 px-4">
+    
+    <!-- Profile Form -->
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-md w-full mx-auto mb-12">
+        <div class="card-body p-6">
+            <h2 class="card-title text-2xl font-bold text-center text-base-content mb-6">Player Profile</h2>
+            
+            <form method="post" class="space-y-5">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="profile">
-                <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
-                    <thead>
-                    <tr class="border-b border-neutral">
-                        <th colspan="2" class="text-lg font-semibold text-center">Player profile</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% if player.user.username and player.user.username != 'N/A' %}
-                        <tr class="border-b border-neutral">
-                            <td class="font-semibold py-2 px-4">Username</td>
-                            <td class="py-2 px-4">
-                                <input type="text" name="username"
-                                       class="input w-full"
-                                       value="{{ player.user.username }}" required>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Name</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="first_name" class="input w-full"
-                                   value="{{ player.user.first_name }}">
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Surname</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="last_name" class="input w-full"
-                                   value="{{ player.user.last_name }}">
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Email</td>
-                        <td class="py-2 px-4">
-                            <input type="email" name="email" class="input w-full" value="{{ player.user.email }}"
-                                   required>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Mobile number</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="mobile_number" class="input w-full"
-                                   value="{{ player.mobile_number }}" required>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Player role</td>
-                        <td class="py-2 px-4">
-                            <select name="role" class="input w-full" required>
-                                {% for val, label in player.ROLE_CHOICES %}
-                                    <option value="{{ val }}" {% if player.role == val %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                
+                {% if player.user.username and player.user.username != 'N/A' %}
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Username</span>
+                    </label>
+                    <input type="text" name="username" class="input input-bordered w-full max-w-sm mx-auto block" 
+                           value="{{ player.user.username }}" required>
+                </div>
+                {% endif %}
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Name</span>
+                    </label>
+                    <input type="text" name="first_name" class="input input-bordered w-full max-w-sm mx-auto block" 
+                           value="{{ player.user.first_name }}">
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Surname</span>
+                    </label>
+                    <input type="text" name="last_name" class="input input-bordered w-full max-w-sm mx-auto block" 
+                           value="{{ player.user.last_name }}">
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Email</span>
+                    </label>
+                    <input type="email" name="email" class="input input-bordered w-full max-w-sm mx-auto block" 
+                           value="{{ player.user.email }}" required>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Mobile number</span>
+                    </label>
+                    <input type="text" name="mobile_number" class="input input-bordered w-full max-w-sm mx-auto block" 
+                           value="{{ player.mobile_number }}" required>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Player role</span>
+                    </label>
+                    <select name="role" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                        {% for val, label in player.ROLE_CHOICES %}
+                            <option value="{{ val }}" {% if player.role == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 {% if user.is_authenticated and user.is_superuser %}
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
+                <div class="form-control pt-4">
+                    <button type="submit" class="btn btn-primary w-full max-w-sm mx-auto block shadow-lg hover:shadow-xl">
+                        Save Changes
+                    </button>
+                </div>
                 {% endif %}
             </form>
-            
-            {% if user.is_authenticated and user.is_superuser %}
-            <!-- Send welcome email form -->
-            <form class="w-full mt-6" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="welcome_email">
-
-                    <div class="card card-border bg-base-100 p-4">
-                        <table class="table w-full mb-4">
-                            <tbody>
-                                <tr class="border-b border-neutral">
-                                    <td class="font-semibold py-2 px-4">Date joined</td>
-                                    <td class="py-2 px-4">{{ player.user.date_joined|date:"d M Y, H:i" }}</td>
-                                </tr>
-                                <tr class="border-b border-neutral">
-                                    <td class="font-semibold py-2 px-4">Last login</td>
-                                    <td class="py-2 px-4">{{ player.user.last_login|date:"d M Y, H:i" }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <h2 class="text-lg font-semibold mb-4">Welcome email</h2>
-                        <button type="submit" class="btn btn-secondary">Send welcome email</button>
-                    </div>
-                
-            </form>
-            {% endif %}
         </div>
     </div>
 
+    <!-- Welcome Email Section (Superuser only) -->
+    {% if user.is_authenticated and user.is_superuser %}
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-md w-full mx-auto">
+        <div class="card-body p-6">
+            <h2 class="card-title text-xl font-bold text-base-content mb-6 flex items-center gap-2">
+                <span class="w-2 h-2 bg-info rounded-full"></span>
+                Welcome Email
+            </h2>
+            
+            <div class="space-y-4 mb-6">
+                <div class="flex justify-between p-4 bg-base-200 rounded-xl">
+                    <span class="font-semibold text-base-content/90">Date joined</span>
+                    <span class="text-base-content/70">{{ player.user.date_joined|date:"d M Y, H:i" }}</span>
+                </div>
+                <div class="flex justify-between p-4 bg-base-200 rounded-xl">
+                    <span class="font-semibold text-base-content/90">Last login</span>
+                    <span class="text-base-content/70">{{ player.user.last_login|date:"d M Y, H:i"|default:"Never" }}</span>
+                </div>
+            </div>
+
+            <form method="post" class="w-full">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="welcome_email">
+                <button type="submit" class="btn btn-secondary w-full shadow-lg hover:shadow-xl">
+                    Send Welcome Email
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
