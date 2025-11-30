@@ -5,55 +5,55 @@
 {% endblock %}
 
 {% block content %}
-    <div class="w-full flex items-center justify-center bg-base-100">
-        <div class="card card-border bg-base-100">
-            <form class="w-full" method="post">
+<div class="w-full flex flex-col items-center justify-center bg-base-100 py-12 px-4">
+    
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-md w-full mx-auto mb-12">
+        <div class="card-body p-6">
+            <h2 class="card-title text-2xl font-bold text-center text-base-content mb-6">Add Game</h2>
+            
+            <form method="post" class="space-y-5">
                 {% csrf_token %}
-                <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
-                    <thead>
-                    <tr class="border-b border-neutral">
-                        <th colspan="2" class="text-lg font-semibold text-center">Add New Game</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">When</td>
-                        <td class="py-2 px-4">
-                            <input type="date" name="when" class="input w-full" value="" required>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Status of game</td>
-                        <td class="py-2 px-4">
-                            <select name="role" class="input w-full" required>
-                                {% for val, label in role_choices %}
-                                    <option value="{{ val }}"
-                                            {% if val == 'Planned' %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">When</span>
+                    </label>
+                    <input type="date" name="when" class="input input-bordered w-full max-w-sm mx-auto block" required>
+                </div>
 
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Description</td>
-                        <td class="py-2 px-4">
-                            <textarea name="description" class="input w-full" rows="3"></textarea>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">
-                            Set players for the game based on their current player status
-                        </td>
-                        <td class="py-2 px-4">
-                            <input type="checkbox" name="set_players" class="checkbox" checked>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Add Game</button>
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Status</span>
+                    </label>
+                    <select name="status" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                        {% for val, label in role_choices %}
+                            <option value="{{ val }}" {% if val == 'Planned' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Description (optional)</span>
+                    </label>
+                    <textarea name="description" class="textarea textarea-bordered w-full max-w-sm mx-auto block" rows="3" 
+                              placeholder="Game notes..."></textarea>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label cursor-pointer justify-start gap-4 mx-auto max-w-sm">
+                        <input type="checkbox" name="set_players" class="checkbox checkbox-primary" checked>
+                        <span class="label-text font-semibold">Set players based on current status</span>
+                    </label>
+                </div>
+
+                <div class="form-control pt-4">
+                    <button type="submit" class="btn btn-primary w-full max-w-sm mx-auto block shadow-lg hover:shadow-xl">
+                        Add game
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 {% endblock %}
