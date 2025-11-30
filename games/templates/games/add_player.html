@@ -5,125 +5,127 @@
 {% endblock %}
 
 {% block content %}
-    <div class="w-full flex items-center justify-center bg-base-100">
-        <div class="card card-border bg-base-100">
-            <form class="w-full" method="post">
+<div class="w-full flex flex-col items-center justify-center bg-base-100 py-12 px-4">
+    
+    <div class="card bg-base-100 shadow-xl border border-base-200 max-w-md w-full mx-auto mb-12">
+        <div class="card-body p-6">
+            <h2 class="card-title text-2xl font-bold text-center text-base-content mb-6">Add Player</h2>
+            
+            <form method="post" class="space-y-5">
                 {% csrf_token %}
-                <table class="table w-full max-w-md border border-neutral shadow-md bg-base-100 text-base-content">
-                    <thead>
-                    <tr class="border-b border-neutral">
-                        <th colspan="2" class="text-lg font-semibold text-center">Add New Player</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Username</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="username" class="input w-full" value="" required>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Name</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="first_name" class="input w-full" value="">
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Surname</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="last_name" class="input w-full" value="">
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Email</td>
-                        <td class="py-2 px-4">
-                            <input type="email" name="email" class="input w-full" value="" required>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-neutral">
-                        <td class="font-semibold py-2 px-4">Mobile number</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="mobile_number" class="input w-full" value="" required>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Player role</td>
-                        <td class="py-2 px-4">
-                            <select name="role" class="input w-full" required>
-                                {% for val, label in role_choices %}
-                                    <option value="{{ val }}"
-                                            {% if val == 'Active' %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Add Player</button>
+                
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Username</span>
+                    </label>
+                    <input type="text" name="username" class="input input-bordered w-full max-w-sm mx-auto block" value="" required>
                 </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const usernameInput = document.querySelector('input[name="username"]');
-                        const emailInput = document.querySelector('input[name="email"]');
-                        const form = usernameInput.closest('form');
 
-                        const usernameErrorDiv = document.createElement('div');
-                        usernameErrorDiv.style.color = 'red';
-                        usernameInput.parentNode.appendChild(usernameErrorDiv);
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Name</span>
+                    </label>
+                    <input type="text" name="first_name" class="input input-bordered w-full max-w-sm mx-auto block" value="">
+                </div>
 
-                        const emailErrorDiv = document.createElement('div');
-                        emailErrorDiv.style.color = 'red';
-                        emailInput.parentNode.appendChild(emailErrorDiv);
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Surname</span>
+                    </label>
+                    <input type="text" name="last_name" class="input input-bordered w-full max-w-sm mx-auto block" value="">
+                </div>
 
-                        const checkUrl = "{% url 'check_username_and_email' %}";
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Email</span>
+                    </label>
+                    <input type="email" name="email" class="input input-bordered w-full max-w-sm mx-auto block" value="" required>
+                </div>
 
-                        let timeout;
+                <div class="form-control mb-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Mobile number</span>
+                    </label>
+                    <input type="text" name="mobile_number" class="input input-bordered w-full max-w-sm mx-auto block" value="" required>
+                </div>
 
-                        function checkInputs() {
-                            clearTimeout(timeout);
-                            const username = usernameInput.value.trim();
-                            const email = emailInput.value.trim();
+                <div class="form-control mb-8">
+                    <label class="label">
+                        <span class="label-text font-semibold">Player role</span>
+                    </label>
+                    <select name="role" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                        {% for val, label in role_choices %}
+                            <option value="{{ val }}" {% if val == 'Active' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                            if (!username && !email) {
-                                usernameErrorDiv.textContent = '';
-                                emailErrorDiv.textContent = '';
-                                return;
-                            }
-
-                            timeout = setTimeout(() => {
-                                fetch(`${checkUrl}?username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}`)
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (username && data.username_exists) {
-                                            usernameErrorDiv.textContent = 'A user with that name already exists.';
-                                        } else {
-                                            usernameErrorDiv.textContent = '';
-                                        }
-                                        if (email && data.email_exists) {
-                                            emailErrorDiv.textContent = 'This email is already taken.';
-                                        } else {
-                                            emailErrorDiv.textContent = '';
-                                        }
-                                    });
-                            }, 500);
-                        }
-
-                        usernameInput.addEventListener('input', checkInputs);
-                        emailInput.addEventListener('input', checkInputs);
-
-                        form.addEventListener('submit', (e) => {
-                            if (usernameErrorDiv.textContent || emailErrorDiv.textContent) {
-                                e.preventDefault();
-                                alert('Please provide unique username and email.');
-                            }
-                        });
-                    });
-                </script>
-
-
+                <div class="form-control pt-4">
+                    <button type="submit" class="btn btn-primary w-full max-w-sm mx-auto block shadow-lg hover:shadow-xl">
+                        Add Player
+                    </button>
+                </div>
             </form>
         </div>
     </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const usernameInput = document.querySelector('input[name="username"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const form = usernameInput.closest('form');
+
+    const usernameErrorDiv = document.createElement('div');
+    usernameErrorDiv.style.color = 'red';
+    usernameInput.parentNode.appendChild(usernameErrorDiv);
+
+    const emailErrorDiv = document.createElement('div');
+    emailErrorDiv.style.color = 'red';
+    emailInput.parentNode.appendChild(emailErrorDiv);
+
+    const checkUrl = "{% url 'check_username_and_email' %}";
+
+    let timeout;
+
+    function checkInputs() {
+        clearTimeout(timeout);
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+
+        if (!username && !email) {
+            usernameErrorDiv.textContent = '';
+            emailErrorDiv.textContent = '';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch(`${checkUrl}?username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (username && data.username_exists) {
+                        usernameErrorDiv.textContent = 'A user with that name already exists.';
+                    } else {
+                        usernameErrorDiv.textContent = '';
+                    }
+                    if (email && data.email_exists) {
+                        emailErrorDiv.textContent = 'This email is already taken.';
+                    } else {
+                        emailErrorDiv.textContent = '';
+                    }
+                });
+        }, 500);
+    }
+
+    usernameInput.addEventListener('input', checkInputs);
+    emailInput.addEventListener('input', checkInputs);
+
+    form.addEventListener('submit', (e) => {
+        if (usernameErrorDiv.textContent || emailErrorDiv.textContent) {
+            e.preventDefault();
+            alert('Please provide unique username and email.');
+        }
+    });
+});
+</script>
 {% endblock %}
