@@ -54,7 +54,6 @@
     {% endwith %}
     <div class="card shadow-lg mb-8 p-4">
     </div>
-    </div>
     <table class="table">
         <thead>
         <tr>
@@ -69,7 +68,7 @@
                     <td class="px-1 text-center">
                         <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player|get_display_name }}</a>
                     </td>
- 
+
                 <td class="px-1 text-center">{{ player.role }}</td>
             </tr>
         {% endfor %}
