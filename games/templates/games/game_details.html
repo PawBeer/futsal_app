@@ -81,11 +81,10 @@
             </form>
         </div>
 
+        <div class="flex flex-col items-center space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
 
-        <div class="p-4">
-
-            <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
-                Permanent players
+            <div class="text-center bg-base-100 text-xl font-semibold">
+                Planned players
             </div>
             <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
                 <span class="w-28 text-center">Play</span>
@@ -110,7 +109,9 @@
                                            checked
                                            onchange="this.form.submit()">
                                 {% else %}
-                                    <div style="width: 64px; height: 24px;"></div>
+                                    <div class="w-6 h-6 bg-success rounded-full flex items-center justify-center text-success-content text-xs font-bold shadow-md flex-shrink-0">
+                                        ✓
+                                    </div>
                                 {% endif %}
                             </label>
                             <span class="w-48 text-center dark:text-gray-300"><a
@@ -137,7 +138,9 @@
                                            title="There is no free slots in the squad" {% endif %}
                                            onchange="this.form.submit()">
                                 {% else %}
-                                    <div style="width: 64px; height: 24px;"></div>
+                                    <div class="w-6 h-6 bg-error rounded-full flex items-center justify-center text-error-content text-xs font-bold shadow-md flex-shrink-0">
+                                        ✗
+                                    </div>
                                 {% endif %}
                             </label>
                             <span class="w-48 text-center dark:text-gray-300"><a
@@ -152,67 +155,68 @@
                         </div>
                     </form>
                 {% endfor %}
+                {% if user.is_superuser %}
+                    <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
+                        Reserved players
+                    </div>
+                    <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
+                        <span class="w-28 text-center">Play</span>
+                        <span class="w-48 text-center">Player</span>
+                    </div>
 
-                <div class="font-bold bg-gray-700 text-gray-200 px-2 py-1 rounded mt-4 mb-2 text-center">
-                    Reserved players
-                </div>
-                <div class="flex items-center font-bold text-gray-300 rounded-t p-2">
-                    <span class="w-28 text-center">Play</span>
-                    <span class="w-48 text-center">Player</span>
-                </div>
-
-                {% for confirmed_player in confirmed_players_for_game %}
-                    <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                        {% csrf_token %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
-                                {% if user.is_superuser or confirmed_player.user.username == user.username %}
-                                    <input type="hidden" name="play_slot_{{ confirmed_player.pk }}" value="off">
-                                    <input type="checkbox"
-                                           name="play_slot_{{ confirmed_player.pk }}"
-                                           value="on"
-                                           id="play_slot_{{ confirmed_player.pk }}"
-                                           class="toggle toggle-primary"
-                                           checked
-                                           onchange="this.form.submit()">
-                                {% else %}
-                                    <div style="width: 64px; height: 24px;"></div>
-                                {% endif %}
-                            </label>
-                            <span class="w-48 text-center dark:text-gray-300"><a
-                                    href="{% url 'player_details_url' player_id=confirmed_player.pk %}">{{ confirmed_player|get_display_name }}</a></span>
-                        </div>
-                    </form>
-                {% endfor %}
-                {% for reserved_player in reserved_players_for_game %}
-                    <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                        {% csrf_token %}
-                        <div class="flex items-center py-2">
-                            <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
-                                {% if user.is_superuser or reserved_player.user.username == user.username %}
-                                    <input type="hidden" name="play_slot_{{ reserved_player.pk }}" value="off">
-                                    <input type="checkbox"
-                                           name="play_slot_{{ reserved_player.pk }}"
-                                           value="on"
-                                           id="play_slot_{{ reserved_player.pk }}"
-                                           class="toggle toggle-primary"
-                                           {% if reserved_player in confirmed_players_for_game %}checked{% endif %}
-                                           onchange="this.form.submit()">
-                                {% else %}
-                                    <div style="width: 64px; height: 24px;"></div>
-                                {% endif %}
-                            </label>
-                            <span class="w-48 text-center dark:text-gray-300"><a
-                                    href="{% url 'player_details_url' player_id=reserved_player.pk %}">{{ reserved_player|get_display_name }}</a></span>
-                        </div>
-                    </form>
-                {% endfor %}
+                    {% for confirmed_player in confirmed_players_for_game %}
+                        <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                            {% csrf_token %}
+                            <div class="flex items-center py-2">
+                                <label for="play_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
+                                    {% if user.is_superuser or confirmed_player.user.username == user.username %}
+                                        <input type="hidden" name="play_slot_{{ confirmed_player.pk }}" value="off">
+                                        <input type="checkbox"
+                                               name="play_slot_{{ confirmed_player.pk }}"
+                                               value="on"
+                                               id="play_slot_{{ confirmed_player.pk }}"
+                                               class="toggle toggle-primary"
+                                               checked
+                                               onchange="this.form.submit()">
+                                    {% else %}
+                                        <div style="width: 64px; height: 24px;"></div>
+                                    {% endif %}
+                                </label>
+                                <span class="w-48 text-center dark:text-gray-300"><a
+                                        href="{% url 'player_details_url' player_id=confirmed_player.pk %}">{{ confirmed_player|get_display_name }}</a></span>
+                            </div>
+                        </form>
+                    {% endfor %}
+                    {% for reserved_player in reserved_players_for_game %}
+                        <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                            {% csrf_token %}
+                            <div class="flex items-center py-2">
+                                <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
+                                    {% if user.is_superuser or reserved_player.user.username == user.username %}
+                                        <input type="hidden" name="play_slot_{{ reserved_player.pk }}" value="off">
+                                        <input type="checkbox"
+                                               name="play_slot_{{ reserved_player.pk }}"
+                                               value="on"
+                                               id="play_slot_{{ reserved_player.pk }}"
+                                               class="toggle toggle-primary"
+                                               {% if reserved_player in confirmed_players_for_game %}checked{% endif %}
+                                               onchange="this.form.submit()">
+                                    {% else %}
+                                        <div style="width: 64px; height: 24px;"></div>
+                                    {% endif %}
+                                </label>
+                                <span class="w-48 text-center dark:text-gray-300"><a
+                                        href="{% url 'player_details_url' player_id=reserved_player.pk %}">{{ reserved_player|get_display_name }}</a></span>
+                            </div>
+                        </form>
+                    {% endfor %}
+                {% endif %}
             </div>
 
         </div>
 
-        <div class="p-4 flex flex-col gap-4">
-            <div class="card shadow-lg text-center bg-base-100 text-xl font-semibold">
+        <div class="flex flex-col items-center space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+            <div class="text-center bg-base-100 text-xl font-semibold">
                 Booking history for this game
             </div>
             <table class="table">
