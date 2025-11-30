@@ -5,25 +5,26 @@
 {% endblock %}
 
 {% block content %}
-<form method="post">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {% for game in games %}
-        <div class="relative p-0 m-0 border rounded-lg shadow bg-white hover:bg-gray-50 transition flex flex-col items-center h-full">
-            <a href="{% url 'game_details_url' game_id=game.id %}" class="block w-full text-center p-6">
-                <span class="text-lg font-semibold text-blue-700 mb-4 block">
-                    {{ game.when|date:'d M Y' }}
-                </span>
-            </a>
-
-            {% if user.is_authenticated and user.is_superuser %}
-            <a href="{% url 'game_remove_url' game_id=game.id %}"
-               class="btn btn-error btn-outline btn-sm px-4 w-full text-center"
-               onclick="event.stopPropagation();">
-                Remove
-            </a>
-            {% endif %}
-        </div>
+            <div class="card bg-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer" data-tile-id="{{ game.id }}">
+                <a href="{% url 'game_details_url' game_id=game.id %}" class="block w-full h-full">
+                    <div class="card-body p-6">
+                        <h2 class="card-title text-primary text-xl">{{ game.when|date:'d M Y' }}</h2>
+                        <p class="text-sm text-gray-600">{{ game.description|default:"Upcoming futsal match" }}</p>
+                        {% if user.is_authenticated and user.is_superuser %}
+                            <div class="card-actions justify-end mt-4">
+                                <a href="{% url 'game_remove_url' game_id=game.id %}"
+                                   class="btn btn-error btn-outline btn-sm px-4 text-center no-underline">
+                                    Remove
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <p class="col-span-full text-center text-gray-500 py-8">No upcoming games scheduled.</p>
         {% endfor %}
     </div>
-</form>
-{% endblock content %}
+{% endblock %}
