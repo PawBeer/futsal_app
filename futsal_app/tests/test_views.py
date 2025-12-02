@@ -1,3 +1,4 @@
+from games.helpers.game_helper import get_players_by_status, get_total_players_for_game
 from games.models import BookingHistoryForGame, Game, PlayerStatus
 
 from .base import BaseTestCase
@@ -57,3 +58,42 @@ class AddGameViewTests(BaseTestCase):
         game = Game.objects.get(description="Test game without players")
         bookings = BookingHistoryForGame.objects.filter(game=game)
         self.assertEqual(bookings.count(), 0)
+
+    def test_transition_from_reserved_to_confirmed(self):
+        data = {
+            "when": "2025-03-03",
+            "status": "Planned",
+            "description": "Test game with reserved player",
+            "set_players": "yes",
+        }
+
+        # Login as superuser and make POST using test client
+        self.client.force_login(self.superuser)
+        response = self.client.post("/games/add_game", data)
+
+        self.assertEqual(response.status_code, 302)
+
+        game = Game.objects.get(when="2025-03-03")
+
+        # get a reserved player
+        reserved_player = (
+            BookingHistoryForGame.objects.filter(
+                game=game, status=PlayerStatus.RESERVED
+            )
+            .order_by("-creation_date")
+            .first()
+        ).player
+
+        # now we have 3 players booked for the game (3 permanent /planned)
+        self.assertEqual(get_total_players_for_game(game), 3)
+
+        data = {
+            f"play_slot_{reserved_player.id}": "on",
+        }
+        response = self.client.post(
+            f"/games/game/{game.id}/update-player-status/", data
+        )
+        self.assertEqual(response.status_code, 302)
+
+        # now the reserved player should be confirmed to play so total is 4
+        self.assertEqual(get_total_players_for_game(game), 4)
