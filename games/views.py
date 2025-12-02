@@ -138,15 +138,8 @@ def game_status_update(request, game_id):
 @require_POST
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    play_slot_keys = [key for key in request.POST if key.startswith("play_slot_")]
-    if not play_slot_keys:
-        return redirect("game_details_url", game_id=game_id)
-
-    changed_key = play_slot_keys[0]
-    player_pk = int(changed_key.replace("play_slot_", ""))
-
-    values = request.POST.getlist(changed_key)
-    checked = "on" in values
+    player_pk = request.POST.get("player_id")
+    checked = "on" == request.POST.get("checked")
 
     player = get_object_or_404(Player, pk=player_pk)
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)

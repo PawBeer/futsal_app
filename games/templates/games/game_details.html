@@ -103,12 +103,13 @@
                     <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                         {% csrf_token %}
                         <div class="flex items-center py-2">
-                            <label for="play_slot_{{ planned_player.pk }}" class="flex justify-center w-28">
+                            <label for="checked" class="flex justify-center w-28">
                                 {% if user.is_superuser or planned_player.user.username == user.username %}
 
-                                    <input type="hidden" name="play_slot_{{ planned_player.pk }}" value="off">
+                                    <input type="hidden" name="player_id" value="{{ planned_player.pk }}">
+                                    <input type="hidden" name="checked" value="off">
                                     <input type="checkbox"
-                                           name="play_slot_{{ planned_player.pk }}"
+                                           name="checked"
                                            value="on"
                                            id="play_slot_{{ planned_player.pk }}"
                                            class="toggle toggle-primary"
@@ -127,12 +128,13 @@
                     <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                         {% csrf_token %}
                         <div class="flex items-center py-2">
-                            <label for="play_slot_{{ cancelled_player.pk }}" class="flex justify-center w-28">
+                            <label for="checked" class="flex justify-center w-28">
                                 {% if user.is_superuser or cancelled_player.user.username == user.username %}
 
-                                    <input type="hidden" name="play_slot_{{ cancelled_player.pk }}" value="off">
+                                    <input type="hidden" name="player_id" value="{{ cancelled_player.pk }}">
+                                    <input type="hidden" name="checked" value="off">
                                     <input type="checkbox"
-                                           name="play_slot_{{ cancelled_player.pk }}"
+                                           name="checked"
                                            value="on"
                                            id="play_slot_{{ cancelled_player.pk }}"
                                            class="toggle toggle-primary"
@@ -167,11 +169,12 @@
                     <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                         {% csrf_token %}
                         <div class="flex items-center py-2">
-                            <label for="play_slot_{{ confirmed_player.pk }}" class="flex justify-center w-28">
+                            <label for="checked" class="flex justify-center w-28">
                                 {% if user.is_superuser or confirmed_player.user.username == user.username %}
-                                    <input type="hidden" name="play_slot_{{ confirmed_player.pk }}" value="off">
+                                    <input type="hidden" name="player_id" value="{{ confirmed_player.pk }}">
+                                    <input type="hidden" name="checked" value="off">
                                     <input type="checkbox"
-                                           name="play_slot_{{ confirmed_player.pk }}"
+                                           name="checked"
                                            value="on"
                                            id="play_slot_{{ confirmed_player.pk }}"
                                            class="toggle toggle-primary"
@@ -189,11 +192,12 @@
                     <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                         {% csrf_token %}
                         <div class="flex items-center py-2">
-                            <label for="play_slot_{{ reserved_player.pk }}" class="flex justify-center w-28">
+                            <label for="checked" class="flex justify-center w-28">
                                 {% if user.is_superuser or reserved_player.user.username == user.username %}
-                                    <input type="hidden" name="play_slot_{{ reserved_player.pk }}" value="off">
+                                    <input type="hidden" name="player_id" value="{{ reserved_player.pk }}">
+                                    <input type="hidden" name="checked" value="off">
                                     <input type="checkbox"
-                                           name="play_slot_{{ reserved_player.pk }}"
+                                           name="checked"
                                            value="on"
                                            id="play_slot_{{ reserved_player.pk }}"
                                            class="toggle toggle-primary"

@@ -88,7 +88,8 @@ class AddGameViewTests(BaseTestCase):
         self.assertEqual(get_total_players_for_game(game), 3)
 
         data = {
-            f"play_slot_{reserved_player.id}": "on",
+            "player_id": reserved_player.id,
+            "checked" : "on",
         }
         response = self.client.post(
             f"/games/game/{game.id}/update-player-status/", data
