@@ -67,9 +67,13 @@ def game_details(request, game_id):
     confirmed_players_for_game = game_helper.get_players_by_status(
         [PlayerStatus.CONFIRMED], found_game
     )
+    awaiting_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.AWAITING], found_game
+    )
     number_of_confirmed_players = len(planned_players_for_game) + len(
         confirmed_players_for_game
     )
+    number_of_cancelled_players = len(cancelled_players_for_game)
     found_booking_history = BookingHistoryForGame.objects.filter(
         game=found_game
     ).order_by("-creation_date")
@@ -92,8 +96,10 @@ def game_details(request, game_id):
             "planned_players_for_game": planned_players_for_game,
             "reserved_players_for_game": reserved_players_for_game,
             "confirmed_players_for_game": confirmed_players_for_game,
+            "awaiting_players_for_game": awaiting_players_for_game,
             "number_of_confirmed_players": number_of_confirmed_players,
             "cancelled_with_substitutes": cancelled_with_substitutes,
+            "number_of_cancelled_players": number_of_cancelled_players,
             "booking_history": found_booking_history,
             "status_options": status_options,
             "breadcrumbs": [
@@ -134,6 +140,58 @@ def game_status_update(request, game_id):
     return redirect("game_details_url", game_id=game_id)
 
 
+def _check_if_empty_slots(game):
+    # function to determine if there are empty slots
+    cancelled_count = len(
+        game_helper.get_players_by_status([PlayerStatus.CANCELLED], game)
+    )
+    confirmed_count = len(
+        game_helper.get_players_by_status([PlayerStatus.CONFIRMED], game)
+    )
+
+    if cancelled_count > confirmed_count:
+        return PlayerStatus.CONFIRMED
+    else:
+        return PlayerStatus.AWAITING
+
+
+def _apply_status_change_logic(current_status, checked, game):
+
+    status_handler = {
+        (PlayerStatus.PLANNED, False): lambda game: PlayerStatus.CANCELLED,
+        (PlayerStatus.CANCELLED, True): lambda game: PlayerStatus.PLANNED,
+        (PlayerStatus.RESERVED, True): lambda game: PlayerStatus.AWAITING,
+        (PlayerStatus.AWAITING, True): _check_if_empty_slots,
+        (PlayerStatus.AWAITING, False): lambda game: PlayerStatus.RESERVED,
+        (PlayerStatus.CONFIRMED, False): lambda game: PlayerStatus.RESERVED,
+        (PlayerStatus.PLANNED, True): lambda game: PlayerStatus.PLANNED,
+    }
+    try:
+        return status_handler[(current_status, checked)](game)
+    except KeyError:
+        raise ValueError(f"No handler for status={current_status}, checked={checked}")
+
+
+def _apply_transition_from_awaiting_to_confirmed(game):
+    awaiting_players = game_helper.get_players_by_status([PlayerStatus.AWAITING], game)
+    if len(awaiting_players) > 0:
+
+        if PlayerStatus.CONFIRMED == _check_if_empty_slots(game):
+            player_to_confirm = awaiting_players[0]
+            BookingHistoryForGame.objects.create(
+                player=player_to_confirm,
+                game=game,
+                status=PlayerStatus.CONFIRMED,
+                creation_date=timezone.now(),
+            )
+            send_player_status_update_email(
+                player_to_confirm, game, PlayerStatus.CONFIRMED
+            )
+            send_player_status_update_email_to_admins(
+                player_to_confirm, game, PlayerStatus.CONFIRMED
+            )
+
+
 @login_required
 @require_POST
 def game_player_status_update(request, game_id):
@@ -145,16 +203,7 @@ def game_player_status_update(request, game_id):
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.status if current_booking else None
 
-    if current_status == PlayerStatus.PLANNED:
-        new_status = PlayerStatus.PLANNED if checked else PlayerStatus.CANCELLED
-    elif current_status == PlayerStatus.CANCELLED:
-        new_status = PlayerStatus.PLANNED if checked else PlayerStatus.CANCELLED
-    elif current_status == PlayerStatus.RESERVED:
-        new_status = PlayerStatus.CONFIRMED if checked else PlayerStatus.RESERVED
-    elif current_status == PlayerStatus.CONFIRMED:
-        new_status = PlayerStatus.CONFIRMED if checked else PlayerStatus.RESERVED
-    else:
-        new_status = current_status
+    new_status = _apply_status_change_logic(current_status, checked, found_game)
 
     if current_status != new_status:
         BookingHistoryForGame.objects.create(
@@ -165,6 +214,8 @@ def game_player_status_update(request, game_id):
         )
         send_player_status_update_email(player, found_game, new_status)
         send_player_status_update_email_to_admins(player, found_game, new_status)
+
+    _apply_transition_from_awaiting_to_confirmed(found_game)
 
     return redirect("game_details_url", game_id=game_id)
 

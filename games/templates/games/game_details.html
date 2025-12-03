@@ -139,7 +139,7 @@
                                            id="play_slot_{{ cancelled_player.pk }}"
                                            class="toggle toggle-primary"
                                            {% if cancelled_player in confirmed_players_for_game %}checked{% endif %}
-                                           {% if number_of_confirmed_players >= 10 and cancelled_player not in confirmed_players_for_game %}disabled title="There is no free slots in the squad" {% endif %}
+                                           {% if number_of_cancelled_players <= number_of_confirmed_players %}disabled title="There is no free slots in the squad" {% endif %}
                                            onchange="this.form.submit()">
                                 {% else %}
                                     <div style="width: 64px; height: 24px;"></div>
@@ -188,6 +188,32 @@
                         </div>
                     </form>
                 {% endfor %}
+
+                {% for awaiting_player in awaiting_players_for_game %}
+                    <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
+                        {% csrf_token %}
+                        <div class="flex items-center py-2">
+                            <label for="checked" class="flex justify-center w-28">
+                                {% if user.is_superuser or awaiting_player.user.username == user.username %}
+                                    <input type="hidden" name="player_id" value="{{ awaiting_player.pk }}">
+                                    <input type="hidden" name="checked" value="off">
+                                    <input type="checkbox"
+                                           name="checked"
+                                           value="on"
+                                           id="play_slot_{{ awaiting_player.pk }}"
+                                           class="toggle toggle-primary"
+                                           checked
+                                           onchange="this.form.submit()">
+                                {% else %}
+                                    <div style="width: 64px; height: 24px;"></div>
+                                {% endif %}
+                            <div style="text-indent: 10px;">?</div>
+                            </label>
+                            <span class="w-48 text-center dark:text-gray-300"><a href="{% url 'player_details_url' player_id=awaiting_player.pk %}" >{{ awaiting_player|get_display_name }}</a></span>
+                        </div>
+                    </form>
+                {% endfor %}
+
                 {% for reserved_player in reserved_players_for_game %}
                     <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                         {% csrf_token %}
