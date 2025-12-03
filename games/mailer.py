@@ -60,7 +60,7 @@ def send_player_status_update_email(player: Player, game, status: str):
     to = [player.user.email]
     player_display_name = player_helper.get_display_name(player)
     # Fallback plain text version
-    text_content = f"Hello {player_display_name}, there is an update regarding Game on {game.when}. Please check your account for details."
+    text_content = f"Hello {player_display_name}, there is an update regarding Game on {game.when}. Your status is now {status}."
 
     # Render the template with context
     html_content = render_to_string(

@@ -15,14 +15,15 @@
     <p>We wanted to let you know that your player status for the game has been updated.</p>
 
 
-    {% if status == "confirmed" %}
-        <p>New Status: <span style="color: green;">{{ status }}</span></p>
-        <p>You are confirmed to play in this game. Please arrive on time and notify us if your plans change.</p>
-    {% elif status == "reserved" %}
-        <p>New Status: <span style="color: orange;">{{ status }}</span></p>
-        <p>You are currently on the reserved list. We will notify you if a slot becomes available.</p>
-    {% elif status == "cancelled" %}
-        <p>New Status: <span style="color: red;">{{ status }}</span></p>
+    {% if status == "confirmed" or status == "planned"%}
+        <p>New Status: <span style="color: green;">CONFIRMED</span></p>
+        <p>You are confirmed to play in this game. Please arrive on time!</p>
+    {% elif status == "awaiting" %}
+        <p>New Status: <span style="color: orange;">AWAITING</span></p>
+        <p>You are now QUEUED for the game, though your booking has not been confirmed yet.</p>
+        <p>We will notify you as soon as a slot becomes available.</p>
+    {% elif status == "cancelled" or status == "reserved" %}
+        <p>New Status: <span style="color: red;">CANCELLED</span></p>
         <p>Your participation has been cancelled. If this is a mistake, please contact the admin.</p>
     {% endif %}
 
