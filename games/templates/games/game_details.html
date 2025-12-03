@@ -15,31 +15,31 @@
                 <div class="text-xl font-bold m-2 w-full">
                     Week {{ game.when|date:'W - d M Y ' }}
                     <div class="flex justify-center w-full mt-10 mb-10">
-                        {% if number_of_confirmed_players > 10 %}
+                        {% if number_of_booked_players > 10 %}
                         <div class="radial-progress text-success"
-                             style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_confirmed_players 1 10 %};"
-                             aria-valuenow="{{ number_of_confirmed_players }}"
+                             style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_booked_players 1 10 %};"
+                             aria-valuenow="{{ number_of_booked_players }}"
                              role="progressbar">10+</div>
-                        {% elif number_of_confirmed_players == 10 %}
+                        {% elif number_of_booked_players == 10 %}
                             <div class="radial-progress text-success"
-                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_confirmed_players 1 10 %};"
-                                 aria-valuenow="{{ number_of_confirmed_players }}"
-                                 role="progressbar">{{ number_of_confirmed_players }}</div>
-                        {% elif number_of_confirmed_players == 9 %}
+                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_booked_players 1 10 %};"
+                                 aria-valuenow="{{ number_of_booked_players }}"
+                                 role="progressbar">{{ number_of_booked_players }}</div>
+                        {% elif number_of_booked_players == 9 %}
                             <div class="radial-progress text-green-200"
-                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_confirmed_players 1 10 %};"
-                                 aria-valuenow="{{ number_of_confirmed_players }}"
-                                 role="progressbar">{{ number_of_confirmed_players }}</div>
-                        {% elif number_of_confirmed_players == 8 %}
+                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_booked_players 1 10 %};"
+                                 aria-valuenow="{{ number_of_booked_players }}"
+                                 role="progressbar">{{ number_of_booked_players }}</div>
+                        {% elif number_of_booked_players == 8 %}
                             <div class="radial-progress text-warning"
-                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_confirmed_players 1 10 %};"
-                                 aria-valuenow="{{ number_of_confirmed_players }}"
-                                 role="progressbar">{{ number_of_confirmed_players }}</div>
+                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_booked_players 1 10 %};"
+                                 aria-valuenow="{{ number_of_booked_players }}"
+                                 role="progressbar">{{ number_of_booked_players }}</div>
                         {% else %}
                             <div class="radial-progress text-error"
-                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_confirmed_players 1 10 %};"
-                                 aria-valuenow="{{ number_of_confirmed_players }}"
-                                 role="progressbar">{{ number_of_confirmed_players }}</div>
+                                 style="--size:100px; --thickness: 1rem; --value:{% widthratio number_of_booked_players 1 10 %};"
+                                 aria-valuenow="{{ number_of_booked_players }}"
+                                 role="progressbar">{{ number_of_booked_players }}</div>
                         {% endif %}
                     </div>
                     <div class="mb-4 mt-2">

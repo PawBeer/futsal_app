@@ -68,12 +68,9 @@ def game_details(request, game_id):
         [PlayerStatus.CONFIRMED], found_game
     )
     awaiting_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.AWAITING], found_game
+        [PlayerStatus.AWAITING], found_game, order_by="latest_creation_date"
     )
-    number_of_confirmed_players = len(planned_players_for_game) + len(
-        confirmed_players_for_game
-    )
-    number_of_cancelled_players = len(cancelled_players_for_game)
+
     found_booking_history = BookingHistoryForGame.objects.filter(
         game=found_game
     ).order_by("-creation_date")
@@ -97,9 +94,11 @@ def game_details(request, game_id):
             "reserved_players_for_game": reserved_players_for_game,
             "confirmed_players_for_game": confirmed_players_for_game,
             "awaiting_players_for_game": awaiting_players_for_game,
-            "number_of_confirmed_players": number_of_confirmed_players,
+            "number_of_booked_players": len(planned_players_for_game)
+            + len(confirmed_players_for_game),
+            "number_of_confirmed_players": len(confirmed_players_for_game),
             "cancelled_with_substitutes": cancelled_with_substitutes,
-            "number_of_cancelled_players": number_of_cancelled_players,
+            "number_of_cancelled_players": len(cancelled_players_for_game),
             "booking_history": found_booking_history,
             "status_options": status_options,
             "breadcrumbs": [
@@ -173,7 +172,9 @@ def _apply_status_change_logic(current_status, checked, game):
 
 
 def _apply_transition_from_awaiting_to_confirmed(game):
-    awaiting_players = game_helper.get_players_by_status([PlayerStatus.AWAITING], game)
+    awaiting_players = game_helper.get_players_by_status(
+        [PlayerStatus.AWAITING], game, order_by="latest_creation_date"
+    )
     if len(awaiting_players) > 0:
 
         if PlayerStatus.CONFIRMED == _check_if_empty_slots(game):

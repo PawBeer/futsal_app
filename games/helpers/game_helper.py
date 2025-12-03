@@ -3,21 +3,31 @@ from django.db.models import OuterRef, Subquery
 from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 
-def get_players_by_status(statuses: list[str], game: Game) -> list[Player]:
+def get_players_by_status(
+    statuses: list[str], game: Game, order_by="-latest_creation_date"
+) -> list[Player]:
     """
-    Returns a list of players for a given game filtered by their booking status.
+    Returns players filtered by their latest booking status,
+    ordered by the creation date of their latest booking history entry.
     """
-    latest_status_sq = (
-        BookingHistoryForGame.objects.filter(player=OuterRef("pk"), game=game)
-        .order_by("-creation_date")
-        .values("status")[:1]
-    )
+
+    latest_history_sq = BookingHistoryForGame.objects.filter(
+        player=OuterRef("pk"), game=game
+    ).order_by(
+        "-creation_date"
+    )  # always choose latest by creation_date
 
     players = (
         Player.objects.filter(status_history__game=game)
-        .annotate(latest_status=Subquery(latest_status_sq))
+        .annotate(
+            latest_status=Subquery(latest_history_sq.values("status")[:1]),
+            latest_creation_date=Subquery(
+                latest_history_sq.values("creation_date")[:1]
+            ),
+        )
         .filter(latest_status__in=statuses)
         .distinct()
+        .order_by(order_by)  # e.g. "-latest_creation_date"
     )
 
     return list(players)
