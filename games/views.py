@@ -48,7 +48,10 @@ def past_games(request):
         .order_by("-when")
         .all()
     )
-    return render(request, "games/past_games.html", {"games": found_games})
+    games_paginator = Paginator(found_games, 20)
+    games_page_number = request.GET.get('games_page')
+    games_page_obj = games_paginator.get_page(games_page_number)
+    return render(request, "games/past_games.html", {"games": games_page_obj})
 
 
 @login_required
