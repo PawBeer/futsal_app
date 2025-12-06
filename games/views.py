@@ -49,7 +49,7 @@ def past_games(request):
         .all()
     )
     games_paginator = Paginator(found_games, 20)
-    games_page_number = request.GET.get('games_page')
+    games_page_number = request.GET.get("games_page")
     games_page_obj = games_paginator.get_page(games_page_number)
     return render(request, "games/past_games.html", {"games": games_page_obj})
 
@@ -416,7 +416,7 @@ def add_absence(request):
     players = Player.objects.all()
     status = PlayerStatus.objects.all().order_by("-id")
     status_paginator = Paginator(status, 15)
-    status_page_number = request.GET.get('status_page')
+    status_page_number = request.GET.get("status_page")
     status_page_obj = status_paginator.get_page(status_page_number)
 
     if request.method == "POST":
