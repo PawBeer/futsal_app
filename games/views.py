@@ -415,6 +415,9 @@ def add_game(request):
 def add_absence(request):
     players = Player.objects.all()
     status = PlayerStatus.objects.all().order_by("-id")
+    status_paginator = Paginator(status, 15)
+    status_page_number = request.GET.get('status_page')
+    status_page_obj = status_paginator.get_page(status_page_number)
 
     if request.method == "POST":
         player_id = request.POST.get("player")
@@ -488,6 +491,6 @@ def add_absence(request):
         {
             "players": players,
             "status_choices": PlayerStatus.STATUS_CHOICES,
-            "status": status,
+            "status": status_page_obj,
         },
     )
