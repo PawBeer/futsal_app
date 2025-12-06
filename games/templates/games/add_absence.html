@@ -110,29 +110,88 @@
 
     {% if user.is_superuser %}
         <div>
-        <table class="table">
-            <thead>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Player</th>
+            <th>Date_start</th>
+            <th>Date end</th>
+            <th>Player status</th>
+            <th class="hidden lg:table-cell">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in status %}
             <tr>
-                <th>Player</th>
-                <th>Date_start</th>
-                <th>Date end</th>
-                <th>Player status</th>
-                <th class="hidden lg:table-cell">Description</th>
+                <td>{{ record.player.user.username }}</td>
+                <td>{{ record.date_start }}</td>
+                <td>{{ record.date_end }}</td>
+                <td>{{ record.status }}</td>
+                <td class="hidden lg:table-cell">{{ record.description }}</td>
             </tr>
-            </thead>
-            <tbody>
-            {% for record in status %}
-                <tr>
-                    <td>{{ record.player.user.username }}</td>
-                    <td>{{ record.date_start }}</td>
-                    <td>{{ record.date_end }}</td>
-                    <td>{{ record.status }}</td>
-                    <td class="hidden lg:table-cell">{{ record.description }}</td>
-                </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-8 text-gray-500">No records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if status.has_other_pages %}
+    <div class="flex justify-center items-center space-x-2 mt-6">
+        {% if status.has_previous %}
+        <a href="?status_page=1" class="btn btn-sm btn-outline btn-secondary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            First
+        </a>
+        {% endif %}
+
+        {% if status.has_previous %}
+        <a href="?status_page={{ status.previous_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+            <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Prev.
+        </a>
+        {% endif %}
+
+        <div class="flex space-x-1">
+            {% for num in status.paginator.page_range %}
+                {% if status.number == num %}
+                    <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
+                {% elif num > status.number|add:'-2' and num < status.number|add:'2' %}
+                    <a href="?status_page={{ num }}" class="btn btn-sm btn-outline btn-secondary">{{ num }}</a>
+                {% endif %}
             {% endfor %}
-            </tbody>
-        </table>
         </div>
+
+        {% if status.has_next %}
+        <a href="?status_page={{ status.next_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+            Next
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+        {% endif %}
+
+        {% if status.has_next %}
+        <a href="?status_page={{ status.paginator.num_pages }}" class="btn btn-sm btn-outline btn-secondary">
+            Last
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H6"></path>
+            </svg>
+        </a>
+        {% endif %}
+    </div>
+
+    <p class="text-sm text-gray-500 text-center mt-2">
+        Page {{ status.number }} of {{ status.paginator.num_pages }} 
+        ({{ status.paginator.count }} records)
+    </p>
+    {% endif %}
+</div>
     {% endif %}
 </div>
 
