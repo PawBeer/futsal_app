@@ -28,5 +28,60 @@
         </tbody>
     </table>
     
+   {% if booking_history.has_other_pages %}
+<div class="flex justify-center items-center space-x-2 mt-6">
+    {% if booking_history.has_previous %}
+    <a href="?page=1" class="btn btn-sm btn-outline btn-secondary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        First
+    </a>
+    {% endif %}
+
+    {% if booking_history.has_previous %}
+    <a href="?page={{ booking_history.previous_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+        <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Prev.
+    </a>
+    {% endif %}
+
+    <div class="flex space-x-1">
+        {% for num in booking_history.paginator.page_range %}
+            {% if booking_history.number == num %}
+                <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
+            {% elif num > booking_history.number|add:'-2' and num < booking_history.number|add:'2' %}
+                <a href="?page={{ num }}" class="btn btn-sm btn-outline btn-secondary">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if booking_history.has_next %}
+    <a href="?page={{ booking_history.next_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+        Next
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+    </a>
+    {% endif %}
+
+    {% if booking_history.has_next %}
+    <a href="?page={{ booking_history.paginator.num_pages }}" class="btn btn-sm btn-outline btn-secondary">
+        Last
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H6"></path>
+        </svg>
+    </a>
+    {% endif %}
+</div>
+
+<p class="text-sm text-gray-500 text-center mt-2">
+    Page {{ booking_history.number }} of {{ booking_history.paginator.num_pages }} 
+    ({{ booking_history.paginator.count }} records)
+</p>
+{% endif %}
+            
 {% endblock content %}
 

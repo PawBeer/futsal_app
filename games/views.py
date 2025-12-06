@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
 
 from games.helpers import game_helper, player_helper
 from games.mailer import (
@@ -320,10 +321,13 @@ def check_username_and_email(request):
 @login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
+    paginator = Paginator(found_booking_history, 100)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
     return render(
         request,
         "games/booking_history.html",
-        {"booking_history": found_booking_history},
+        {"booking_history": page_obj},
     )
 
 
