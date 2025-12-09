@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Game, BookingHistoryForGame
+
+from .models import BookingHistoryForGame, Game
 
 
 class GameAdmin(admin.ModelAdmin):

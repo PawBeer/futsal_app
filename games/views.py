@@ -3,7 +3,6 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -13,10 +12,12 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 
+from games.forms import PlayerProfileForm
 from games.helpers import game_helper, player_helper
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
+    send_welcome_email,
 )
 
 from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
@@ -70,9 +71,10 @@ def game_details(request, game_id):
     confirmed_players_for_game = game_helper.get_players_by_status(
         [PlayerStatus.CONFIRMED], found_game
     )
-    number_of_confirmed_players = len(planned_players_for_game) + len(
-        confirmed_players_for_game
+    awaiting_players_for_game = game_helper.get_players_by_status(
+        [PlayerStatus.AWAITING], found_game, order_by="latest_creation_date"
     )
+
     found_booking_history = BookingHistoryForGame.objects.filter(
         game=found_game
     ).order_by("-creation_date")
@@ -95,8 +97,12 @@ def game_details(request, game_id):
             "planned_players_for_game": planned_players_for_game,
             "reserved_players_for_game": reserved_players_for_game,
             "confirmed_players_for_game": confirmed_players_for_game,
-            "number_of_confirmed_players": number_of_confirmed_players,
+            "awaiting_players_for_game": awaiting_players_for_game,
+            "number_of_booked_players": len(planned_players_for_game)
+            + len(confirmed_players_for_game),
+            "number_of_confirmed_players": len(confirmed_players_for_game),
             "cancelled_with_substitutes": cancelled_with_substitutes,
+            "number_of_cancelled_players": len(cancelled_players_for_game),
             "booking_history": found_booking_history,
             "status_options": status_options,
             "breadcrumbs": [
@@ -137,34 +143,72 @@ def game_status_update(request, game_id):
     return redirect("game_details_url", game_id=game_id)
 
 
+def _check_if_empty_slots(game):
+    # function to determine if there are empty slots
+    cancelled_count = len(
+        game_helper.get_players_by_status([PlayerStatus.CANCELLED], game)
+    )
+    confirmed_count = len(
+        game_helper.get_players_by_status([PlayerStatus.CONFIRMED], game)
+    )
+
+    if cancelled_count > confirmed_count:
+        return PlayerStatus.CONFIRMED
+    else:
+        return PlayerStatus.AWAITING
+
+
+def _apply_status_change_logic(current_status, checked, game):
+
+    status_handler = {
+        (PlayerStatus.PLANNED, False): lambda game: PlayerStatus.CANCELLED,
+        (PlayerStatus.CANCELLED, True): lambda game: PlayerStatus.PLANNED,
+        (PlayerStatus.RESERVED, True): lambda game: PlayerStatus.AWAITING,
+        (PlayerStatus.AWAITING, True): _check_if_empty_slots,
+        (PlayerStatus.AWAITING, False): lambda game: PlayerStatus.RESERVED,
+        (PlayerStatus.CONFIRMED, False): lambda game: PlayerStatus.RESERVED,
+        (PlayerStatus.PLANNED, True): lambda game: PlayerStatus.PLANNED,
+    }
+    try:
+        return status_handler[(current_status, checked)](game)
+    except KeyError:
+        raise ValueError(f"No handler for status={current_status}, checked={checked}")
+
+
+def _apply_transition_from_awaiting_to_confirmed(game):
+    awaiting_players = game_helper.get_players_by_status(
+        [PlayerStatus.AWAITING], game, order_by="latest_creation_date"
+    )
+    if len(awaiting_players) > 0:
+
+        if PlayerStatus.CONFIRMED == _check_if_empty_slots(game):
+            player_to_confirm = awaiting_players[0]
+            BookingHistoryForGame.objects.create(
+                player=player_to_confirm,
+                game=game,
+                status=PlayerStatus.CONFIRMED,
+                creation_date=timezone.now(),
+            )
+            send_player_status_update_email(
+                player_to_confirm, game, PlayerStatus.CONFIRMED
+            )
+            send_player_status_update_email_to_admins(
+                player_to_confirm, game, PlayerStatus.CONFIRMED
+            )
+
+
 @login_required
 @require_POST
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
-    play_slot_keys = [key for key in request.POST if key.startswith("play_slot_")]
-    if not play_slot_keys:
-        return redirect("game_details_url", game_id=game_id)
-
-    changed_key = play_slot_keys[0]
-    player_pk = int(changed_key.replace("play_slot_", ""))
-
-    values = request.POST.getlist(changed_key)
-    checked = "on" in values
+    player_pk = request.POST.get("player_id")
+    checked = "on" == request.POST.get("checked")
 
     player = get_object_or_404(Player, pk=player_pk)
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.status if current_booking else None
 
-    if current_status == PlayerStatus.PLANNED:
-        new_status = PlayerStatus.PLANNED if checked else PlayerStatus.CANCELLED
-    elif current_status == PlayerStatus.CANCELLED:
-        new_status = PlayerStatus.PLANNED if checked else PlayerStatus.CANCELLED
-    elif current_status == PlayerStatus.RESERVED:
-        new_status = PlayerStatus.CONFIRMED if checked else PlayerStatus.RESERVED
-    elif current_status == PlayerStatus.CONFIRMED:
-        new_status = PlayerStatus.CONFIRMED if checked else PlayerStatus.RESERVED
-    else:
-        new_status = current_status
+    new_status = _apply_status_change_logic(current_status, checked, found_game)
 
     if current_status != new_status:
         BookingHistoryForGame.objects.create(
@@ -175,6 +219,8 @@ def game_player_status_update(request, game_id):
         )
         send_player_status_update_email(player, found_game, new_status)
         send_player_status_update_email_to_admins(player, found_game, new_status)
+
+    _apply_transition_from_awaiting_to_confirmed(found_game)
 
     return redirect("game_details_url", game_id=game_id)
 
@@ -217,33 +263,43 @@ def all_players(request):
 @login_required
 def player_details(request, player_id):
     player = get_object_or_404(Player, id=player_id)
-    user = player.user
+    # bind the profile form (template uses plain input names that match the form fields)
+    profile_form = PlayerProfileForm(request.POST or None, instance=player)
+
     if request.method == "POST":
-        new_username = request.POST.get("username")
-        if (
-            User.objects.filter(username=new_username)
-            .exclude(id=player.user.id)
-            .exists()
-        ):
-            messages.error(request, "This login already exists.")
-            return render(
-                request,
-                "games/player_details.html",
-                {"player": player, "form": ..., "error": True},
-            )
+        form_type = request.POST.get("form_type")
 
-        user.username = new_username
-        user.first_name = request.POST.get("first_name", "")
-        user.last_name = request.POST.get("last_name", "")
-        user.email = request.POST.get("email", "")
-        user.save()
+        if form_type == "profile":
+            if profile_form.is_valid():
+                new_username = profile_form.cleaned_data.get("username")
+                if (
+                    User.objects.filter(username=new_username)
+                    .exclude(id=player.user.id)
+                    .exists()
+                ):
+                    messages.error(request, "This username already exists.")
+                else:
+                    try:
+                        profile_form.save()
+                        messages.success(request, "Profile updated successfully.")
+                        return redirect("player_details_url", player_id=player.id)
+                    except IntegrityError:
+                        messages.error(
+                            request, "An error occurred while saving the profile."
+                        )
+            else:
+                # collect form errors and show them as a message so template (which uses raw inputs) can display
+                errors = []
+                for field, field_errors in profile_form.errors.items():
+                    errors.extend([f"{field}: {e}" for e in field_errors])
+                messages.error(request, "Invalid data: " + "; ".join(errors))
 
-        player.mobile_number = request.POST.get("mobile_number", "")
-        player.role = request.POST.get("role", "")
-        player.save()
-
-        return redirect("all_players_url")
-
+        elif form_type == "welcome_email":
+            # build a sensible activation link (fallback to next_games)
+            activation_link = request.build_absolute_uri(reverse("password_reset"))
+            send_welcome_email(player.user, activation_link)
+            messages.success(request, "Welcome email has been sent.")
+            return redirect("player_details_url", player_id=player.id)
     return render(
         request,
         "games/player_details.html",
@@ -263,40 +319,27 @@ def player_details(request, player_id):
 @user_passes_test(lambda u: u.is_superuser)
 def add_player(request):
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        first_name = request.POST.get("first_name", "").strip()
-        last_name = request.POST.get("last_name", "").strip()
-        email = request.POST.get("email", "").strip()
-        mobile_number = request.POST.get("mobile_number", "").strip()
-        role = request.POST.get("role", Player.ROLE_ACTIVE)
-
-        if not username or not email or not mobile_number:
-            messages.error(request, "Username, email and mobile number are required.")
+        profile_form = PlayerProfileForm(request.POST)
+        if profile_form.is_valid():
+            new_username = profile_form.cleaned_data.get("username")
+            if User.objects.filter(username=new_username).exists():
+                messages.error(request, "This username already exists.")
+            else:
+                try:
+                    profile_form.save()
+                    messages.success(request, "Player added successfully.")
+                    return redirect("all_players_url")
+                except IntegrityError:
+                    messages.error(
+                        request, "An error occurred while saving the player."
+                    )
         else:
-            try:
-                user = User.objects.create_user(username=username, email=email)
-                user.first_name = first_name
-                user.last_name = last_name
-                user.full_clean()
-                user.save()
+            # collect form errors and show them as a message so template (which uses raw inputs) can display
+            errors = []
+            for field, field_errors in profile_form.errors.items():
+                errors.extend([f"{field}: {e}" for e in field_errors])
+            messages.error(request, "Invalid data: " + "; ".join(errors))
 
-                player = Player(user=user, mobile_number=mobile_number, role=role)
-                player.save()
-
-                messages.success(
-                    request, f"Player '{username}' It has been added successfully."
-                )
-                return redirect("all_players_url")
-
-            except IntegrityError:
-                messages.error(request, "A user with that name already exists.")
-            except ValidationError as e:
-                errors = "; ".join([str(err) for err in e.messages])
-                messages.error(request, f"Error in the form: {errors}")
-            except Exception as e:
-                messages.error(request, f"An unexpected error has occurred: {e}")
-
-        return redirect("all_players_url")
     context = {
         "role_choices": Player.ROLE_CHOICES,
     }

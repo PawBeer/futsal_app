@@ -54,6 +54,7 @@ class PlayerStatus(models.Model):
     CONFIRMED = "confirmed"
     RESERVED = "reserved"
     RESTING = "resting"
+    AWAITING = "awaiting"  # the player is happy to play (responed positive) but the booking is not yet confirmed
 
     STATUS_CHOICES = [
         (PLANNED, PLANNED),
@@ -61,6 +62,7 @@ class PlayerStatus(models.Model):
         (CONFIRMED, CONFIRMED),
         (RESERVED, RESERVED),
         (RESTING, RESTING),
+        (AWAITING, AWAITING),
     ]
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     date_start = models.DateField()

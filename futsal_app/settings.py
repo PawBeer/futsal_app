@@ -24,7 +24,7 @@ SECRET_KEY = env(
     "SECRET_KEY",
     default="your-default-secret-key-for-develelopment-only-9r3ur9348g8h4g8hfd09g34g8hfd0",
 )
-DEBUG = env.bool("DEBUG", default=False)
+DEBUG = env.bool("DEBUG", default=True)  # debug True for development only
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
