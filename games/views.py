@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
 
 from games.forms import PlayerProfileForm
 from games.helpers import game_helper, player_helper
@@ -48,7 +49,10 @@ def past_games(request):
         .order_by("-when")
         .all()
     )
-    return render(request, "games/past_games.html", {"games": found_games})
+    games_paginator = Paginator(found_games, 20)
+    games_page_number = request.GET.get("games_page")
+    games_page_obj = games_paginator.get_page(games_page_number)
+    return render(request, "games/past_games.html", {"games": games_page_obj})
 
 
 @login_required
@@ -363,10 +367,13 @@ def check_username_and_email(request):
 @login_required()
 def booking_history(request):
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
+    paginator = Paginator(found_booking_history, 100)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
     return render(
         request,
         "games/booking_history.html",
-        {"booking_history": found_booking_history},
+        {"booking_history": page_obj},
     )
 
 
@@ -451,6 +458,9 @@ def add_game(request):
 def add_absence(request):
     players = Player.objects.all()
     status = PlayerStatus.objects.all().order_by("-id")
+    status_paginator = Paginator(status, 15)
+    status_page_number = request.GET.get("status_page")
+    status_page_obj = status_paginator.get_page(status_page_number)
 
     if request.method == "POST":
         player_id = request.POST.get("player")
@@ -524,6 +534,6 @@ def add_absence(request):
         {
             "players": players,
             "status_choices": PlayerStatus.STATUS_CHOICES,
-            "status": status,
+            "status": status_page_obj,
         },
     )

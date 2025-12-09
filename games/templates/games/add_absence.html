@@ -5,170 +5,233 @@
 {% endblock %}
 
 {% block content %}
-    <div class="w-full flex items-center justify-center bg-base-100">
-        <div class="card card-border bg-base-100 max-w-lg px-6 py-4">
-            <form method="post" class="w-full">
-                {% csrf_token %}
-                <table class="table w-full border border-neutral shadow-md bg-base-100 text-base-content">
-                    <thead>
-                    <tr class="border-b border-neutral">
-                        <th colspan="2" class="text-lg font-semibold text-center">Add Absence</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Player</td>
-                        <td class="py-2 px-4">
-                            {% if user.is_superuser %}
-                                <select name="player" class="select select-bordered w-full" required>
-                                    <option value="">Select player</option>
-                                    {% for player in players %}
-                                        <option value="{{ player.id }}"
-                                                {% if player.user.username == user.get_username %}
-                                                selected
-                                                {% endif %}
-                                        >
-                                            {{ player.user.username }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            {% else %}
-                                {% for player in players %}
-                                    {% if player.user.username == user.get_username %}
-                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
-                                            {{ player.user.username }}
-                                        </div>
-                                        <input type="hidden" name="player" value="{{ player.id }}">
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </td>
+<div class="w-full flex flex-col items-center justify-center bg-base-100 py-12 px-4">
+    
+<div class="card bg-base-100 shadow-xl border border-base-200 max-w-md w-full mx-auto mb-12">
+    <div class="card-body p-6">
+        <h2 class="card-title text-2xl font-bold text-center text-base-content mb-6">Add absence</h2>
+        
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Player</span>
+                </label>
+                {% if user.is_superuser %}
+                    <select name="player" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                        <option value="">Select player</option>
+                        {% for player in players %}
+                            <option value="{{ player.id }}"
+                                    {% if player.user.username == user.get_username %}selected{% endif %}>
+                                {{ player.user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    {% for player in players %}
+                        {% if player.user.username == user.get_username %}
+                            <div class="flex items-center gap-3 p-4 bg-base-200 rounded-xl border border-base-300 mx-auto max-w-sm">
+                                <div class="w-10 h-10 bg-base-300 rounded-full flex items-center justify-center font-semibold text-base-content text-sm">
+                                    {{ player.user.username.0|upper }}
+                                </div>
+                                <div class="text-left">
+                                    <div class="font-semibold text-base-content">{{ player.user.username }}</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="player" value="{{ player.id }}">
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
 
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Start date</td>
-                        <td class="py-2 px-4">
-                            <input type="date" id="date_start" name="date_start" class="input w-full" required>
-                        </td>
-                    </tr>
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Start date</span>
+                </label>
+                <input type="date" id="date_start" name="date_start" class="input input-bordered w-full max-w-sm mx-auto block" required>
+            </div>
 
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Longer break?</td>
-                        <td class="py-2 px-4 flex items-center">
-                            <input type="checkbox" id="longer_break" name="longer_break" class="checkbox">
-                            <label for="longer_break" class="ml-2">I need a longer break</label>
-                        </td>
-                    </tr>
+            <div class="form-control mb-4">
+                <label class="label cursor-pointer justify-start gap-4 mx-auto max-w-sm">
+                    <input type="checkbox" id="longer_break" name="longer_break" class="checkbox checkbox-primary">
+                    <span class="label-text font-semibold">I need a longer break</span>
+                </label>
+            </div>
 
-                    <tr>
-                        <td class="font-semibold py-2 px-4">End date</td>
-                        <td class="py-2 px-4">
-                            <input type="date"
-                                   id="date_end_display"
-                                   name="date_end"
-                                   class="input w-full bg-gray-200 text-gray-500 cursor-not-allowed"
-                                   disabled>
-                            <input type="hidden" id="date_end" name="date_end">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Status</td>
-                        <td class="py-2 px-4">
-                            {% if user.is_superuser %}
-                                <select name="status" class="select select-bordered w-full" required>
-                                    {% for key, label in status_choices %}
-                                        <option value="{{ key }}"
-                                                {% if forloop.last %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            {% else %}
-                                {% for key, label in status_choices %}
-                                    {% if forloop.last %}
-                                        <div class="py-2 px-4 bg-gray-100 rounded cursor-not-allowed select-none bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
-                                            {{ label }}
-                                        </div>
-                                        <input type="hidden" name="status" value="{{ key }}">
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </td>
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">End date</span>
+                </label>
+                <input type="date" id="date_end_display" name="date_end" 
+                       class="input input-bordered w-full max-w-sm mx-auto block bg-base-200 text-base-content/50 cursor-not-allowed" disabled>
+                <input type="hidden" id="date_end" name="date_end">
+            </div>
 
-                    </tr>
-                    <tr>
-                        <td class="font-semibold py-2 px-4">Description</td>
-                        <td class="py-2 px-4">
-                            <textarea name="description" class="textarea textarea-bordered w-full" rows="3"></textarea>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div class="mt-4 text-center">
-                    <button type="submit" class="btn btn-primary">Add Absence</button>
-                </div>
-            </form>
-        </div>
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Status</span>
+                </label>
+                {% if user.is_superuser %}
+                    <select name="status" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                        {% for key, label in status_choices %}
+                            <option value="{{ key }}" {% if forloop.last %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    {% for key, label in status_choices %}
+                        {% if forloop.last %}
+                            <div class="p-4 bg-base-200 rounded-xl border border-base-300 flex items-center justify-between mx-auto max-w-sm">
+                                <span class="font-semibold text-base-content">{{ label }}</span>
+                                <span class="badge badge-outline badge-warning">Pending</span>
+                            </div>
+                            <input type="hidden" name="status" value="{{ key }}">
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Description (optional)</span>
+                </label>
+                <textarea name="description" class="textarea textarea-bordered w-full max-w-sm mx-auto block" rows="3" 
+                          placeholder="Reason for absence..."></textarea>
+            </div>
+
+            <div class="form-control pt-4">
+                <button type="submit" class="btn btn-primary w-full max-w-sm mx-auto block shadow-lg hover:shadow-xl">
+                    Add Absence
+                </button>
+            </div>
+        </form>
     </div>
+</div>
+
     {% if user.is_superuser %}
         <div>
-        <table class="table">
-            <thead>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Player</th>
+            <th>Date_start</th>
+            <th>Date end</th>
+            <th>Player status</th>
+            <th class="hidden lg:table-cell">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in status %}
             <tr>
-                <th>Player</th>
-                <th>Date_start</th>
-                <th>Date end</th>
-                <th>Player status</th>
-                <th>Description</th>
+                <td>{{ record.player.user.username }}</td>
+                <td>{{ record.date_start }}</td>
+                <td>{{ record.date_end }}</td>
+                <td>{{ record.status }}</td>
+                <td class="hidden lg:table-cell">{{ record.description }}</td>
             </tr>
-            </thead>
-            <tbody>
-            {% for record in status %}
-                <tr>
-                    <td>{{ record.player.user.username }}</td>
-                    <td>{{ record.date_start }}</td>
-                    <td>{{ record.date_end }}</td>
-                    <td>{{ record.status }}</td>
-                    <td>{{ record.description }}</td>
-                </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-8 text-gray-500">No records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if status.has_other_pages %}
+    <div class="flex justify-center items-center space-x-2 mt-6">
+        {% if status.has_previous %}
+        <a href="?status_page=1" class="btn btn-sm btn-outline btn-secondary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            First
+        </a>
+        {% endif %}
+
+        {% if status.has_previous %}
+        <a href="?status_page={{ status.previous_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+            <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Prev.
+        </a>
+        {% endif %}
+
+        <div class="flex space-x-1">
+            {% for num in status.paginator.page_range %}
+                {% if status.number == num %}
+                    <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
+                {% elif num > status.number|add:'-2' and num < status.number|add:'2' %}
+                    <a href="?status_page={{ num }}" class="btn btn-sm btn-outline btn-secondary">{{ num }}</a>
+                {% endif %}
             {% endfor %}
-            </tbody>
-        </table>
         </div>
+
+        {% if status.has_next %}
+        <a href="?status_page={{ status.next_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+            Next
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+        {% endif %}
+
+        {% if status.has_next %}
+        <a href="?status_page={{ status.paginator.num_pages }}" class="btn btn-sm btn-outline btn-secondary">
+            Last
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H6"></path>
+            </svg>
+        </a>
+        {% endif %}
+    </div>
+
+    <p class="text-sm text-gray-500 text-center mt-2">
+        Page {{ status.number }} of {{ status.paginator.num_pages }} 
+        ({{ status.paginator.count }} records)
+    </p>
     {% endif %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const longerBreakCheckbox = document.getElementById('longer_break');
-            const startDateInput = document.getElementById('date_start');
-            const endDateDisplay = document.getElementById('date_end_display');
-            const endDateHidden = document.getElementById('date_end');
+</div>
+    {% endif %}
+</div>
 
-            function syncEndDate(value) {
-                endDateDisplay.value = value;
-                endDateHidden.value = value;
-            }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const longerBreakCheckbox = document.getElementById('longer_break');
+    const startDateInput = document.getElementById('date_start');
+    const endDateDisplay = document.getElementById('date_end_display');
+    const endDateHidden = document.getElementById('date_end');
 
-            startDateInput.addEventListener('change', () => {
-                if (!longerBreakCheckbox.checked) {
-                    syncEndDate(startDateInput.value);
-                }
-            });
+    function syncEndDate(value) {
+        endDateDisplay.value = value;
+        endDateHidden.value = value;
+    }
 
-            longerBreakCheckbox.addEventListener('change', () => {
-                if (longerBreakCheckbox.checked) {
-                    endDateDisplay.disabled = false;
-                    endDateDisplay.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
-                } else {
-                    endDateDisplay.disabled = true;
-                    endDateDisplay.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
-                    syncEndDate(startDateInput.value);
-                }
-            });
-
-            endDateDisplay.addEventListener('change', () => {
-                endDateHidden.value = endDateDisplay.value;
-            });
-
+    startDateInput.addEventListener('change', () => {
+        if (!longerBreakCheckbox.checked) {
             syncEndDate(startDateInput.value);
-        });
-    </script>
+        }
+    });
+
+    longerBreakCheckbox.addEventListener('change', () => {
+        if (longerBreakCheckbox.checked) {
+            endDateDisplay.disabled = false;
+            endDateDisplay.classList.remove('bg-base-200', 'text-base-content/50', 'cursor-not-allowed');
+            endDateDisplay.classList.add('input-bordered');
+        } else {
+            endDateDisplay.disabled = true;
+            endDateDisplay.classList.add('bg-base-200', 'text-base-content/50', 'cursor-not-allowed');
+            endDateDisplay.classList.remove('input-bordered');
+            syncEndDate(startDateInput.value);
+        }
+    });
+
+    endDateDisplay.addEventListener('change', () => {
+        endDateHidden.value = endDateDisplay.value;
+    });
+
+    syncEndDate(startDateInput.value);
+});
+</script>
 
 {% endblock %}

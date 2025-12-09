@@ -7,7 +7,7 @@
 {% block content %}
     {% with active_status=request.GET.status %}
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mr-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mr-10">
 
             <a href="{% url 'all_players_url' %}" style="text-decoration: none;">
                 <div class="card shadow-xl bg-players-purple cursor-pointer
@@ -54,23 +54,25 @@
     {% endwith %}
     <div class="card shadow-lg mb-8 p-4">
     </div>
-    </div>
     <table class="table">
         <thead>
         <tr>
-            <th>Player</th>
-            <th>Player role</th>
+            <th class="px-1 text-center">Player</th>
+            <th class="px-1 text-center">Username</th>
+            <th class="px-1 text-center">Player role</th>
         </tr>
         </thead>
         <tbody>
         {% for player in players %}
             <tr>
 
-                    <td>
-                        <a href="{% url 'player_details_url' player_id=player.id %}" >{{ player|get_display_name }}</a>
-                    </td>
- 
-                <td>{{ player.role }}</td>
+                <td class="px-1 text-center">
+                    <a href="{% url 'player_details_url' player_id=player.id %}">{{ player|get_display_name }}</a>
+                </td>
+                <td class="px-1 text-center">
+                    <a href="{% url 'player_details_url' player_id=player.id %}">{{ player.user }}</a>
+                </td>
+                <td class="px-1 text-center">{{ player.role }}</td>
             </tr>
         {% endfor %}
         </tbody>
