@@ -103,8 +103,7 @@
                                 {% csrf_token %}
                                 <tr class="hover">
                                     <td class="text-center py-3">
-                                        {% if user.is_superuser or planned_player.user.username == user.username %}
-                                        <input type="hidden" name="player_id" value="{{ planned_player.pk }}">
+                                        {% if user.is_superuser or planned_player.user.username == user.username and game.status == 'Planned' %}                                        <input type="hidden" name="player_id" value="{{ planned_player.pk }}">
                                         <input type="hidden" name="checked" value="off">
                                         <input type="checkbox"
                                             name="checked"
@@ -137,7 +136,7 @@
                                 {% csrf_token %}
                                 <tr class="hover">
                                     <td class="text-center py-3">
-                                        {% if user.is_superuser or cancelled_player.user.username == user.username %}
+                                        {% if user.is_superuser or cancelled_player.user.username == user.username and game.status == 'Planned' %}
                                             <input type="hidden" name="player_id" value="{{ cancelled_player.pk }}">
                                             <input type="hidden" name="checked" value="off">
                                             <input type="checkbox" 
@@ -198,7 +197,7 @@
                             {% csrf_token %}
                             <tr class="hover bg-success/10">
                                 <td class="text-center py-3">
-                                    {% if user.is_superuser or confirmed_player.user.username == user.username %}
+                                    {% if user.is_superuser or confirmed_player.user.username == user.username and game.status == 'Planned' %}
                                         <input type="hidden" name="player_id" value="{{ confirmed_player.pk }}">
                                         <input type="hidden" name="checked" value="off">
                                         <input type="checkbox"
@@ -261,12 +260,12 @@
                 
                 <!-- Reserved players -->
                 {% for reserved_player in reserved_players_for_game %}
-                    {% if reserved_player.user.username == user.username or user.is_superuser %}
+                    {% if reserved_player.user.username == user.username or user.is_superuser%}
                         <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
                             {% csrf_token %}
                             <tr class="hover {% if reserved_player.status == 'reserved' %}opacity-75 bg-warning/10{% endif %}">
                                 <td class="text-center py-3">
-                                    {% if user.is_superuser or reserved_player.user.username == user.username %}
+                                    {% if user.is_superuser or reserved_player.user.username == user.username and game.status == 'Planned'%}
                                         <input type="hidden" name="player_id" value="{{ reserved_player.pk }}">
                                         <input type="hidden" name="checked" value="off">
                                         <input type="checkbox"
