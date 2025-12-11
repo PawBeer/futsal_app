@@ -4,7 +4,7 @@ from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 
 def get_players_by_status(
-    statuses: list[str], game: Game, order_by="-latest_creation_date"
+    statuses: list[str], game: Game, order_by="latest_creation_date"
 ) -> list[Player]:
     """
     Returns players filtered by their latest booking status,
