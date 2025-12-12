@@ -5,44 +5,79 @@
 {% endblock %}
 
 {% block content %}
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Game date</th>
-            <th>Status for Game</th>
-            <th>Player</th>
-            <th>Status for Player</th>
-            <th>Created</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for record in booking_history %}
+
+<div class="flex items-center justify-between mb-4">
+    <form method="get" class="flex items-center gap-2">
+        <label for="page_size" class="text-sm text-base-content/70">Rows:</label>
+        <select id="page_size" name="page_size" class="select select-xs select-bordered" onchange="this.form.submit()">
+    {% for size in page_sizes %}
+        <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>
+            {{ size }}
+        </option>
+    {% endfor %}
+</select>
+
+        {% if booking_history.number %}
+            <input type="hidden" name="page" value="{{ booking_history.number }}">
+        {% endif %}
+    </form>
+</div>
+
+<div class="card shadow-lg mb-6 p-4">
+    <div class="overflow-x-auto">
+        <table class="table w-full">
+            <thead>
             <tr>
-                <td>{{ record.game.when }}</td>
-                <td>{{ record.game.status }}</td>
-                <td>{{ record.player|get_display_name }}</td>
-                <td>{{ record.status }}</td>
-                <td>{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Game date</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Status for Game</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Status for Player</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Created</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    
-   {% if booking_history.has_other_pages %}
-<div class="flex justify-center items-center space-x-2 mt-6">
+            </thead>
+            <tbody>
+            {% for record in booking_history %}
+                <tr class="hover">
+                    <td class="py-2 text-sm">
+                        <a href="{% url 'game_details_url' game_id=record.game.id %}"
+                           class="link link-primary font-medium">
+                            {{ record.game.when|date:'d M Y' }}
+                        </a>
+                    </td>
+                    <td class="py-2 text-sm">{{ record.game.status }}</td>
+                    <td class="py-2 text-sm">
+                        <a href="{% url 'player_details_url' player_id=record.player.id %}"
+                           class="link link-primary font-medium">
+                            {{ record.player|get_display_name }}
+                        </a>
+                    </td>
+                    <td class="py-2 text-sm">{{ record.status|title }}</td>
+                    <td class="py-2 text-sm">{{ record.creation_date|date:'d M Y, H:i:s' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if booking_history.has_other_pages %}
+<div class="flex justify-center items-center space-x-2 mt-4">
     {% if booking_history.has_previous %}
-    <a href="?page=1" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page=1&page_size={{ page_size }}" class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
         First
     </a>
     {% endif %}
 
     {% if booking_history.has_previous %}
-    <a href="?page={{ booking_history.previous_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page={{ booking_history.previous_page_number }}&page_size={{ page_size }}"
+       class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 19l-7-7 7-7"></path>
         </svg>
         Prev.
     </a>
@@ -53,35 +88,41 @@
             {% if booking_history.number == num %}
                 <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
             {% elif num > booking_history.number|add:'-2' and num < booking_history.number|add:'2' %}
-                <a href="?page={{ num }}" class="btn btn-sm btn-outline btn-secondary">{{ num }}</a>
+                <a href="?page={{ num }}&page_size={{ page_size }}"
+                   class="btn btn-sm btn-outline btn-secondary">
+                    {{ num }}
+                </a>
             {% endif %}
         {% endfor %}
     </div>
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.next_page_number }}" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page={{ booking_history.next_page_number }}&page_size={{ page_size }}"
+       class="btn btn-sm btn-outline btn-secondary">
         Next
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
         </svg>
     </a>
     {% endif %}
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.paginator.num_pages }}" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page={{ booking_history.paginator.num_pages }}&page_size={{ page_size }}"
+       class="btn btn-sm btn-outline btn-secondary">
         Last
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H6"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 5l7 7m0 0l-7 7m7-7H6"></path>
         </svg>
     </a>
     {% endif %}
 </div>
 
-<p class="text-sm text-gray-500 text-center mt-2">
-    Page {{ booking_history.number }} of {{ booking_history.paginator.num_pages }} 
-    ({{ booking_history.paginator.count }} records)
+<p class="text-sm text-base-content/50 text-center mt-2 mb-8">
+    Page {{ booking_history.number }} of {{ booking_history.paginator.num_pages }}
+    ({{ booking_history.paginator.count }} records, {{ page_size }} per page)
 </p>
 {% endif %}
-            
-{% endblock content %}
 
+{% endblock content %}

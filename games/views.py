@@ -366,15 +366,28 @@ def check_username_and_email(request):
 
 @login_required()
 def booking_history(request):
+    page_size = request.GET.get("page_size", 25)
+    try:
+        page_size = int(page_size)
+    except (TypeError, ValueError):
+        page_size = 25
+    page_size = max(5, min(page_size, 100))
+
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
-    paginator = Paginator(found_booking_history, 100)
+    paginator = Paginator(found_booking_history, page_size)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
     return render(
         request,
         "games/booking_history.html",
-        {"booking_history": page_obj},
+        {
+            "booking_history": page_obj,
+            "page_size": page_size,
+            "page_sizes": [10, 25, 50, 100],  # ← DODAJ TO
+        },
     )
+
 
 
 @login_required
