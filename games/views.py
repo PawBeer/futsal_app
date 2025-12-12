@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
-from django.db.models import Count, Q, Max
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -216,10 +216,24 @@ def _apply_transition_from_awaiting_to_confirmed(game):
 @require_POST
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
+
+    if found_game.status != 'Planned' and not request.user.is_superuser:
+        messages.error(request, "Can only change status for Planned games.")
+        return redirect("game_details_url", game_id=game_id)
+
     player_pk = request.POST.get("player_id")
     checked = "on" == request.POST.get("checked")
 
     player = get_object_or_404(Player, pk=player_pk)
+
+    if not (request.user.is_superuser or player.user == request.user):
+        messages.error(request, "You can only change your own status.")
+        return redirect("game_details_url", game_id=game_id)
+
+    if not BookingHistoryForGame.objects.filter(player=player, game=found_game).exists():
+        messages.error(request, "Player not found in this game.")
+        return redirect("game_details_url", game_id=game_id)
+
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.status if current_booking else None
 
