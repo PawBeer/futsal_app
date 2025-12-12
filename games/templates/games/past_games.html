@@ -5,24 +5,35 @@
 {% endblock %}
 
 {% block content %}
-<table class="table">
-    <thead>
-    <tr>
-        <th class="px-1 text-center">Date</th>
-        <th class="px-1 text-center">Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for game in games %}
-        <tr>
-            <td class="px-1 text-center"><a href="{% url 'game_details_url' game_id=game.id %}">{{ game.when|date:'d M Y' }}</a></td>
-            <td class="px-1 text-center">{{ game.status }}</td>
-        </tr>
-    {% empty %}
-        <tr><td colspan="2" class="px-1 text-center py-4 text-gray-500">No games found</td></tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="card shadow-lg mb-8 p-4">
+    <div class="overflow-x-auto">
+        <table class="table w-full">
+            <thead>
+            <tr>
+                <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Date</th>
+                <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for game in games %}
+                <tr class="hover">
+                    <td class="px-1 text-center py-3">
+                        <a href="{% url 'game_details_url' game_id=game.id %}"
+                           class="link link-primary font-medium">
+                            {{ game.when|date:'d M Y' }}
+                        </a>
+                    </td>
+                    <td class="px-1 text-center py-3">{{ game.status }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2" class="px-1 text-center py-4 text-base-content/50">No games found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 {% if games.has_other_pages %}
 <div class="flex justify-center items-center space-x-2 mt-6">
@@ -73,11 +84,10 @@
     {% endif %}
 </div>
 
-<p class="text-sm text-gray-500 text-center mt-2 mb-8">
+<p class="text-sm text-base-content/50 text-center mt-2 mb-8">
     Page {{ games.number }} of {{ games.paginator.num_pages }} 
     ({{ games.paginator.count }} games)
 </p>
 {% endif %}
 
 {% endblock content %}
-

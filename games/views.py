@@ -36,9 +36,14 @@ def next_games(request):
     found_games = (
         Game.objects.filter(when__gte=datetime.today())
         .exclude(status="Played")
+        .select_related()
         .order_by("when")
-        .all()
+        .prefetch_related("bookinghistoryforgame_set")
     )
+
+    for game in found_games:
+        game.number_of_booked_players = game_helper.get_number_of_booked_players(game)
+
     return render(request, "games/next_games.html", {"games": found_games})
 
 
@@ -89,6 +94,29 @@ def game_details(request, game_id):
         )
         cancelled_with_substitutes.append((cancelled_player, substitute))
 
+    today = timezone.now().date()
+    game_date = (
+        found_game.when.date() if hasattr(found_game.when, "date") else found_game.when
+    )
+
+    if game_date < today:
+        active_link = "Past games"
+        active_url = reverse("past_games_url")
+    else:
+        active_link = "Next games"
+        active_url = reverse("next_games_url")
+
+    breadcrumbs = [
+        Breadcrumb(active_url, active_link),
+        Breadcrumb(reverse("game_details_url", args=[found_game.id]), found_game.when),
+    ]
+
+    user_has_reserved_or_confirmed = False
+    if request.user.is_authenticated:
+        user_has_reserved_or_confirmed = any(
+            p.user == request.user for p in reserved_players_for_game
+        ) or any(p.user == request.user for p in confirmed_players_for_game)
+
     return render(
         request,
         "games/game_details.html",
@@ -105,13 +133,8 @@ def game_details(request, game_id):
             "number_of_cancelled_players": len(cancelled_players_for_game),
             "booking_history": found_booking_history,
             "status_options": status_options,
-            "breadcrumbs": [
-                Breadcrumb(reverse("past_games_url"), "Past games"),
-                Breadcrumb(reverse("next_games_url"), "Next games"),
-                Breadcrumb(
-                    reverse("game_details_url", args=[found_game.id]), found_game.when
-                ),
-            ],
+            "breadcrumbs": breadcrumbs,
+            "user_has_reserved_or_confirmed": user_has_reserved_or_confirmed,
         },
     )
 
@@ -159,7 +182,6 @@ def _check_if_empty_slots(game):
 
 
 def _apply_status_change_logic(current_status, checked, game):
-
     status_handler = {
         (PlayerStatus.PLANNED, False): lambda game: PlayerStatus.CANCELLED,
         (PlayerStatus.CANCELLED, True): lambda game: PlayerStatus.PLANNED,
@@ -201,10 +223,26 @@ def _apply_transition_from_awaiting_to_confirmed(game):
 @require_POST
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
+
+    if found_game.status != "Planned" and not request.user.is_superuser:
+        messages.error(request, "Can only change status for Planned games.")
+        return redirect("game_details_url", game_id=game_id)
+
     player_pk = request.POST.get("player_id")
     checked = "on" == request.POST.get("checked")
 
     player = get_object_or_404(Player, pk=player_pk)
+
+    if not (request.user.is_superuser or player.user == request.user):
+        messages.error(request, "You can only change your own status.")
+        return redirect("game_details_url", game_id=game_id)
+
+    if not BookingHistoryForGame.objects.filter(
+        player=player, game=found_game
+    ).exists():
+        messages.error(request, "Player not found in this game.")
+        return redirect("game_details_url", game_id=game_id)
+
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.status if current_booking else None
 
@@ -366,14 +404,26 @@ def check_username_and_email(request):
 
 @login_required()
 def booking_history(request):
+    page_size = request.GET.get("page_size", 25)
+    try:
+        page_size = int(page_size)
+    except (TypeError, ValueError):
+        page_size = 25
+    page_size = max(5, min(page_size, 100))
+
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
-    paginator = Paginator(found_booking_history, 100)
+    paginator = Paginator(found_booking_history, page_size)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
     return render(
         request,
         "games/booking_history.html",
-        {"booking_history": page_obj},
+        {
+            "booking_history": page_obj,
+            "page_size": page_size,
+            "page_sizes": [10, 25, 50, 100],
+        },
     )
 
 

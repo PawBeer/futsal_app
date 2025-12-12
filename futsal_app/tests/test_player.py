@@ -99,12 +99,12 @@ class PlayerModelTests(BaseTestCase):
 
         awaiting_players = get_players_by_status([PlayerStatus.AWAITING], game)
         self.assertEqual(len(awaiting_players), 2)
-        self.assertEqual(awaiting_players[1], reksio)
-        self.assertEqual(awaiting_players[0], new_player1)
-
-        awaiting_players = get_players_by_status(
-            [PlayerStatus.AWAITING], game, order_by="latest_creation_date"
-        )
-        self.assertEqual(len(awaiting_players), 2)
         self.assertEqual(awaiting_players[0], reksio)
         self.assertEqual(awaiting_players[1], new_player1)
+
+        awaiting_players = get_players_by_status(
+            [PlayerStatus.AWAITING], game, order_by="-latest_creation_date"
+        )
+        self.assertEqual(len(awaiting_players), 2)
+        self.assertEqual(awaiting_players[1], reksio)
+        self.assertEqual(awaiting_players[0], new_player1)
