@@ -31,7 +31,6 @@ class Breadcrumb:
         self.label = label
 
 
-
 @login_required
 def next_games(request):
     found_games = (
@@ -94,6 +93,23 @@ def game_details(request, game_id):
             else None
         )
         cancelled_with_substitutes.append((cancelled_player, substitute))
+    today = timezone.now().date()
+    game_date = found_game.when.date() if hasattr(found_game.when, 'date') else found_game.when
+
+    if game_date < today:
+        active_link = "Past games"
+        active_url = reverse("past_games_url")
+    else:
+        active_link = "Next games"
+        active_url = reverse("next_games_url")
+
+    breadcrumbs = [
+        Breadcrumb(active_url, active_link),
+        Breadcrumb(
+            reverse("game_details_url", args=[found_game.id]),
+            found_game.when
+        ),
+    ]
 
     return render(
         request,
@@ -105,19 +121,13 @@ def game_details(request, game_id):
             "confirmed_players_for_game": confirmed_players_for_game,
             "awaiting_players_for_game": awaiting_players_for_game,
             "number_of_booked_players": len(planned_players_for_game)
-            + len(confirmed_players_for_game),
+                                        + len(confirmed_players_for_game),
             "number_of_confirmed_players": len(confirmed_players_for_game),
             "cancelled_with_substitutes": cancelled_with_substitutes,
             "number_of_cancelled_players": len(cancelled_players_for_game),
             "booking_history": found_booking_history,
             "status_options": status_options,
-            "breadcrumbs": [
-                Breadcrumb(reverse("past_games_url"), "Past games"),
-                Breadcrumb(reverse("next_games_url"), "Next games"),
-                Breadcrumb(
-                    reverse("game_details_url", args=[found_game.id]), found_game.when
-                ),
-            ],
+            "breadcrumbs": breadcrumbs,
         },
     )
 
@@ -165,7 +175,6 @@ def _check_if_empty_slots(game):
 
 
 def _apply_status_change_logic(current_status, checked, game):
-
     status_handler = {
         (PlayerStatus.PLANNED, False): lambda game: PlayerStatus.CANCELLED,
         (PlayerStatus.CANCELLED, True): lambda game: PlayerStatus.PLANNED,
@@ -279,9 +288,9 @@ def player_details(request, player_id):
             if profile_form.is_valid():
                 new_username = profile_form.cleaned_data.get("username")
                 if (
-                    User.objects.filter(username=new_username)
-                    .exclude(id=player.user.id)
-                    .exists()
+                        User.objects.filter(username=new_username)
+                                .exclude(id=player.user.id)
+                                .exists()
                 ):
                     messages.error(request, "This username already exists.")
                 else:
@@ -393,7 +402,6 @@ def booking_history(request):
             "page_sizes": [10, 25, 50, 100],  # ← DODAJ TO
         },
     )
-
 
 
 @login_required
