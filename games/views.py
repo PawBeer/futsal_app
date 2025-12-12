@@ -38,7 +38,7 @@ def next_games(request):
         .exclude(status="Played")
         .select_related()
         .order_by("when")
-        .prefetch_related('bookinghistoryforgame_set')
+        .prefetch_related("bookinghistoryforgame_set")
     )
 
     for game in found_games:
@@ -95,7 +95,9 @@ def game_details(request, game_id):
         cancelled_with_substitutes.append((cancelled_player, substitute))
 
     today = timezone.now().date()
-    game_date = found_game.when.date() if hasattr(found_game.when, "date") else found_game.when
+    game_date = (
+        found_game.when.date() if hasattr(found_game.when, "date") else found_game.when
+    )
 
     if game_date < today:
         active_link = "Past games"
@@ -106,19 +108,14 @@ def game_details(request, game_id):
 
     breadcrumbs = [
         Breadcrumb(active_url, active_link),
-        Breadcrumb(
-            reverse("game_details_url", args=[found_game.id]),
-            found_game.when
-        ),
+        Breadcrumb(reverse("game_details_url", args=[found_game.id]), found_game.when),
     ]
 
     user_has_reserved_or_confirmed = False
     if request.user.is_authenticated:
         user_has_reserved_or_confirmed = any(
             p.user == request.user for p in reserved_players_for_game
-        ) or any(
-            p.user == request.user for p in confirmed_players_for_game
-        )
+        ) or any(p.user == request.user for p in confirmed_players_for_game)
 
     return render(
         request,
@@ -130,7 +127,7 @@ def game_details(request, game_id):
             "confirmed_players_for_game": confirmed_players_for_game,
             "awaiting_players_for_game": awaiting_players_for_game,
             "number_of_booked_players": len(planned_players_for_game)
-                                        + len(confirmed_players_for_game),
+            + len(confirmed_players_for_game),
             "number_of_confirmed_players": len(confirmed_players_for_game),
             "cancelled_with_substitutes": cancelled_with_substitutes,
             "number_of_cancelled_players": len(cancelled_players_for_game),
@@ -140,7 +137,6 @@ def game_details(request, game_id):
             "user_has_reserved_or_confirmed": user_has_reserved_or_confirmed,
         },
     )
-
 
 
 @login_required
@@ -228,7 +224,7 @@ def _apply_transition_from_awaiting_to_confirmed(game):
 def game_player_status_update(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
 
-    if found_game.status != 'Planned' and not request.user.is_superuser:
+    if found_game.status != "Planned" and not request.user.is_superuser:
         messages.error(request, "Can only change status for Planned games.")
         return redirect("game_details_url", game_id=game_id)
 
@@ -241,7 +237,9 @@ def game_player_status_update(request, game_id):
         messages.error(request, "You can only change your own status.")
         return redirect("game_details_url", game_id=game_id)
 
-    if not BookingHistoryForGame.objects.filter(player=player, game=found_game).exists():
+    if not BookingHistoryForGame.objects.filter(
+        player=player, game=found_game
+    ).exists():
         messages.error(request, "Player not found in this game.")
         return redirect("game_details_url", game_id=game_id)
 
@@ -313,9 +311,9 @@ def player_details(request, player_id):
             if profile_form.is_valid():
                 new_username = profile_form.cleaned_data.get("username")
                 if (
-                        User.objects.filter(username=new_username)
-                                .exclude(id=player.user.id)
-                                .exists()
+                    User.objects.filter(username=new_username)
+                    .exclude(id=player.user.id)
+                    .exists()
                 ):
                     messages.error(request, "This username already exists.")
                 else:

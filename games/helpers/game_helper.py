@@ -54,23 +54,19 @@ def get_total_players_for_game(game: Game) -> int:
         .count()
     )
 
+
 def get_number_of_booked_players(game):
     """Number of players with resent status PLANNED/CONFIRMED"""
     latest_bookings = (
-        BookingHistoryForGame.objects
-        .filter(game=game)
-        .values('player')
-        .annotate(latest_date=Max('creation_date'))
-        .values_list('latest_date', flat=True)
+        BookingHistoryForGame.objects.filter(game=game)
+        .values("player")
+        .annotate(latest_date=Max("creation_date"))
+        .values_list("latest_date", flat=True)
     )
 
-    booked_count = (
-        BookingHistoryForGame.objects
-        .filter(
-            game=game,
-            status__in=[PlayerStatus.PLANNED, PlayerStatus.CONFIRMED],
-            creation_date__in=latest_bookings
-        )
-        .count()
-    )
+    booked_count = BookingHistoryForGame.objects.filter(
+        game=game,
+        status__in=[PlayerStatus.PLANNED, PlayerStatus.CONFIRMED],
+        creation_date__in=latest_bookings,
+    ).count()
     return booked_count
