@@ -93,8 +93,9 @@ def game_details(request, game_id):
             else None
         )
         cancelled_with_substitutes.append((cancelled_player, substitute))
+
     today = timezone.now().date()
-    game_date = found_game.when.date() if hasattr(found_game.when, 'date') else found_game.when
+    game_date = found_game.when.date() if hasattr(found_game.when, "date") else found_game.when
 
     if game_date < today:
         active_link = "Past games"
@@ -110,6 +111,14 @@ def game_details(request, game_id):
             found_game.when
         ),
     ]
+
+    user_has_reserved_or_confirmed = False
+    if request.user.is_authenticated:
+        user_has_reserved_or_confirmed = any(
+            p.user == request.user for p in reserved_players_for_game
+        ) or any(
+            p.user == request.user for p in confirmed_players_for_game
+        )
 
     return render(
         request,
@@ -128,8 +137,10 @@ def game_details(request, game_id):
             "booking_history": found_booking_history,
             "status_options": status_options,
             "breadcrumbs": breadcrumbs,
+            "user_has_reserved_or_confirmed": user_has_reserved_or_confirmed,
         },
     )
+
 
 
 @login_required

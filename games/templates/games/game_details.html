@@ -65,7 +65,7 @@
                                   class="textarea textarea-bordered w-full resize-vertical">{{ game.description }}</textarea>
                     {% else %}
                         <div class="font-medium text-base-content/90 bg-base-200 px-4 py-3 rounded-lg cursor-default select-none min-h-[100px] flex items-start leading-relaxed pt-2">
-                            {{ game.description|default:"No description" }}
+                            {{ game.description|default:"Upcoming futsal match" }}
                         </div>
                     {% endif %}
                 </div>
@@ -128,7 +128,7 @@
                                         </a>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-ghost">–</span>
+                                        <span class="badge badge-ghost"></span>
                                     </td>
                                 </tr>
                             </form>
@@ -179,8 +179,8 @@
                 </div>
             </div>
 
-            <!-- Reserved/Confirmed players - dla superuser LUB gracza z odpowiednim statusem -->
-            {% if user.is_superuser or reserved_players_for_game|length > 0 %}
+            <!-- Reserved/Confirmed players - tylko dla superuser lub gracza z reserved/confirmed -->
+{% if user.is_superuser or user_has_reserved_or_confirmed %}
                 <div class="divide-y divide-base-200">
                     <div class="bg-base-200 px-6 py-4 rounded-t-xl">
                         <h3 class="text-xl font-semibold text-base-content text-center">Reserve List</h3>
