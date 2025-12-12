@@ -10,7 +10,13 @@
             <div class="card bg-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer" data-tile-id="{{ game.id }}">
                 <a href="{% url 'game_details_url' game_id=game.id %}" class="block w-full h-full">
                     <div class="card-body p-6">
-                        <h2 class="card-title text-primary text-xl">{{ game.when|date:'d M Y' }}</h2>
+                        <h2 class="card-title text-primary text-xl">{{ game.when|date:'d M Y' }}
+                        {% if game.status == 'Cancelled' %}
+                                <div class="badge badge-error badge-lg px-4 py-2 shadow-lg text-error-content font-bold tracking-wide">
+                                    CANCELLED
+                                </div>                            
+                        {% endif %}
+                        </h2>
                         <p class="text-sm text-gray-600">{{ game.description|default:"Upcoming futsal match" }}</p>
                         {% if user.is_authenticated and user.is_superuser %}
                             <div class="card-actions justify-end mt-4">
