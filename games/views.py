@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -31,14 +31,20 @@ class Breadcrumb:
         self.label = label
 
 
+
 @login_required
 def next_games(request):
     found_games = (
         Game.objects.filter(when__gte=datetime.today())
         .exclude(status="Played")
+        .select_related()
         .order_by("when")
-        .all()
+        .prefetch_related('bookinghistoryforgame_set')
     )
+
+    for game in found_games:
+        game.number_of_booked_players = game_helper.get_number_of_booked_players(game)
+
     return render(request, "games/next_games.html", {"games": found_games})
 
 
