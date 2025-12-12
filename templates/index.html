@@ -11,162 +11,205 @@
 <body class="dark text-gray-700">
 
 <div class="flex items-center justify-between p-4 bg-base-100 shadow-sm lg:hidden">
-  <div class="flex-none">
-    <input type="checkbox" id="mobile-menu-toggle" class="hidden" />
-    <label for="mobile-menu-toggle" class="btn btn-square btn-ghost" aria-controls="mobile-menu" aria-expanded="false" role="button" tabindex="0">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           class="inline-block w-6 h-6 stroke-gray-900 dark:stroke-gray-100"
-           fill="none" viewBox="0 0 24 24" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </label>
-      <a href="{% url 'next_games_url' %}" class="flex-shrink-0">
-    <div class="avatar w-16">
-      <img class="object-contain w-full h-auto" src="{% static 'img/logo_FutsalApp.png' %}" alt="Futsal Logo" />
+    <div class="flex-none">
+        <input type="checkbox" id="mobile-menu-toggle" class="hidden"/>
+        <label for="mobile-menu-toggle" class="btn btn-square btn-ghost" aria-controls="mobile-menu"
+               aria-expanded="false" role="button" tabindex="0">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="inline-block w-6 h-6 stroke-gray-900 dark:stroke-gray-100"
+                 fill="none" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </label>
+        <a href="{% url 'next_games_url' %}" class="flex-shrink-0">
+            <div class="avatar w-16">
+                <img class="object-contain w-full h-auto" src="{% static 'img/logo_FutsalApp.png' %}"
+                     alt="Futsal Logo"/>
+            </div>
+        </a>
     </div>
-  </a>
-  </div>
 
-  <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-15 rounded-full">
-          <img alt="logo" src="{% static 'img/logo.jpg' %}" />
+    <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+            <div class="w-15 rounded-full">
+                <img alt="logo" src="{% static 'img/logo.jpg' %}"/>
+            </div>
         </div>
-      </div>
-      <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li>{{ user.get_username }}</li>
-        {% if not user.is_authenticated %}
-          <li><a href="{% url 'login_url' %}"><button>Log in</button></a></li>
-        {% endif %}
-        {% if user.is_authenticated %}
-          <li>
-            <form method="post" action="{% url 'logout_url' %}">
-              {% csrf_token %}
-              <button>Log out</button>
-            </form>
-            <form method="post" action="{% url 'password_change' %}">
-              {% csrf_token %}
-              <button>Change Password</button>
-            </form>
-          </li>
-        {% endif %}
-      </ul>
+        <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+            <li>{{ user.get_username }}</li>
+            {% if not user.is_authenticated %}
+                <li><a href="{% url 'login_url' %}">
+                    <button>Log in</button>
+                </a></li>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <li>
+                    <form method="post" action="{% url 'logout_url' %}">
+                        {% csrf_token %}
+                        <button>Log out</button>
+                    </form>
+                    <form method="post" action="{% url 'password_change' %}">
+                        {% csrf_token %}
+                        <button>Change Password</button>
+                    </form>
+                </li>
+            {% endif %}
+        </ul>
     </div>
 </div>
 
 <div id="mobile-menu" class="hidden bg-base-100 p-4 lg:hidden">
-  <a href="{% url 'next_games_url' %}" class="block py-2 border-b">Next games</a>
-  {% if user.is_authenticated %}
-    <a href="{% url 'all_players_url' %}" class="block py-2 border-b">Players</a>
-  {% endif %}
-  <a href="{% url 'past_games_url' %}" class="block py-2 border-b">Past games</a>
-  <a href="{% url 'add_absence_url' %}" class="block py-2 border-b">Add absence</a>
-  {% if user.is_authenticated and user.is_superuser %}
-    <a href="{% url 'booking_history_url' %}" class="block py-2 border-b">Booking history</a>
-    <a href="{% url 'add_game_url' %}" class="block py-2 border-b">Add game</a>
-    <a href="{% url 'add_player_url' %}" class="block py-2 border-b">Add player</a>
-  {% endif %}
+    <a href="{% url 'next_games_url' %}" class="block py-2 border-b">Next games</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'all_players_url' %}" class="block py-2 border-b">Players</a>
+    {% endif %}
+    <a href="{% url 'past_games_url' %}" class="block py-2 border-b">Past games</a>
+    <a href="{% url 'add_absence_url' %}" class="block py-2 border-b">Add absence</a>
+    {% if user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'booking_history_url' %}" class="block py-2 border-b">Booking history</a>
+        <a href="{% url 'add_game_url' %}" class="block py-2 border-b">Add game</a>
+        <a href="{% url 'add_player_url' %}" class="block py-2 border-b">Add player</a>
+    {% endif %}
 </div>
 
 <div class="navbar bg-base-100 shadow-sm p-4 mb-4 hidden lg:flex">
-  <div class="flex-1">
-    <a class="mx-2" href="{% url 'next_games_url' %}">
-      <div class="avatar w-24">
-        <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar" />
-      </div>
-    </a>
-    <a href="{% url 'next_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next games</a>
-    {% if user.is_authenticated %}
-      <a href="{% url 'all_players_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
-    <a href="{% url 'past_games_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past games</a>
-    <a href="{% url 'add_absence_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_absence_url' %}btn-active border-accent-content{% endif %}">Add absence</a>
-        {% endif %}
-{% if user.is_authenticated and user.is_superuser %}
-      <a href="{% url 'booking_history_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active border-accent-content{% endif %}">Booking history</a>
-    {% endif %}
-  </div>
-  <div class="flex gap-2 ml-auto">
-    {% if user.is_authenticated and user.is_superuser %}
-      <a href="{% url 'add_game_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_url' %}btn-active border-accent-content{% endif %}">Add game</a>
-      <a href="{% url 'add_player_url' %}" class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_url' %}btn-active border-accent-content{% endif %}">Add player</a>
-    {% endif %}
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-15 rounded-full">
-          <img alt="logo" src="{% static 'img/logo.jpg' %}" />
-        </div>
-      </div>
-      <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        <li>{{ user.get_username }}</li>
-        {% if not user.is_authenticated %}
-          <li><a href="{% url 'login_url' %}"><button>Log in</button></a></li>
-        {% endif %}
+    <div class="flex-1">
+        <a class="mx-2" href="{% url 'next_games_url' %}">
+            <div class="avatar w-24">
+                <img src="{% static 'img/logo_FutsalApp.png' %}" alt="Avatar"/>
+            </div>
+        </a>
+        <a href="{% url 'next_games_url' %}"
+           class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next
+            games</a>
         {% if user.is_authenticated %}
-          <li>
-            <form method="post" action="{% url 'logout_url' %}">
-              {% csrf_token %}
-              <button>Log out</button>
-            </form>
-            <form method="post" action="{% url 'password_change' %}">
-              {% csrf_token %}
-              <button>Change Password</button>
-            </form>
-          </li>
+            <a href="{% url 'all_players_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
+            <a href="{% url 'past_games_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past
+                games</a>
+            <a href="{% url 'add_absence_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_absence_url' %}btn-active border-accent-content{% endif %}">Add
+                absence</a>
         {% endif %}
-      </ul>
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'booking_history_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'booking_history_url' %}btn-active border-accent-content{% endif %}">Booking
+                history</a>
+        {% endif %}
     </div>
-  </div>
+    <div class="flex gap-2 ml-auto">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'add_game_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_url' %}btn-active border-accent-content{% endif %}">Add
+                game</a>
+            <a href="{% url 'add_player_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_player_url' %}btn-active border-accent-content{% endif %}">Add
+                player</a>
+        {% endif %}
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                <div class="w-15 rounded-full">
+                    <img alt="logo" src="{% static 'img/logo.jpg' %}"/>
+                </div>
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                <li>{{ user.get_username }}</li>
+                {% if not user.is_authenticated %}
+                    <li><a href="{% url 'login_url' %}">
+                        <button>Log in</button>
+                    </a></li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <li>
+                        <form method="post" action="{% url 'logout_url' %}">
+                            {% csrf_token %}
+                            <button>Log out</button>
+                        </form>
+                        <form method="post" action="{% url 'password_change' %}">
+                            {% csrf_token %}
+                            <button>Change Password</button>
+                        </form>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </div>
 
 {% if breadcrumbs %}
-  <div class="breadcrumbs text-sm px-10">
-    <ul>
-      {% for b in breadcrumbs %}
-        <li><a href="{{ b.path }}">{{ b.label }}</a></li>
-      {% endfor %}
-    </ul>
-  </div>
+    <div class="breadcrumbs text-sm px-10">
+        <nav class="breadcrumbs text-sm mb-8">
+            {% for breadcrumb in breadcrumbs %}
+                {% if forloop.last %}
+                    <span class="font-semibold text-base-content">{{ breadcrumb.label }}</span>
+                {% else %}
+                    <a href="{{ breadcrumb.path }}" class="link link-hover text-base-content/70">
+                        {{ breadcrumb.label }}
+                    </a>
+                    {% if not forloop.last %} > {% endif %}
+                {% endif %}
+            {% endfor %}
+        </nav>
+
+    </div>
 {% endif %}
 
 
 
 <div class="mx-auto px-2 my-12">
-  {% block content %}
-  {% endblock %}
+    {% block content %}
+    {% endblock %}
 </div>
 
 {% if messages %}
-  <div class="px-4">
-    {% for message in messages %}
-      <div class="alert mb-4 {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %} shadow-lg">
-        <div class="flex items-center">
-          {% if message.tags == 'error' %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {% elif message.tags == 'success' %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {% elif message.tags == 'warning' %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-          {% elif message.tags == 'info' %}
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {% endif %}
-          <span>{{ message }}</span>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+    <div class="px-4">
+        {% for message in messages %}
+            <div class="alert mb-4 {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %} shadow-lg">
+                <div class="flex items-center">
+                    {% if message.tags == 'error' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    {% elif message.tags == 'success' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    {% elif message.tags == 'warning' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    {% elif message.tags == 'info' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endif %}
 
 <footer class="text-xs text-right p-2">Futsal App v0.1.2</footer>
 
 <script>
-  document.getElementById('mobile-menu-toggle').addEventListener('change', function () {
-    const menu = document.getElementById('mobile-menu');
-    if (this.checked) {
-      menu.classList.remove('hidden');
-    } else {
-      menu.classList.add('hidden');
-    }
-  });
+    document.getElementById('mobile-menu-toggle').addEventListener('change', function () {
+        const menu = document.getElementById('mobile-menu');
+        if (this.checked) {
+            menu.classList.remove('hidden');
+        } else {
+            menu.classList.add('hidden');
+        }
+    });
 </script>
 </body>
 </html>
