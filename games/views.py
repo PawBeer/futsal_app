@@ -422,7 +422,7 @@ def booking_history(request):
         {
             "booking_history": page_obj,
             "page_size": page_size,
-            "page_sizes": [10, 25, 50, 100],  # ← DODAJ TO
+            "page_sizes": [10, 25, 50, 100],
         },
     )
 
