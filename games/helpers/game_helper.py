@@ -1,10 +1,11 @@
 from django.db.models import OuterRef, Subquery
+from django.db.models import Max
 
 from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 
 def get_players_by_status(
-    statuses: list[str], game: Game, order_by="-latest_creation_date"
+    statuses: list[str], game: Game, order_by="latest_creation_date"
 ) -> list[Player]:
     """
     Returns players filtered by their latest booking status,
@@ -52,3 +53,20 @@ def get_total_players_for_game(game: Game) -> int:
         .distinct()
         .count()
     )
+
+
+def get_number_of_booked_players(game):
+    """Number of players with resent status PLANNED/CONFIRMED"""
+    latest_bookings = (
+        BookingHistoryForGame.objects.filter(game=game)
+        .values("player")
+        .annotate(latest_date=Max("creation_date"))
+        .values_list("latest_date", flat=True)
+    )
+
+    booked_count = BookingHistoryForGame.objects.filter(
+        game=game,
+        status__in=[PlayerStatus.PLANNED, PlayerStatus.CONFIRMED],
+        creation_date__in=latest_bookings,
+    ).count()
+    return booked_count
