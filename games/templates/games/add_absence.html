@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-
+{% load player_extras %}
 {% block page_title %}
     Add Absence
 {% endblock %}
@@ -24,7 +24,7 @@
                         {% for player in players %}
                             <option value="{{ player.id }}"
                                     {% if player.user.username == user.get_username %}selected{% endif %}>
-                                {{ player.user.username }}
+                                {{ player|get_display_name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -33,10 +33,7 @@
                         {% if player.user.username == user.get_username %}
                             <div class="flex items-center gap-3 p-4 bg-base-200 rounded-xl border border-base-300 mx-auto max-w-sm">
                                 <div class="w-10 h-10 bg-base-300 rounded-full flex items-center justify-center font-semibold text-base-content text-sm">
-                                    {{ player.user.username.0|upper }}
-                                </div>
-                                <div class="text-left">
-                                    <div class="font-semibold text-base-content">{{ player.user.username }}</div>
+                                    {{ player|get_display_name }}
                                 </div>
                             </div>
                             <input type="hidden" name="player" value="{{ player.id }}">
@@ -83,7 +80,6 @@
                         {% if forloop.last %}
                             <div class="p-4 bg-base-200 rounded-xl border border-base-300 flex items-center justify-between mx-auto max-w-sm">
                                 <span class="font-semibold text-base-content">{{ label }}</span>
-                                <span class="badge badge-outline badge-warning">Pending</span>
                             </div>
                             <input type="hidden" name="status" value="{{ key }}">
                         {% endif %}
@@ -123,7 +119,7 @@
         <tbody>
         {% for record in status %}
             <tr>
-                <td>{{ record.player.user.username }}</td>
+                <td>{{ record.player|get_display_name }}</td>
                 <td>{{ record.date_start }}</td>
                 <td>{{ record.date_end }}</td>
                 <td>{{ record.status }}</td>
