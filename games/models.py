@@ -49,6 +49,7 @@ class Game(models.Model):
         return f"{self.when} - {self.status}"
 
 
+# pylint: disable=too-many-ancestors
 class StatusChoices(models.TextChoices):
     PLANNED = "planned", "Planned"
     CANCELLED = "cancelled", "Cancelled"
@@ -57,6 +58,11 @@ class StatusChoices(models.TextChoices):
     RESTING = "resting", "Resting"
     # the player is happy to play (responded positive) but the booking is not yet confirmed
     AWAITING = "awaiting", "Awaiting"
+
+    @classmethod
+    def filtered_choices(cls, *, exclude=None):
+        exclude = set(exclude or [])
+        return [(value, label) for value, label in cls.choices if value not in exclude]
 
 
 class PlayerStatus(models.Model):

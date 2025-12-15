@@ -593,7 +593,9 @@ def add_absence(request):
         "games/add_absence.html",
         {
             "players": players,
-            "status_choices": StatusChoices.choices,
+            "status_choices": StatusChoices.filtered_choices(
+                exclude=[StatusChoices.AWAITING]
+            ),
             "status": status_page_obj,
         },
     )
