@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -10,7 +11,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.paginator import Paginator
 
 from games.forms import PlayerProfileForm
 from games.helpers import game_helper, player_helper
@@ -20,7 +20,16 @@ from games.mailer import (
     send_welcome_email,
 )
 
-from .models import BookingHistoryForGame, Game, Player, PlayerStatus, User
+from .models import (
+    BookingHistoryForGame,
+    Game,
+    GameStatus,
+    Player,
+    PlayerRole,
+    PlayerStatus,
+    StatusChoices,
+    User,
+)
 
 User = get_user_model()
 
@@ -50,7 +59,7 @@ def next_games(request):
 @login_required
 def past_games(request):
     found_games = (
-        Game.objects.filter(Q(when__lt=datetime.today()) | Q(status="Played"))
+        Game.objects.filter(Q(when__lt=datetime.today()) | Q(status=GameStatus.PLAYED))
         .order_by("-when")
         .all()
     )
@@ -65,25 +74,24 @@ def game_details(request, game_id):
     found_game = get_object_or_404(Game, id=game_id)
 
     planned_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.PLANNED], found_game
+        [StatusChoices.PLANNED], found_game
     )
     cancelled_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.CANCELLED], found_game
+        [StatusChoices.CANCELLED], found_game
     )
     reserved_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.RESERVED], found_game
+        [StatusChoices.RESERVED], found_game
     )
     confirmed_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.CONFIRMED], found_game
+        [StatusChoices.CONFIRMED], found_game
     )
     awaiting_players_for_game = game_helper.get_players_by_status(
-        [PlayerStatus.AWAITING], found_game, order_by="latest_creation_date"
+        [StatusChoices.AWAITING], found_game, order_by="latest_creation_date"
     )
 
     found_booking_history = BookingHistoryForGame.objects.filter(
         game=found_game
     ).order_by("-creation_date")
-    status_options = [choice[0] for choice in Game.STATUS_CHOICES]
 
     cancelled_with_substitutes = []
     for idx, cancelled_player in enumerate(cancelled_players_for_game):
@@ -132,7 +140,7 @@ def game_details(request, game_id):
             "cancelled_with_substitutes": cancelled_with_substitutes,
             "number_of_cancelled_players": len(cancelled_players_for_game),
             "booking_history": found_booking_history,
-            "status_options": status_options,
+            "status_options": GameStatus.labels,
             "breadcrumbs": breadcrumbs,
             "user_has_reserved_or_confirmed": user_has_reserved_or_confirmed,
         },
@@ -169,27 +177,27 @@ def game_status_update(request, game_id):
 def _check_if_empty_slots(game):
     # function to determine if there are empty slots
     cancelled_count = len(
-        game_helper.get_players_by_status([PlayerStatus.CANCELLED], game)
+        game_helper.get_players_by_status([StatusChoices.CANCELLED], game)
     )
     confirmed_count = len(
-        game_helper.get_players_by_status([PlayerStatus.CONFIRMED], game)
+        game_helper.get_players_by_status([StatusChoices.CONFIRMED], game)
     )
 
     if cancelled_count > confirmed_count:
-        return PlayerStatus.CONFIRMED
+        return StatusChoices.CONFIRMED
 
-    return PlayerStatus.AWAITING
+    return StatusChoices.AWAITING
 
 
 def _apply_status_change_logic(current_status, checked, game):
     status_handler = {
-        (PlayerStatus.PLANNED, False): lambda game: PlayerStatus.CANCELLED,
-        (PlayerStatus.CANCELLED, True): lambda game: PlayerStatus.PLANNED,
-        (PlayerStatus.RESERVED, True): lambda game: PlayerStatus.AWAITING,
-        (PlayerStatus.AWAITING, True): _check_if_empty_slots,
-        (PlayerStatus.AWAITING, False): lambda game: PlayerStatus.RESERVED,
-        (PlayerStatus.CONFIRMED, False): lambda game: PlayerStatus.RESERVED,
-        (PlayerStatus.PLANNED, True): lambda game: PlayerStatus.PLANNED,
+        (StatusChoices.PLANNED, False): lambda game: StatusChoices.CANCELLED,
+        (StatusChoices.CANCELLED, True): lambda game: StatusChoices.PLANNED,
+        (StatusChoices.RESERVED, True): lambda game: StatusChoices.AWAITING,
+        (StatusChoices.AWAITING, True): _check_if_empty_slots,
+        (StatusChoices.AWAITING, False): lambda game: StatusChoices.RESERVED,
+        (StatusChoices.CONFIRMED, False): lambda game: StatusChoices.RESERVED,
+        (StatusChoices.PLANNED, True): lambda game: StatusChoices.PLANNED,
     }
     try:
         return status_handler[(current_status, checked)](game)
@@ -199,23 +207,23 @@ def _apply_status_change_logic(current_status, checked, game):
 
 def _apply_transition_from_awaiting_to_confirmed(game):
     awaiting_players = game_helper.get_players_by_status(
-        [PlayerStatus.AWAITING], game, order_by="latest_creation_date"
+        [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
     if len(awaiting_players) > 0:
 
-        if PlayerStatus.CONFIRMED == _check_if_empty_slots(game):
+        if StatusChoices.CONFIRMED == _check_if_empty_slots(game):
             player_to_confirm = awaiting_players[0]
             BookingHistoryForGame.objects.create(
                 player=player_to_confirm,
                 game=game,
-                status=PlayerStatus.CONFIRMED,
+                status=StatusChoices.CONFIRMED,
                 creation_date=timezone.now(),
             )
             send_player_status_update_email(
-                player_to_confirm, game, PlayerStatus.CONFIRMED
+                player_to_confirm, game, StatusChoices.CONFIRMED
             )
             send_player_status_update_email_to_admins(
-                player_to_confirm, game, PlayerStatus.CONFIRMED
+                player_to_confirm, game, StatusChoices.CONFIRMED
             )
 
 
@@ -270,9 +278,9 @@ def all_players(request):
 
     stat_counts = Player.objects.aggregate(
         total_players=Count("id"),
-        permanent_players=Count("id", filter=Q(role=Player.ROLE_PERMANENT)),
-        active_players=Count("id", filter=Q(role=Player.ROLE_ACTIVE)),
-        inactive_players=Count("id", filter=Q(role=Player.ROLE_INACTIVE)),
+        permanent_players=Count("id", filter=Q(role=PlayerRole.PERMANENT)),
+        active_players=Count("id", filter=Q(role=PlayerRole.ACTIVE)),
+        inactive_players=Count("id", filter=Q(role=PlayerRole.INACTIVE)),
     )
 
     players = Player.objects.all()
@@ -343,10 +351,12 @@ def player_details(request, player_id):
         "games/player_details.html",
         {
             "player": player,
+            "player_role_choices": PlayerRole.choices,
             "breadcrumbs": [
                 Breadcrumb(reverse("all_players_url"), "All Players"),
                 Breadcrumb(
-                    reverse("player_details_url", args=[player.id]), player.user
+                    reverse("player_details_url", args=[player.id]),
+                    player_helper.get_display_name(player),
                 ),
             ],
         },
@@ -379,7 +389,7 @@ def add_player(request):
             messages.error(request, "Invalid data: " + "; ".join(errors))
 
     context = {
-        "role_choices": Player.ROLE_CHOICES,
+        "role_choices": PlayerRole.choices,
     }
     return render(request, "games/add_player.html", context)
 
@@ -433,21 +443,21 @@ def add_game(request):
     if request.method == "POST":
         game = Game.objects.create(
             when=datetime.strptime(request.POST.get("when", ""), "%Y-%m-%d"),
-            status=request.POST.get("status", Game.PLANNED),
+            status=request.POST.get("status", GameStatus.PLANNED),
             description=request.POST.get("description", ""),
         )
         if request.POST.get("set_players"):
-            permanent_players = Player.objects.filter(role=Player.ROLE_PERMANENT)
-            active_players = Player.objects.filter(role=Player.ROLE_ACTIVE)
+            permanent_players = Player.objects.filter(role=PlayerRole.PERMANENT)
+            active_players = Player.objects.filter(role=PlayerRole.ACTIVE)
 
             for player in permanent_players:
                 BookingHistoryForGame.objects.create(
-                    game=game, player=player, status=PlayerStatus.PLANNED
+                    game=game, player=player, status=StatusChoices.PLANNED
                 )
 
             for player in active_players:
                 BookingHistoryForGame.objects.create(
-                    game=game, player=player, status=PlayerStatus.RESERVED
+                    game=game, player=player, status=StatusChoices.RESERVED
                 )
 
             psm_list = PlayerStatus.objects.all().order_by("date_start")
@@ -455,7 +465,7 @@ def add_game(request):
 
             for psm in psm_list:
                 if psm.date_start <= game_date <= psm.date_end:
-                    if psm.status == PlayerStatus.RESTING:
+                    if psm.status == StatusChoices.RESTING:
                         games_in_range = Game.objects.filter(
                             when__gte=psm.date_start, when__lte=psm.date_end
                         )
@@ -471,15 +481,15 @@ def add_game(request):
                             if latest_booking:
                                 current_status_key = latest_booking.status
                                 if current_status_key in [
-                                    PlayerStatus.PLANNED,
-                                    PlayerStatus.CANCELLED,
+                                    StatusChoices.PLANNED,
+                                    StatusChoices.CANCELLED,
                                 ]:
-                                    new_status = PlayerStatus.CANCELLED
+                                    new_status = StatusChoices.CANCELLED
                                 elif current_status_key in [
-                                    PlayerStatus.CONFIRMED,
-                                    PlayerStatus.RESERVED,
+                                    StatusChoices.CONFIRMED,
+                                    StatusChoices.RESERVED,
                                 ]:
-                                    new_status = PlayerStatus.RESERVED
+                                    new_status = StatusChoices.RESERVED
                                 else:
                                     new_status = psm.status
                             else:
@@ -499,7 +509,7 @@ def add_game(request):
         request,
         "games/add_game.html",
         {
-            "role_choices": Game.STATUS_CHOICES,
+            "role_choices": GameStatus.choices,
         },
     )
 
@@ -536,7 +546,7 @@ def add_absence(request):
                 when__gte=date_start, when__lte=date_end
             )
 
-            resting_status_key = PlayerStatus.RESTING
+            resting_status_key = StatusChoices.RESTING
 
             for game in games_in_range:
                 latest_booking = (
@@ -548,15 +558,15 @@ def add_absence(request):
                 if status == resting_status_key and latest_booking:
                     current_status_key = latest_booking.status
                     if current_status_key in [
-                        PlayerStatus.PLANNED,
-                        PlayerStatus.CANCELLED,
+                        StatusChoices.PLANNED,
+                        StatusChoices.CANCELLED,
                     ]:
-                        new_status = PlayerStatus.CANCELLED
+                        new_status = StatusChoices.CANCELLED
                     elif current_status_key in [
-                        PlayerStatus.CONFIRMED,
-                        PlayerStatus.RESERVED,
+                        StatusChoices.CONFIRMED,
+                        StatusChoices.RESERVED,
                     ]:
-                        new_status = PlayerStatus.RESERVED
+                        new_status = StatusChoices.RESERVED
                     else:
                         new_status = status
                 else:
@@ -583,7 +593,7 @@ def add_absence(request):
         "games/add_absence.html",
         {
             "players": players,
-            "status_choices": PlayerStatus.STATUS_CHOICES,
+            "status_choices": StatusChoices.choices,
             "status": status_page_obj,
         },
     )

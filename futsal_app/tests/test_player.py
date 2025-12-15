@@ -1,10 +1,17 @@
 from unittest.mock import patch
 
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from games.helpers.game_helper import get_players_by_status
-from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
+from games.models import (
+    BookingHistoryForGame,
+    Game,
+    GameStatus,
+    Player,
+    PlayerRole,
+    StatusChoices,
+)
 
 from .base import BaseTestCase
 
@@ -16,9 +23,9 @@ class PlayerModelTests(BaseTestCase):
     def test_players_various_roles(self):
 
         self.assertEqual(Player.objects.all().count(), 4)
-        self.assertEqual(Player.objects.filter(role=Player.ROLE_PERMANENT).count(), 3)
-        self.assertEqual(Player.objects.filter(role=Player.ROLE_INACTIVE).count(), 0)
-        self.assertEqual(Player.objects.filter(role=Player.ROLE_ACTIVE).count(), 1)
+        self.assertEqual(Player.objects.filter(role=PlayerRole.PERMANENT).count(), 3)
+        self.assertEqual(Player.objects.filter(role=PlayerRole.INACTIVE).count(), 0)
+        self.assertEqual(Player.objects.filter(role=PlayerRole.ACTIVE).count(), 1)
 
     @patch("games.views.send_welcome_email")
     def test_player_details_send_welcome_email(self, mock_send_welcome_email):
@@ -40,7 +47,7 @@ class PlayerModelTests(BaseTestCase):
             "last_name": "Player",
             "email": "player@example.com",
             "mobile_number": "123456789",
-            "role": Player.ROLE_ACTIVE,
+            "role": PlayerRole.ACTIVE,
         }
         self.client.force_login(self.superuser)
         url = reverse("add_player_url")
@@ -49,7 +56,7 @@ class PlayerModelTests(BaseTestCase):
         new_player = Player.objects.get(user__username="newplayer")
         self.assertIsNotNone(new_player)
         self.assertEqual(new_player.mobile_number, "123456789")
-        self.assertEqual(new_player.role, Player.ROLE_ACTIVE)
+        self.assertEqual(new_player.role, PlayerRole.ACTIVE)
 
     def test_update_player_view(self):
         tola = Player.objects.get(user__username="tola")
@@ -58,7 +65,7 @@ class PlayerModelTests(BaseTestCase):
             "username": tola.user.username,  # username is not changed
             "email": tola.user.email,  # email is not changed
             "mobile_number": "987654321",  # tola's current is "123456789"
-            "role": Player.ROLE_INACTIVE,  # changing from Permanent to Inactive
+            "role": PlayerRole.INACTIVE,  # changing from Permanent to Inactive
         }
         self.client.force_login(self.superuser)
         url = reverse("player_details_url", kwargs={"player_id": tola.id})
@@ -66,7 +73,7 @@ class PlayerModelTests(BaseTestCase):
         self.assertEqual(response.status_code, 302)
         updated_tola = Player.objects.get(user__username="tola")
         self.assertEqual(updated_tola.mobile_number, "987654321")
-        self.assertEqual(updated_tola.role, Player.ROLE_INACTIVE)
+        self.assertEqual(updated_tola.role, PlayerRole.INACTIVE)
 
     def _create_user_and_player(self, username: str, role: str) -> Player:
         user = User.objects.create_user(username=username, password="testpass")
@@ -86,25 +93,25 @@ class PlayerModelTests(BaseTestCase):
     def test_awaiting_players_are_picked_in_fifo_order(self):
 
         new_player1 = self._create_user_and_player(
-            "some_new_player_1", Player.ROLE_ACTIVE
+            "some_new_player_1", PlayerRole.ACTIVE
         )
         game = Game.objects.create(
-            when="2024-07-01", description="just a test game", status=Game.PLANNED
+            when="2024-07-01", description="just a test game", status=GameStatus.PLANNED
         )
         # we should have now 3 planned and 2 reserved player
 
         reksio = Player.objects.get(user__username="reksio")
 
-        self._change_player_status_for_game(reksio, game, PlayerStatus.AWAITING)
-        self._change_player_status_for_game(new_player1, game, PlayerStatus.AWAITING)
+        self._change_player_status_for_game(reksio, game, StatusChoices.AWAITING)
+        self._change_player_status_for_game(new_player1, game, StatusChoices.AWAITING)
 
-        awaiting_players = get_players_by_status([PlayerStatus.AWAITING], game)
+        awaiting_players = get_players_by_status([StatusChoices.AWAITING], game)
         self.assertEqual(len(awaiting_players), 2)
         self.assertEqual(awaiting_players[0], reksio)
         self.assertEqual(awaiting_players[1], new_player1)
 
         awaiting_players = get_players_by_status(
-            [PlayerStatus.AWAITING], game, order_by="-latest_creation_date"
+            [StatusChoices.AWAITING], game, order_by="-latest_creation_date"
         )
         self.assertEqual(len(awaiting_players), 2)
         self.assertEqual(awaiting_players[1], reksio)

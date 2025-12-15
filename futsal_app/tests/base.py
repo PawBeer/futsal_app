@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
-from games.models import Player
+from games.models import Player, PlayerRole
 
 User = get_user_model()
 
@@ -53,17 +53,17 @@ class BaseTestCase(TestCase):
         Player.objects.create(
             user=self.user_1_per,
             mobile_number="123456789",
-            role=Player.ROLE_PERMANENT,
+            role=PlayerRole.PERMANENT,
         )
         Player.objects.create(
             user=self.user_2_per,
             mobile_number="123456789",
-            role=Player.ROLE_PERMANENT,
+            role=PlayerRole.PERMANENT,
         )
         Player.objects.create(
             user=self.user_3_per,
             mobile_number="123456789",
-            role=Player.ROLE_PERMANENT,
+            role=PlayerRole.PERMANENT,
         )
         Player.objects.create(
             user=self.user_4_act,

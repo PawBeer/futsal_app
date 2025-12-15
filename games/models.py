@@ -5,17 +5,16 @@ from django.db import models
 User = get_user_model()
 
 
+class PlayerRole(models.TextChoices):
+    ACTIVE = "Active", "Active"
+    INACTIVE = "Inactive", "Inactive"
+    PERMANENT = "Permanent", "Permanent"
+
+
 class Player(models.Model):
-    ROLE_ACTIVE = "Active"
-    ROLE_INACTIVE = "Inactive"
-    ROLE_PERMANENT = "Permanent"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    ROLE_CHOICES = [
-        (ROLE_ACTIVE, ROLE_ACTIVE),
-        (ROLE_INACTIVE, ROLE_INACTIVE),
-        (ROLE_PERMANENT, ROLE_PERMANENT),
-    ]
+
     mobile_number = models.CharField(
         max_length=9,
         validators=[
@@ -24,50 +23,50 @@ class Player(models.Model):
             )
         ],
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=ROLE_ACTIVE)
+    role = models.CharField(
+        max_length=10, choices=PlayerRole.choices, default=PlayerRole.ACTIVE
+    )
 
     def __str__(self):
         return self.user.username if self.user else "(No user)"
 
 
-class Game(models.Model):
-    PLANNED = "Planned"
-    PLAYED = "Played"
-    CANCELLED = "Cancelled"
+class GameStatus(models.TextChoices):
+    PLANNED = "Planned", "Planned"
+    PLAYED = "Played", "Played"
+    CANCELLED = "Cancelled", "Cancelled"
 
-    STATUS_CHOICES = [
-        (PLANNED, PLANNED),
-        (PLAYED, PLAYED),
-        (CANCELLED, CANCELLED),
-    ]
+
+class Game(models.Model):
+
     when = models.DateField()
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default=PLANNED)
+    status = models.CharField(
+        max_length=100, choices=GameStatus.choices, default=GameStatus.PLANNED
+    )
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.when} - {self.status}"
 
 
-class PlayerStatus(models.Model):
-    PLANNED = "planned"
-    CANCELLED = "cancelled"
-    CONFIRMED = "confirmed"
-    RESERVED = "reserved"
-    RESTING = "resting"
-    AWAITING = "awaiting"  # the player is happy to play (responed positive) but the booking is not yet confirmed
+class StatusChoices(models.TextChoices):
+    PLANNED = "planned", "Planned"
+    CANCELLED = "cancelled", "Cancelled"
+    CONFIRMED = "confirmed", "Confirmed"
+    RESERVED = "reserved", "Reserved"
+    RESTING = "resting", "Resting"
+    # the player is happy to play (responded positive) but the booking is not yet confirmed
+    AWAITING = "awaiting", "Awaiting"
 
-    STATUS_CHOICES = [
-        (PLANNED, PLANNED),
-        (CANCELLED, CANCELLED),
-        (CONFIRMED, CONFIRMED),
-        (RESERVED, RESERVED),
-        (RESTING, RESTING),
-        (AWAITING, AWAITING),
-    ]
+
+class PlayerStatus(models.Model):
+
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     date_start = models.DateField()
     date_end = models.DateField()
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=RESTING)
+    status = models.CharField(
+        max_length=50, choices=StatusChoices.choices, default=StatusChoices.RESTING
+    )
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -82,7 +81,7 @@ class BookingHistoryForGame(models.Model):
         Player, on_delete=models.CASCADE, related_name="status_history"
     )
     status = models.CharField(
-        max_length=50, choices=PlayerStatus.STATUS_CHOICES, default=PlayerStatus.RESTING
+        max_length=50, choices=StatusChoices.choices, default=StatusChoices.RESTING
     )
     creation_date = models.DateTimeField(auto_now_add=True)
 

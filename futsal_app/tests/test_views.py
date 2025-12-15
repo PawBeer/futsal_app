@@ -1,6 +1,11 @@
 from games.helpers import game_helper
 from games.helpers.game_helper import get_total_players_for_game
-from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
+from games.models import (
+    BookingHistoryForGame,
+    Game,
+    Player,
+    StatusChoices,
+)
 
 from .base import BaseTestCase
 
@@ -31,13 +36,13 @@ class AddGameViewTests(BaseTestCase):
 
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, status=PlayerStatus.PLANNED
+                game=game, status=StatusChoices.PLANNED
             ).count(),
             3,
         )
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, status=PlayerStatus.RESERVED
+                game=game, status=StatusChoices.RESERVED
             ).count(),
             1,
         )
@@ -79,7 +84,7 @@ class AddGameViewTests(BaseTestCase):
         # get a reserved player
         reserved_player = (
             BookingHistoryForGame.objects.filter(
-                game=game, status=PlayerStatus.RESERVED
+                game=game, status=StatusChoices.RESERVED
             )
             .order_by("-creation_date")
             .first()
@@ -119,7 +124,7 @@ class AddGameViewTests(BaseTestCase):
         # get a reserved player
         reserved_player = (
             BookingHistoryForGame.objects.filter(
-                game=game, status=PlayerStatus.RESERVED
+                game=game, status=StatusChoices.RESERVED
             )
             .order_by("-creation_date")
             .first()
@@ -151,15 +156,15 @@ class AddGameViewTests(BaseTestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-            len(game_helper.get_players_by_status([PlayerStatus.AWAITING], game)), 0
+            len(game_helper.get_players_by_status([StatusChoices.AWAITING], game)), 0
         )
         self.assertEqual(
-            len(game_helper.get_players_by_status([PlayerStatus.PLANNED], game)), 2
+            len(game_helper.get_players_by_status([StatusChoices.PLANNED], game)), 2
         )
         self.assertEqual(
-            len(game_helper.get_players_by_status([PlayerStatus.CONFIRMED], game)), 1
+            len(game_helper.get_players_by_status([StatusChoices.CONFIRMED], game)), 1
         )
         self.assertEqual(
-            len(game_helper.get_players_by_status([PlayerStatus.CANCELLED], game)), 1
+            len(game_helper.get_players_by_status([StatusChoices.CANCELLED], game)), 1
         )
         self.assertEqual(get_total_players_for_game(game), 3)

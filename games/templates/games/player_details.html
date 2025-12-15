@@ -63,7 +63,7 @@
                         <span class="label-text font-semibold">Player role</span>
                     </label>
                     <select name="role" class="select select-bordered w-full max-w-sm mx-auto block" required>
-                        {% for val, label in player.ROLE_CHOICES %}
+                        {% for val, label in player_role_choices %}
                             <option value="{{ val }}" {% if player.role == val %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>

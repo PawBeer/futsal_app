@@ -2,7 +2,13 @@ from datetime import datetime
 
 from django.urls import reverse
 
-from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
+from games.models import (
+    BookingHistoryForGame,
+    Game,
+    Player,
+    PlayerStatus,
+    StatusChoices,
+)
 
 from .base import BaseTestCase
 
@@ -17,7 +23,7 @@ class SimpleAddAbsenceTest(BaseTestCase):
         )
 
         BookingHistoryForGame.objects.create(
-            game=game, player=player, status=PlayerStatus.PLANNED
+            game=game, player=player, status=StatusChoices.PLANNED
         )
 
         data = {
@@ -35,10 +41,10 @@ class SimpleAddAbsenceTest(BaseTestCase):
 
         self.assertTrue(PlayerStatus.objects.filter(player=player).exists())
         status_obj = PlayerStatus.objects.get(player=player)
-        self.assertEqual(status_obj.status, PlayerStatus.RESTING)
+        self.assertEqual(status_obj.status, StatusChoices.RESTING)
 
         booking_obj = BookingHistoryForGame.objects.filter(
             player=player, game=game
         ).last()
         self.assertIsNotNone(booking_obj)
-        self.assertEqual(booking_obj.status, PlayerStatus.CANCELLED)
+        self.assertEqual(booking_obj.status, StatusChoices.CANCELLED)

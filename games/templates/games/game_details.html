@@ -166,7 +166,11 @@
                                     </td>
                                     <td class="text-center">
                                         {% if substitute %}
-                                            <span class="badge badge-success">{{ substitute|get_display_name }}</span>
+                                            <a href="{% url 'player_details_url' player_id=substitute.pk %}">
+                                                <span class="badge badge-success link link-primary">
+                                                    {{ substitute|get_display_name }}
+                                                </span>
+                                            </a>
                                         {% else %}
                                             <span class="badge badge-error text-error-content">free slot</span>
                                         {% endif %}

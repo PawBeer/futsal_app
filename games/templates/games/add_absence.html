@@ -110,7 +110,7 @@
         <thead>
         <tr>
             <th>Player</th>
-            <th>Date_start</th>
+            <th>Date start</th>
             <th>Date end</th>
             <th>Player status</th>
             <th class="hidden lg:table-cell">Description</th>
@@ -122,7 +122,7 @@
                 <td>{{ record.player|get_display_name }}</td>
                 <td>{{ record.date_start }}</td>
                 <td>{{ record.date_end }}</td>
-                <td>{{ record.status }}</td>
+                <td>{{ record.status|get_label_for_status }}</td>
                 <td class="hidden lg:table-cell">{{ record.description }}</td>
             </tr>
         {% empty %}

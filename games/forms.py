@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from .models import Player
+from .models import Player, PlayerRole
 
 User = get_user_model()
 
@@ -14,7 +14,7 @@ class PlayerProfileForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     # they come from Player model
     mobile_number = forms.CharField(required=True)
-    role = forms.ChoiceField(choices=Player.ROLE_CHOICES, required=True)
+    role = forms.ChoiceField(choices=PlayerRole.choices, required=True)
 
     class Meta:
         model = Player
