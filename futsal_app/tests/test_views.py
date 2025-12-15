@@ -1,5 +1,5 @@
 from games.helpers import game_helper
-from games.helpers.game_helper import get_players_by_status, get_total_players_for_game
+from games.helpers.game_helper import get_total_players_for_game
 from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 from .base import BaseTestCase

@@ -1,11 +1,14 @@
 from unittest.mock import patch
 
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 from games.helpers.game_helper import get_players_by_status
 from games.models import BookingHistoryForGame, Game, Player, PlayerStatus
 
 from .base import BaseTestCase
+
+User = get_user_model()
 
 
 class PlayerModelTests(BaseTestCase):
@@ -51,7 +54,7 @@ class PlayerModelTests(BaseTestCase):
     def test_update_player_view(self):
         tola = Player.objects.get(user__username="tola")
         data = {
-            "form_type": "profile",  # fixme: currently the same url handles 2 posts distinguished by form_type
+            "form_type": "profile",
             "username": tola.user.username,  # username is not changed
             "email": tola.user.email,  # email is not changed
             "mobile_number": "987654321",  # tola's current is "123456789"
@@ -66,8 +69,6 @@ class PlayerModelTests(BaseTestCase):
         self.assertEqual(updated_tola.role, Player.ROLE_INACTIVE)
 
     def _create_user_and_player(self, username: str, role: str) -> Player:
-        from django.contrib.auth.models import User
-
         user = User.objects.create_user(username=username, password="testpass")
         player = Player.objects.create(user=user, role=role)
         return player

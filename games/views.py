@@ -177,8 +177,8 @@ def _check_if_empty_slots(game):
 
     if cancelled_count > confirmed_count:
         return PlayerStatus.CONFIRMED
-    else:
-        return PlayerStatus.AWAITING
+
+    return PlayerStatus.AWAITING
 
 
 def _apply_status_change_logic(current_status, checked, game):

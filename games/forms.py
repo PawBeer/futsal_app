@@ -29,7 +29,7 @@ class PlayerProfileForm(forms.ModelForm):
             self.fields["last_name"].initial = self.instance.user.last_name
             self.fields["email"].initial = self.instance.user.email
 
-    def save(self):
+    def save(self, commit=True):
         if self.instance and self.instance.user:
             player = super().save(commit=False)
             player.user.username = self.cleaned_data["username"]
