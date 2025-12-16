@@ -183,8 +183,8 @@
                 </div>
             </div>
 
-            <!-- Reserved/Confirmed players - tylko dla superuser lub gracza z reserved/confirmed -->
-{% if user.is_superuser or user_has_reserved_or_confirmed %}
+            <!-- Reserved/Confirmed/Awaiting players - tylko dla superuser lub gracza z reserved/confirmed/awaiting -->
+{% if user.is_superuser or player_should_see_reserved_table %}
                 <div class="divide-y divide-base-200">
                     <div class="bg-base-200 px-6 py-4 rounded-t-xl">
                         <h3 class="text-xl font-semibold text-base-content text-center">Reserve List</h3>

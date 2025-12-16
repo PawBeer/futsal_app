@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Iterable
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.db import IntegrityError
@@ -69,45 +71,42 @@ def past_games(request):
     return render(request, "games/past_games.html", {"games": games_page_obj})
 
 
+def _player_should_see_reserved_table(
+    user: AbstractBaseUser, players: Iterable[Player]
+) -> bool:
+    player = getattr(user, "player", None)
+    if player is None:
+        return True  # admins may not have a player
+    return player in players
+
+
+def _apply_substitute_to_cancelled_players(
+    cancelled: list[Player], confirmed: list[Player]
+) -> list[tuple[Player, Player]]:
+    cancelled_with_substitutes = []
+    for idx, cancelled_player in enumerate(cancelled):
+        substitute = confirmed[idx] if idx < len(confirmed) else None
+        cancelled_with_substitutes.append((cancelled_player, substitute))
+    return cancelled_with_substitutes
+
+
 @login_required
 def game_details(request, game_id):
-    found_game = get_object_or_404(Game, id=game_id)
+    game = get_object_or_404(Game, id=game_id)
 
-    planned_players_for_game = game_helper.get_players_by_status(
-        [StatusChoices.PLANNED], found_game
+    planned_players = game_helper.get_players_by_status([StatusChoices.PLANNED], game)
+    cancelled_players = game_helper.get_players_by_status(
+        [StatusChoices.CANCELLED], game
     )
-    cancelled_players_for_game = game_helper.get_players_by_status(
-        [StatusChoices.CANCELLED], found_game
+    reserved_players = game_helper.get_players_by_status([StatusChoices.RESERVED], game)
+    confirmed_players = game_helper.get_players_by_status(
+        [StatusChoices.CONFIRMED], game
     )
-    reserved_players_for_game = game_helper.get_players_by_status(
-        [StatusChoices.RESERVED], found_game
-    )
-    confirmed_players_for_game = game_helper.get_players_by_status(
-        [StatusChoices.CONFIRMED], found_game
-    )
-    awaiting_players_for_game = game_helper.get_players_by_status(
-        [StatusChoices.AWAITING], found_game, order_by="latest_creation_date"
+    awaiting_players = game_helper.get_players_by_status(
+        [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
 
-    found_booking_history = BookingHistoryForGame.objects.filter(
-        game=found_game
-    ).order_by("-creation_date")
-
-    cancelled_with_substitutes = []
-    for idx, cancelled_player in enumerate(cancelled_players_for_game):
-        substitute = (
-            confirmed_players_for_game[idx]
-            if idx < len(confirmed_players_for_game)
-            else None
-        )
-        cancelled_with_substitutes.append((cancelled_player, substitute))
-
-    today = timezone.now().date()
-    game_date = (
-        found_game.when.date() if hasattr(found_game.when, "date") else found_game.when
-    )
-
-    if game_date < today:
+    if game.when < timezone.now().date():
         active_link = "Past games"
         active_url = reverse("past_games_url")
     else:
@@ -116,33 +115,33 @@ def game_details(request, game_id):
 
     breadcrumbs = [
         Breadcrumb(active_url, active_link),
-        Breadcrumb(reverse("game_details_url", args=[found_game.id]), found_game.when),
+        Breadcrumb(reverse("game_details_url", args=[game.id]), game.when),
     ]
-
-    user_has_reserved_or_confirmed = False
-    if request.user.is_authenticated:
-        user_has_reserved_or_confirmed = any(
-            p.user == request.user for p in reserved_players_for_game
-        ) or any(p.user == request.user for p in confirmed_players_for_game)
 
     return render(
         request,
         "games/game_details.html",
         {
-            "game": found_game,
-            "planned_players_for_game": planned_players_for_game,
-            "reserved_players_for_game": reserved_players_for_game,
-            "confirmed_players_for_game": confirmed_players_for_game,
-            "awaiting_players_for_game": awaiting_players_for_game,
-            "number_of_booked_players": len(planned_players_for_game)
-            + len(confirmed_players_for_game),
-            "number_of_confirmed_players": len(confirmed_players_for_game),
-            "cancelled_with_substitutes": cancelled_with_substitutes,
-            "number_of_cancelled_players": len(cancelled_players_for_game),
-            "booking_history": found_booking_history,
+            "game": game,
+            "planned_players_for_game": planned_players,
+            "reserved_players_for_game": reserved_players,
+            "confirmed_players_for_game": confirmed_players,
+            "awaiting_players_for_game": awaiting_players,
+            "number_of_booked_players": len(planned_players) + len(confirmed_players),
+            "number_of_confirmed_players": len(confirmed_players),
+            "cancelled_with_substitutes": _apply_substitute_to_cancelled_players(
+                cancelled=cancelled_players, confirmed=confirmed_players
+            ),
+            "number_of_cancelled_players": len(cancelled_players),
+            "booking_history": BookingHistoryForGame.objects.filter(game=game).order_by(
+                "-creation_date"
+            ),
             "status_options": GameStatus.labels,
             "breadcrumbs": breadcrumbs,
-            "user_has_reserved_or_confirmed": user_has_reserved_or_confirmed,
+            "player_should_see_reserved_table": _player_should_see_reserved_table(
+                request.user,
+                reserved_players + confirmed_players + awaiting_players,
+            ),
         },
     )
 
@@ -437,6 +436,11 @@ def booking_history(request):
     )
 
 
+def _create_booking_for_players(game: Game, players: Iterable[Player], status):
+    for player in players:
+        BookingHistoryForGame.objects.create(game=game, player=player, status=status)
+
+
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def add_game(request):
@@ -447,18 +451,17 @@ def add_game(request):
             description=request.POST.get("description", ""),
         )
         if request.POST.get("set_players"):
-            permanent_players = Player.objects.filter(role=PlayerRole.PERMANENT)
-            active_players = Player.objects.filter(role=PlayerRole.ACTIVE)
 
-            for player in permanent_players:
-                BookingHistoryForGame.objects.create(
-                    game=game, player=player, status=StatusChoices.PLANNED
-                )
-
-            for player in active_players:
-                BookingHistoryForGame.objects.create(
-                    game=game, player=player, status=StatusChoices.RESERVED
-                )
+            _create_booking_for_players(
+                game,
+                Player.objects.filter(role=PlayerRole.PERMANENT),
+                StatusChoices.PLANNED,
+            )
+            _create_booking_for_players(
+                game,
+                Player.objects.filter(role=PlayerRole.ACTIVE),
+                StatusChoices.RESERVED,
+            )
 
             psm_list = PlayerStatus.objects.all().order_by("date_start")
             game_date = game.when.date() if hasattr(game.when, "date") else game.when

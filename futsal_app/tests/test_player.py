@@ -12,7 +12,7 @@ from games.models import (
     PlayerRole,
     StatusChoices,
 )
-
+from games.views import _create_booking_for_players
 from .base import BaseTestCase
 
 User = get_user_model()
@@ -116,3 +116,39 @@ class PlayerModelTests(BaseTestCase):
         self.assertEqual(len(awaiting_players), 2)
         self.assertEqual(awaiting_players[1], reksio)
         self.assertEqual(awaiting_players[0], new_player1)
+
+    def test_create_booking_for_players_using_list(self):
+
+        game = Game.objects.create(
+            when="2024-08-01",
+            description="another test game",
+            status=GameStatus.PLANNED,
+        )
+        reksio = Player.objects.get(user__username="reksio")
+        tola = Player.objects.get(user__username="tola")
+        players = [reksio, tola]
+
+        _create_booking_for_players(game, players, StatusChoices.PLANNED)
+
+        bookings = BookingHistoryForGame.objects.filter(game=game)
+        self.assertEqual(bookings.count(), 2)
+        statuses = set(booking.status for booking in bookings)
+        self.assertEqual(statuses, {StatusChoices.PLANNED})
+
+    def test_create_booking_for_players_using_queryset(self):
+
+        game = Game.objects.create(
+            when="2024-08-01",
+            description="another test game",
+            status=GameStatus.PLANNED,
+        )
+        _create_booking_for_players(
+            game,
+            Player.objects.filter(role=PlayerRole.PERMANENT),
+            StatusChoices.PLANNED,
+        )
+
+        bookings = BookingHistoryForGame.objects.filter(game=game)
+        self.assertEqual(bookings.count(), 3)
+        statuses = set(booking.status for booking in bookings)
+        self.assertEqual(statuses, {StatusChoices.PLANNED})
