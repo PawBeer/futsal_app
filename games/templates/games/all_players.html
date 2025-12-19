@@ -7,7 +7,7 @@
 {% block content %}
     {% with active_status=request.GET.status %}
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mr-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 p-2 mb-4">
 
             <a href="{% url 'all_players_url' %}" style="text-decoration: none;">
                 <div class="card shadow-xl bg-players-purple cursor-pointer
