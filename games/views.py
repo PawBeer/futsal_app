@@ -520,7 +520,10 @@ def add_game(request):
 @login_required
 def add_absence(request):
     players = Player.objects.all()
-    status = PlayerStatus.objects.all().order_by("-id")
+    if request.user.is_superuser:
+        status = PlayerStatus.objects.all().order_by("-id")
+    else:
+        status = PlayerStatus.objects.filter(player__user=request.user)
     status_paginator = Paginator(status, 15)
     status_page_number = request.GET.get("status_page")
     status_page_obj = status_paginator.get_page(status_page_number)
