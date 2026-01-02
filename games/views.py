@@ -127,7 +127,9 @@ def game_details(request, game_id):
             "reserved_players_for_game": reserved_players,
             "confirmed_players_for_game": confirmed_players,
             "awaiting_players_for_game": awaiting_players,
-            "number_of_booked_players": len(planned_players) + len(confirmed_players),
+            "number_of_booked_players": len(planned_players)
+            + len(confirmed_players)
+            + len(awaiting_players),
             "number_of_confirmed_players": len(confirmed_players),
             "cancelled_with_substitutes": _apply_substitute_to_cancelled_players(
                 cancelled=cancelled_players, confirmed=confirmed_players
