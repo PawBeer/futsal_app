@@ -315,6 +315,9 @@ def player_details(request, player_id):
         form_type = request.POST.get("form_type")
 
         if form_type == "profile":
+            if not request.user.is_superuser:
+                messages.error(request, "You don't have permission to edit this profile.")
+                return redirect("player_details_url", player_id=player.id)
             if profile_form.is_valid():
                 new_username = profile_form.cleaned_data.get("username")
                 if (
