@@ -523,7 +523,7 @@ def add_absence(request):
     if request.user.is_superuser:
         status = PlayerStatus.objects.all().order_by("-id")
     else:
-        status = PlayerStatus.objects.filter(player__user=request.user)
+        status = PlayerStatus.objects.filter(player__user=request.user).order_by("-id")
     status_paginator = Paginator(status, 15)
     status_page_number = request.GET.get("status_page")
     status_page_obj = status_paginator.get_page(status_page_number)
