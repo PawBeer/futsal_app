@@ -152,3 +152,111 @@ class PlayerModelTests(BaseTestCase):
         self.assertEqual(bookings.count(), 3)
         statuses = set(booking.status for booking in bookings)
         self.assertEqual(statuses, {StatusChoices.PLANNED})
+
+
+def test_non_superuser_cannot_update_player_profile(self):
+    tola = Player.objects.get(user__username="tola")
+    reksio = Player.objects.get(user__username="reksio")
+
+    # Login as regular user (not superuser)
+    self.client.force_login(reksio.user)
+
+    # Try to update tola's profile
+    data = {
+        "form_type": "profile",
+        "username": tola.user.username,
+        "email": tola.user.email,
+        "mobile_number": "999999999",  # trying to change
+        "role": PlayerRole.INACTIVE,  # trying to change
+    }
+
+    url = reverse("player_details_url", kwargs={"player_id": tola.id})
+    response = self.client.post(url, data)
+
+    # Should redirect back to the same page
+    self.assertEqual(response.status_code, 302)
+    self.assertRedirects(response, url)
+
+    # Verify that tola's data was NOT changed
+    updated_tola = Player.objects.get(user__username="tola")
+    self.assertNotEqual(updated_tola.mobile_number, "999999999")
+    self.assertEqual(updated_tola.role, PlayerRole.PERMANENT)  # should remain unchanged
+
+    # Verify error message was shown
+    messages = list(response.wsgi_request._messages)
+    self.assertEqual(len(messages), 1)
+    self.assertIn("permission", str(messages[0]).lower())
+
+
+def test_non_superuser_cannot_send_welcome_email(self):
+    reksio = Player.objects.get(user__username="reksio")
+    tola = Player.objects.get(user__username="tola")
+
+    # Login as regular user (not superuser)
+    self.client.force_login(reksio.user)
+
+    with patch("games.views.send_welcome_email") as mock_send_welcome_email:
+        data = {
+            "form_type": "welcome_email",
+        }
+
+        url = reverse("player_details_url", kwargs={"player_id": tola.id})
+        response = self.client.post(url, data)
+
+        # Should redirect back to the same page
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, url)
+
+        # Verify that email was NOT sent
+        mock_send_welcome_email.assert_not_called()
+
+        # Verify error message was shown
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertIn("permission", str(messages[0]).lower())
+
+
+def test_superuser_can_update_player_profile(self):
+    tola = Player.objects.get(user__username="tola")
+
+    # Login as superuser
+    self.client.force_login(self.superuser)
+
+    data = {
+        "form_type": "profile",
+        "username": tola.user.username,
+        "email": tola.user.email,
+        "mobile_number": "111222333",
+        "role": PlayerRole.INACTIVE,
+    }
+
+    url = reverse("player_details_url", kwargs={"player_id": tola.id})
+    response = self.client.post(url, data)
+
+    self.assertEqual(response.status_code, 302)
+
+    # Verify that tola's data WAS changed
+    updated_tola = Player.objects.get(user__username="tola")
+    self.assertEqual(updated_tola.mobile_number, "111222333")
+    self.assertEqual(updated_tola.role, PlayerRole.INACTIVE)
+
+    # Verify success message
+    messages = list(response.wsgi_request._messages)
+    self.assertEqual(len(messages), 1)
+    self.assertIn("success", str(messages[0]).lower())
+
+
+def test_non_superuser_can_view_player_profile(self):
+    reksio = Player.objects.get(user__username="reksio")
+    tola = Player.objects.get(user__username="tola")
+
+    # Login as regular user
+    self.client.force_login(reksio.user)
+
+    url = reverse("player_details_url", kwargs={"player_id": tola.id})
+    response = self.client.get(url)
+
+    # Should be able to view the page
+    self.assertEqual(response.status_code, 200)
+    self.assertContains(response, tola.user.username)
+    self.assertContains(response, tola.mobile_number)
