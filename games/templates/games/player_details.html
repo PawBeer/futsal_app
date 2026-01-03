@@ -22,7 +22,7 @@
                         <span class="label-text font-semibold">Username</span>
                     </label>
                     <input type="text" name="username" class="input input-bordered w-full max-w-sm mx-auto block" 
-                           value="{{ player.user.username }}" required>
+                           value="{{ player.user.username }}" required {% if not user.is_superuser %}disabled{% endif %}>
                 </div>
                 {% endif %}
 
@@ -31,7 +31,7 @@
                         <span class="label-text font-semibold">Name</span>
                     </label>
                     <input type="text" name="first_name" class="input input-bordered w-full max-w-sm mx-auto block" 
-                           value="{{ player.user.first_name }}">
+                           value="{{ player.user.first_name }}" {% if not user.is_superuser %}disabled{% endif %}>
                 </div>
 
                 <div class="form-control mb-4">
@@ -39,7 +39,7 @@
                         <span class="label-text font-semibold">Surname</span>
                     </label>
                     <input type="text" name="last_name" class="input input-bordered w-full max-w-sm mx-auto block" 
-                           value="{{ player.user.last_name }}">
+                           value="{{ player.user.last_name }}" {% if not user.is_superuser %}disabled{% endif %}>
                 </div>
 
                 <div class="form-control mb-4">
@@ -47,7 +47,7 @@
                         <span class="label-text font-semibold">Email</span>
                     </label>
                     <input type="email" name="email" class="input input-bordered w-full max-w-sm mx-auto block" 
-                           value="{{ player.user.email }}" required>
+                           value="{{ player.user.email }}" required {% if not user.is_superuser %}disabled{% endif %}>
                 </div>
 
                 <div class="form-control mb-4">
@@ -55,14 +55,14 @@
                         <span class="label-text font-semibold">Mobile number</span>
                     </label>
                     <input type="text" name="mobile_number" class="input input-bordered w-full max-w-sm mx-auto block" 
-                           value="{{ player.mobile_number }}" required>
+                           value="{{ player.mobile_number }}" required {% if not user.is_superuser %}disabled{% endif %}>
                 </div>
 
                 <div class="form-control mb-4">
                     <label class="label">
                         <span class="label-text font-semibold">Player role</span>
                     </label>
-                    <select name="role" class="select select-bordered w-full max-w-sm mx-auto block" required>
+                    <select name="role" class="select select-bordered w-full max-w-sm mx-auto block" required {% if not user.is_superuser %}disabled{% endif %}>
                         {% for val, label in player_role_choices %}
                             <option value="{{ val }}" {% if player.role == val %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}

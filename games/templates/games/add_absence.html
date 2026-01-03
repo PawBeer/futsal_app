@@ -103,9 +103,9 @@
         </form>
     </div>
 </div>
+</div>
 
-    {% if user.is_superuser %}
-        <div>
+        <div class="p-2">
     <table class="table">
         <thead>
         <tr>
@@ -113,7 +113,7 @@
             <th>Date start</th>
             <th>Date end</th>
             <th>Player status</th>
-            <th class="hidden lg:table-cell">Description</th>
+            <th>Description</th>
         </tr>
         </thead>
         <tbody>
@@ -123,7 +123,7 @@
                 <td>{{ record.date_start }}</td>
                 <td>{{ record.date_end }}</td>
                 <td>{{ record.status|get_label_for_status }}</td>
-                <td class="hidden lg:table-cell">{{ record.description }}</td>
+                <td>{{ record.description }}</td>
             </tr>
         {% empty %}
             <tr>
@@ -186,8 +186,6 @@
         Page {{ status.number }} of {{ status.paginator.num_pages }} 
         ({{ status.paginator.count }} records)
     </p>
-    {% endif %}
-</div>
     {% endif %}
 </div>
 

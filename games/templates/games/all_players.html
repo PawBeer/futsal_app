@@ -7,7 +7,7 @@
 {% block content %}
     {% with active_status=request.GET.status %}
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mr-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 p-2 mb-4">
 
             <a href="{% url 'all_players_url' %}" style="text-decoration: none;">
                 <div class="card shadow-xl bg-players-purple cursor-pointer
@@ -52,15 +52,16 @@
         </div>
 
     {% endwith %}
-    
+
     <div class="card shadow-lg mb-8 p-4">
         <div class="overflow-x-auto">
             <table class="table w-full">
                 <thead>
                 <tr>
                     <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
-                    <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Username</th>
-                    <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Player role</th>
+                    <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Player
+                        role
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -70,12 +71,6 @@
                             <a href="{% url 'player_details_url' player_id=player.id %}"
                                class="link link-primary font-medium">
                                 {{ player|get_display_name }}
-                            </a>
-                        </td>
-                        <td class="px-1 text-center py-3">
-                            <a href="{% url 'player_details_url' player_id=player.id %}"
-                               class="link link-primary font-medium">
-                                {{ player.user }}
                             </a>
                         </td>
                         <td class="px-1 text-center py-3">{{ player.role }}</td>

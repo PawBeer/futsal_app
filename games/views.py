@@ -127,7 +127,9 @@ def game_details(request, game_id):
             "reserved_players_for_game": reserved_players,
             "confirmed_players_for_game": confirmed_players,
             "awaiting_players_for_game": awaiting_players,
-            "number_of_booked_players": len(planned_players) + len(confirmed_players),
+            "number_of_booked_players": len(planned_players)
+            + len(confirmed_players)
+            + len(awaiting_players),
             "number_of_confirmed_players": len(confirmed_players),
             "cancelled_with_substitutes": _apply_substitute_to_cancelled_players(
                 cancelled=cancelled_players, confirmed=confirmed_players
@@ -315,6 +317,11 @@ def player_details(request, player_id):
         form_type = request.POST.get("form_type")
 
         if form_type == "profile":
+            if not request.user.is_superuser:
+                messages.error(
+                    request, "You don't have permission to edit this profile."
+                )
+                return redirect("player_details_url", player_id=player.id)
             if profile_form.is_valid():
                 new_username = profile_form.cleaned_data.get("username")
                 if (
@@ -520,7 +527,10 @@ def add_game(request):
 @login_required
 def add_absence(request):
     players = Player.objects.all()
-    status = PlayerStatus.objects.all().order_by("-id")
+    if request.user.is_superuser:
+        status = PlayerStatus.objects.all().order_by("-id")
+    else:
+        status = PlayerStatus.objects.filter(player__user=request.user).order_by("-id")
     status_paginator = Paginator(status, 15)
     status_page_number = request.GET.get("status_page")
     status_page_obj = status_paginator.get_page(status_page_number)
