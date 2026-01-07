@@ -204,7 +204,8 @@ def _apply_status_change_logic(current_status, checked, game):
         raise ValueError(f"No handler for status={current_status}, checked={checked}")
 
 
-def _apply_transition_from_awaiting_to_confirmed(game):
+def _apply_transition_from_awaiting_to_confirmed(game) -> Player|None:
+    ''' Returns Player if a player was confirmed, None otherwise '''
     awaiting_players = game_helper.get_players_by_status(
         [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
@@ -224,6 +225,8 @@ def _apply_transition_from_awaiting_to_confirmed(game):
             send_player_status_update_email_to_admins(
                 player_to_confirm, game, StatusChoices.CONFIRMED
             )
+            return player_to_confirm
+    return None
 
 
 @login_required
@@ -262,10 +265,9 @@ def game_player_status_update(request, game_id):
             status=new_status,
             creation_date=timezone.now(),
         )
-        send_player_status_update_email(player, found_game, new_status)
-        send_player_status_update_email_to_admins(player, found_game, new_status)
-
-    _apply_transition_from_awaiting_to_confirmed(found_game)
+        if player != _apply_transition_from_awaiting_to_confirmed(found_game):
+            send_player_status_update_email(player, found_game, new_status)
+            send_player_status_update_email_to_admins(player, found_game, new_status)
 
     return redirect("game_details_url", game_id=game_id)
 
