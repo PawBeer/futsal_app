@@ -24,4 +24,5 @@ urlpatterns = [
     path("", RedirectView.as_view(url="games/")),
     path("games/", include("games.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
+    path('api/', include('api.urls')),
 ]
