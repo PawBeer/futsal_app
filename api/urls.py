@@ -6,15 +6,15 @@ from .views import (
 )
 
 urlpatterns = [
-    path("games/<int:game_id>/players/",
-         GamePlayerListCreateView.as_view(),
-         name="game-players"),
-
-    path("goals/",
-         GoalEventCreateView.as_view(),
-         name="goal-create"),
-
-    path("games/<int:game_id>/goals/",
-         GoalEventListByGameView.as_view(),
-         name="game-goals"),
+    path(
+        "games/<int:game_id>/players/",
+        GamePlayerListCreateView.as_view(),
+        name="game-players",
+    ),
+    path("goals/", GoalEventCreateView.as_view(), name="goal-create"),
+    path(
+        "games/<int:game_id>/goals/",
+        GoalEventListByGameView.as_view(),
+        name="game-goals",
+    ),
 ]

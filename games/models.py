@@ -101,15 +101,9 @@ class TeamChoices(models.TextChoices):
 
 
 class GamePlayer(models.Model):
-    game = models.ForeignKey(
-        Game, on_delete=models.CASCADE, related_name="players"
-    )
-    player = models.ForeignKey(
-        Player, on_delete=models.CASCADE, related_name="games"
-    )
-    team = models.CharField(
-        max_length=10, choices=TeamChoices.choices
-    )
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="players")
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="games")
+    team = models.CharField(max_length=10, choices=TeamChoices.choices)
 
     class Meta:
         unique_together = ("game", "player")
@@ -119,15 +113,9 @@ class GamePlayer(models.Model):
 
 
 class GoalEvent(models.Model):
-    game = models.ForeignKey(
-        Game, on_delete=models.CASCADE, related_name="goals"
-    )
-    team = models.CharField(
-        max_length=10, choices=TeamChoices.choices
-    )
-    scorer = models.ForeignKey(
-        Player, on_delete=models.SET_NULL, null=True, blank=True
-    )
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="goals")
+    team = models.CharField(max_length=10, choices=TeamChoices.choices)
+    scorer = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True)
     own_goal = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
