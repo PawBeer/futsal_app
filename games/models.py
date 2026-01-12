@@ -93,3 +93,32 @@ class BookingHistoryForGame(models.Model):
 
     def __str__(self):
         return f"{self.player} - {self.status} on {self.game}"
+
+
+class TeamChoices(models.TextChoices):
+    BLACK = "black", "Black"
+    WHITE = "white", "White"
+
+
+class GamePlayer(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="players")
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="games")
+    team = models.CharField(max_length=10, choices=TeamChoices.choices)
+
+    class Meta:
+        unique_together = ("game", "player")
+
+    def __str__(self):
+        return f"{self.player} ({self.team}) - {self.game}"
+
+
+class GoalEvent(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="goals")
+    team = models.CharField(max_length=10, choices=TeamChoices.choices)
+    scorer = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True)
+    own_goal = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        og = " (OG)" if self.own_goal else ""
+        return f"{self.game} | {self.scorer}{og} | {self.created_at}'"
