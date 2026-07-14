@@ -12,6 +12,13 @@ def get_display_name(player: Player) -> str:
     return "Unknown Player"
 
 
+def get_display_name_for_user(user) -> str:
+    player = getattr(user, "player", None)
+    if player:
+        return get_display_name(player)
+    return user.get_username()
+
+
 def get_latest_booking_for_game(
     player: Player, game: Game
 ) -> BookingHistoryForGame | None:

@@ -31,4 +31,6 @@ urlpatterns = [
         views.check_username_and_email,
         name="check_username_and_email",
     ),
+    path("chat/messages/", views.chat_messages, name="chat_messages_url"),
+    path("chat/send/", views.chat_send, name="chat_send_url"),
 ]
