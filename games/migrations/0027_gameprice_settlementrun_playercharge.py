@@ -7,11 +7,9 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    initial = True
-
     dependencies = [
-        ('games', '0026_player_is_accountant'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('games', '0026_player_is_accountant'),
     ]
 
     operations = [
@@ -51,7 +49,7 @@ class Migration(migrations.Migration):
                 ('paid_at', models.DateTimeField(blank=True, null=True)),
                 ('marked_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='payment_charges_marked', to=settings.AUTH_USER_MODEL)),
                 ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_charges', to='games.player')),
-                ('settlement_run', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='payments.settlementrun')),
+                ('settlement_run', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='games.settlementrun')),
             ],
             options={
                 'ordering': ['player__user__username'],

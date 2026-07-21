@@ -5,9 +5,15 @@ from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
 
-from games.models import BookingHistoryForGame, Game, GameStatus, StatusChoices
-from payments.helpers import settlement_helper
-from payments.models import GamePrice, SettlementRun
+from games.helpers import settlement_helper
+from games.models import (
+    BookingHistoryForGame,
+    Game,
+    GamePrice,
+    GameStatus,
+    SettlementRun,
+    StatusChoices,
+)
 
 from .base import BaseTestCase
 

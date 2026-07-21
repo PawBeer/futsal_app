@@ -4,9 +4,15 @@ from datetime import date
 from decimal import Decimal
 
 from games.helpers import game_helper, player_helper
-from games.models import Game, GameStatus, Player, StatusChoices
-
-from ..models import GamePrice, PlayerCharge, SettlementRun
+from games.models import (
+    Game,
+    GamePrice,
+    GameStatus,
+    Player,
+    PlayerCharge,
+    SettlementRun,
+    StatusChoices,
+)
 
 CHARGEABLE_STATUSES = [StatusChoices.PLANNED, StatusChoices.CANCELLED]
 SETTLEMENT_GAME_STATUSES = [GameStatus.PLAYED, GameStatus.CANCELLED]
