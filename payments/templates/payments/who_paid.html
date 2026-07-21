@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+{% load player_extras %}
+{% block page_title %}
+    Payments
+{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-4">
+    <form method="get" class="flex items-center gap-2">
+        <label for="year" class="text-sm text-base-content/70">Year:</label>
+        <input type="number" id="year" name="year" value="{{ year }}"
+               class="input input-sm input-bordered w-24">
+        <label for="month" class="text-sm text-base-content/70">Month:</label>
+        <input type="number" id="month" name="month" value="{{ month }}" min="1" max="12"
+               class="input input-sm input-bordered w-20">
+        <button type="submit" class="btn btn-sm btn-secondary">Show</button>
+    </form>
+</div>
+
+{% if not run %}
+<p class="text-sm text-base-content/50">No settlement has been generated for this period yet.</p>
+{% else %}
+<div class="card shadow-lg mb-6 p-4">
+    <div class="overflow-x-auto">
+        <table class="table w-full">
+            <thead>
+            <tr>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Games</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Amount</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for charge in charges %}
+                <tr class="hover">
+                    <td class="py-2 text-sm">{{ charge.player|get_display_name }}</td>
+                    <td class="py-2 text-sm">{{ charge.game_count }}</td>
+                    <td class="py-2 text-sm">{{ charge.amount }}</td>
+                    <td class="py-2 text-sm">
+                        {% if charge.is_paid %}
+                            <span class="badge badge-success">Paid</span>
+                        {% else %}
+                            <span class="badge badge-outline">Unpaid</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock content %}

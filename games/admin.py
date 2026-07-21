@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BookingHistoryForGame, Game
+from .models import BookingHistoryForGame, Game, Player
 
 
 class GameAdmin(admin.ModelAdmin):
@@ -12,3 +12,4 @@ class GameAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Game, GameAdmin)
 admin.site.register(BookingHistoryForGame)
+admin.site.register(Player)
