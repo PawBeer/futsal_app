@@ -90,6 +90,11 @@ def calculate_settlement(year: int, month: int) -> list:
     )
 
 
+def get_price_for_game(when: date) -> Decimal | None:
+    """Returns the price valid on the given game date, or None if not set."""
+    return _price_lookup()(when)
+
+
 def games_missing_price(year: int, month: int) -> list:
     """Qualifying games with no GamePrice valid on or before their date."""
     start_date, end_date = get_period_bounds(year, month)

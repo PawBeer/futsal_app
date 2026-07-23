@@ -74,3 +74,18 @@ def get_number_of_booked_players(game):
         creation_date__in=latest_bookings,
     ).count()
     return booked_count
+
+
+def pair_cancelled_with_substitutes(game: Game) -> list[tuple[Player, Player | None]]:
+    """
+    Pairs each cancelled player for the game with the confirmed player who
+    took their slot (matched by order), or None if the slot is still free.
+    """
+    cancelled_players = get_players_by_status([StatusChoices.CANCELLED], game)
+    confirmed_players = get_players_by_status([StatusChoices.CONFIRMED], game)
+
+    pairs = []
+    for idx, cancelled_player in enumerate(cancelled_players):
+        substitute = confirmed_players[idx] if idx < len(confirmed_players) else None
+        pairs.append((cancelled_player, substitute))
+    return pairs

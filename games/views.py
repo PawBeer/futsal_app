@@ -20,6 +20,7 @@ from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
     send_settlement_email,
+    send_substitute_payment_email,
     send_welcome_email,
 )
 
@@ -83,16 +84,6 @@ def _player_should_see_reserved_table(
     return player in players
 
 
-def _apply_substitute_to_cancelled_players(
-    cancelled: list[Player], confirmed: list[Player]
-) -> list[tuple[Player, Player]]:
-    cancelled_with_substitutes = []
-    for idx, cancelled_player in enumerate(cancelled):
-        substitute = confirmed[idx] if idx < len(confirmed) else None
-        cancelled_with_substitutes.append((cancelled_player, substitute))
-    return cancelled_with_substitutes
-
-
 @login_required
 def game_details(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -134,8 +125,8 @@ def game_details(request, game_id):
             + len(confirmed_players)
             + len(awaiting_players),
             "number_of_confirmed_players": len(confirmed_players),
-            "cancelled_with_substitutes": _apply_substitute_to_cancelled_players(
-                cancelled=cancelled_players, confirmed=confirmed_players
+            "cancelled_with_substitutes": game_helper.pair_cancelled_with_substitutes(
+                game
             ),
             "number_of_cancelled_players": len(cancelled_players),
             "booking_history": BookingHistoryForGame.objects.filter(game=game).order_by(
@@ -163,18 +154,41 @@ def game_remove(request, game_id):
     return render(request, "games/game_confirm_remove.html", {"game": found_game})
 
 
+def _notify_substitutes_of_payment(game: Game) -> None:
+    """
+    For a game that just became Played, email every confirmed player who
+    took over a cancelled player's slot, telling them how much to send
+    that player (the price valid on the game's date).
+    """
+    amount = settlement_helper.get_price_for_game(game.when)
+    if amount is None:
+        return
+
+    for cancelled_player, substitute in game_helper.pair_cancelled_with_substitutes(
+        game
+    ):
+        if substitute is None or not substitute.user or not substitute.user.email:
+            continue
+        send_substitute_payment_email(substitute, cancelled_player, game, amount)
+
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     status_value = request.POST.get("status")
     description = request.POST.get("description")
+    previous_status = game.status
 
     if status_value:
         game.status = status_value
     if description is not None:
         game.description = description
     game.save()
+
+    if previous_status != GameStatus.PLAYED and game.status == GameStatus.PLAYED:
+        _notify_substitutes_of_payment(game)
+
     return redirect("game_details_url", game_id=game_id)
 
 

@@ -323,3 +323,61 @@ class SettlementEmailSendingTests(BaseTestCase):
         run = SettlementRun.objects.get(year=2026, month=6)
         self.assertEqual(run.send_count, 2)
         self.assertIsNotNone(run.last_sent_at)
+
+
+class SubstitutePaymentEmailTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        GamePrice.objects.create(amount=Decimal("20.00"), valid_from=date(2026, 1, 1))
+        for user in (self.user_1_per, self.user_2_per, self.user_3_per):
+            user.email = f"{user.username}@example.com"
+            user.save()
+
+        self.game = Game.objects.create(when=date(2026, 7, 5), status=GameStatus.PLANNED)
+        # user_1 cancelled, user_2 confirmed as their substitute
+        BookingHistoryForGame.objects.create(
+            game=self.game, player=self.user_1_per.player, status=StatusChoices.CANCELLED
+        )
+        BookingHistoryForGame.objects.create(
+            game=self.game, player=self.user_2_per.player, status=StatusChoices.CONFIRMED
+        )
+        self.status_update_url = reverse(
+            "game_status_update_url", args=[self.game.id]
+        )
+
+    def test_substitute_gets_email_when_game_marked_played(self):
+        self.client.force_login(self.superuser)
+        self.client.post(self.status_update_url, {"status": GameStatus.PLAYED})
+
+        self.assertEqual(len(mail.outbox), 1)
+        sent = mail.outbox[0]
+        self.assertEqual(sent.to, [self.user_2_per.email])
+        self.assertIn("bolek", sent.body)
+        self.assertIn("20.00", sent.body)
+
+    def test_cancelled_player_without_substitute_gets_no_email(self):
+        BookingHistoryForGame.objects.create(
+            game=self.game, player=self.user_3_per.player, status=StatusChoices.CANCELLED
+        )
+        self.client.force_login(self.superuser)
+        self.client.post(self.status_update_url, {"status": GameStatus.PLAYED})
+
+        recipients = {email.to[0] for email in mail.outbox}
+        self.assertEqual(recipients, {self.user_2_per.email})
+
+    def test_no_email_sent_when_price_is_missing(self):
+        GamePrice.objects.all().delete()
+        self.client.force_login(self.superuser)
+        self.client.post(self.status_update_url, {"status": GameStatus.PLAYED})
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_resaving_played_status_does_not_resend_email(self):
+        self.client.force_login(self.superuser)
+        self.client.post(self.status_update_url, {"status": GameStatus.PLAYED})
+        self.client.post(
+            self.status_update_url,
+            {"status": GameStatus.PLAYED, "description": "updated"},
+        )
+
+        self.assertEqual(len(mail.outbox), 1)

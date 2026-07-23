@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -144,6 +146,40 @@ def send_player_status_update_email_to_admins(player: Player, game: Game, status
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
+
+
+def send_substitute_payment_email(
+    substitute: Player, cancelled_player: Player, game: Game, amount: Decimal
+) -> None:
+    """
+    Notify a player who was confirmed to fill a cancelled player's slot that
+    they played on the substitute's behalf and owe them the game price.
+    """
+    substitute_display_name = player_helper.get_display_name(substitute)
+    cancelled_display_name = player_helper.get_display_name(cancelled_player)
+    subject = f"Rozliczenie za mecz {game.when}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [substitute.user.email]
+
+    text_content = (
+        f"Hello {substitute_display_name}, on {game.when} you played instead of "
+        f"{cancelled_display_name}. Please send them {amount}."
+    )
+
+    html_content = render_to_string(
+        "emails/substitute_payment.html",
+        {
+            "substitute_display_name": substitute_display_name,
+            "cancelled_display_name": cancelled_display_name,
+            "cancelled_player": cancelled_player,
+            "game": game,
+            "amount": amount,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 
 def send_settlement_email(charge: PlayerCharge) -> None:

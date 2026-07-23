@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rozliczenie za mecz</title>
+</head>
+<body>
+    <h3>Rozliczenie za mecz {{ game.when|date:"d M Y" }}</h3>
+
+    <p>Hello {{ substitute_display_name }},</p>
+
+    <p>You played on {{ game.when|date:"d M Y" }} instead of <strong>{{ cancelled_display_name }}</strong>.</p>
+
+    <p>Please send them the game price: <strong>{{ amount }}</strong>
+    {% if cancelled_player.mobile_number %}
+        (mobile: {{ cancelled_player.mobile_number }})
+    {% endif %}
+    </p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>
