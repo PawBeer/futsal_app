@@ -8,6 +8,11 @@ Installing Python libraries from a requirements file:
 pip install -r requirements.txt
 ```
 
+For a full development environment (includes black, pylint, pytest):
+```bash
+pip install -r requirements-devel.txt
+```
+
 Application description:
 
 The purpose of the Futsal App is to manage games taking place on a specific date, in which 10 players participate. 
