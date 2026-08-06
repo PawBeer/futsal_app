@@ -156,3 +156,33 @@ class PlayerCharge(models.Model):
 
     def __str__(self):
         return f"{self.player} - {self.amount} ({self.settlement_run})"
+
+
+class SubstitutePayment(models.Model):
+    """
+    Tracks the peer-to-peer payment for one game: a substitute (confirmed)
+    player owes the cancelled player they filled in for the game price.
+    """
+
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="substitute_payments"
+    )
+    cancelled_player = models.ForeignKey(
+        Player, on_delete=models.CASCADE, related_name="received_substitute_payments"
+    )
+    substitute_player = models.ForeignKey(
+        Player, on_delete=models.CASCADE, related_name="sent_substitute_payments"
+    )
+    sent_at = models.DateTimeField(null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["game", "cancelled_player", "substitute_player"],
+                name="unique_substitute_payment_per_game",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.substitute_player} -> {self.cancelled_player} ({self.game})"

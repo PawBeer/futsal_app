@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime
 from typing import Iterable
 
@@ -34,6 +35,7 @@ from .models import (
     PlayerStatus,
     SettlementRun,
     StatusChoices,
+    SubstitutePayment,
     User,
 )
 
@@ -84,6 +86,22 @@ def _player_should_see_reserved_table(
     return player in players
 
 
+def _pair_cancelled_with_substitutes_and_payment(game: Game):
+    pairs = game_helper.pair_cancelled_with_substitutes(game)
+    payments = {
+        (payment.cancelled_player_id, payment.substitute_player_id): payment
+        for payment in SubstitutePayment.objects.filter(game=game)
+    }
+    return [
+        (
+            cancelled_player,
+            substitute,
+            payments.get((cancelled_player.id, substitute.id)) if substitute else None,
+        )
+        for cancelled_player, substitute in pairs
+    ]
+
+
 @login_required
 def game_details(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -125,7 +143,7 @@ def game_details(request, game_id):
             + len(confirmed_players)
             + len(awaiting_players),
             "number_of_confirmed_players": len(confirmed_players),
-            "cancelled_with_substitutes": game_helper.pair_cancelled_with_substitutes(
+            "cancelled_with_substitutes": _pair_cancelled_with_substitutes_and_payment(
                 game
             ),
             "number_of_cancelled_players": len(cancelled_players),
@@ -285,6 +303,50 @@ def game_player_status_update(request, game_id):
         send_player_status_update_email_to_admins(player, found_game, new_status)
 
     _apply_transition_from_awaiting_to_confirmed(found_game)
+
+    return redirect("game_details_url", game_id=game_id)
+
+
+def _get_substitute_payment_pair(request):
+    substitute = get_object_or_404(Player, pk=request.POST.get("substitute_id"))
+    cancelled_player = get_object_or_404(Player, pk=request.POST.get("cancelled_id"))
+    return substitute, cancelled_player
+
+
+@login_required
+@require_POST
+def toggle_substitute_payment_sent(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    substitute, cancelled_player = _get_substitute_payment_pair(request)
+
+    if not (request.user.is_superuser or substitute.user == request.user):
+        messages.error(request, "You can only mark your own payment as sent.")
+        return redirect("game_details_url", game_id=game_id)
+
+    payment, _created = SubstitutePayment.objects.get_or_create(
+        game=game, cancelled_player=cancelled_player, substitute_player=substitute
+    )
+    payment.sent_at = None if payment.sent_at else timezone.now()
+    payment.save(update_fields=["sent_at"])
+
+    return redirect("game_details_url", game_id=game_id)
+
+
+@login_required
+@require_POST
+def toggle_substitute_payment_confirmed(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    substitute, cancelled_player = _get_substitute_payment_pair(request)
+
+    if not (request.user.is_superuser or cancelled_player.user == request.user):
+        messages.error(request, "You can only confirm payments sent to you.")
+        return redirect("game_details_url", game_id=game_id)
+
+    payment, _created = SubstitutePayment.objects.get_or_create(
+        game=game, cancelled_player=cancelled_player, substitute_player=substitute
+    )
+    payment.confirmed_at = None if payment.confirmed_at else timezone.now()
+    payment.save(update_fields=["confirmed_at"])
 
     return redirect("game_details_url", game_id=game_id)
 
@@ -641,17 +703,35 @@ def _is_accountant_or_superuser(user):
 accountant_required = user_passes_test(_is_accountant_or_superuser)
 
 
+def _default_period():
+    """Last calendar month, since settlements are typically run in arrears."""
+    today = timezone.now().date()
+    if today.month == 1:
+        return today.year - 1, 12
+    return today.year, today.month - 1
+
+
 def _resolve_period(request, source=None):
     source = source if source is not None else request.GET
-    today = timezone.now().date()
+    default_year, default_month = _default_period()
     try:
-        year = int(source.get("year", today.year))
-        month = int(source.get("month", today.month))
+        year = int(source.get("year", default_year))
+        month = int(source.get("month", default_month))
     except (TypeError, ValueError):
-        year, month = today.year, today.month
+        year, month = default_year, default_month
     if not 1 <= month <= 12:
-        month = today.month
+        month = default_month
     return year, month
+
+
+def _period_choices():
+    """Year and (number, name) month choices for the period-picker dropdowns."""
+    today = timezone.now().date()
+    earliest_game = Game.objects.order_by("when").first()
+    start_year = min(earliest_game.when.year, today.year) if earliest_game else today.year
+    year_choices = list(range(start_year, today.year + 2))
+    month_choices = list(enumerate(calendar.month_name))[1:]
+    return year_choices, month_choices
 
 
 @login_required
@@ -666,6 +746,7 @@ def settlement_overview(request):
         if run
         else []
     )
+    year_choices, month_choices = _period_choices()
 
     return render(
         request,
@@ -673,6 +754,8 @@ def settlement_overview(request):
         {
             "year": year,
             "month": month,
+            "year_choices": year_choices,
+            "month_choices": month_choices,
             "settlements": settlements,
             "missing_price_games": missing_price_games,
             "run": run,
@@ -728,9 +811,17 @@ def who_paid(request):
         if run
         else []
     )
+    year_choices, month_choices = _period_choices()
 
     return render(
         request,
         "games/who_paid.html",
-        {"year": year, "month": month, "run": run, "charges": charges},
+        {
+            "year": year,
+            "month": month,
+            "year_choices": year_choices,
+            "month_choices": month_choices,
+            "run": run,
+            "charges": charges,
+        },
     )

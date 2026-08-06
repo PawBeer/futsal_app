@@ -18,6 +18,16 @@ urlpatterns = [
         views.game_player_status_update,
         name="game_player_status_update_url",
     ),
+    path(
+        "game/<int:game_id>/substitute-payment/sent/",
+        views.toggle_substitute_payment_sent,
+        name="toggle_substitute_payment_sent_url",
+    ),
+    path(
+        "game/<int:game_id>/substitute-payment/confirmed/",
+        views.toggle_substitute_payment_confirmed,
+        name="toggle_substitute_payment_confirmed_url",
+    ),
     path("players/", views.all_players, name="all_players_url"),
     path("players/<player_id>/", views.player_details, name="player_details_url"),
     path("add_player", views.add_player, name="add_player_url"),

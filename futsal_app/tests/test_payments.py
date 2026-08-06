@@ -13,6 +13,7 @@ from games.models import (
     GameStatus,
     SettlementRun,
     StatusChoices,
+    SubstitutePayment,
 )
 
 from .base import BaseTestCase
@@ -381,3 +382,110 @@ class SubstitutePaymentEmailTests(BaseTestCase):
         )
 
         self.assertEqual(len(mail.outbox), 1)
+
+
+class SubstitutePaymentTogglingTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.game = Game.objects.create(when=date(2026, 7, 5), status=GameStatus.PLAYED)
+        self.cancelled_player = self.user_1_per.player
+        self.substitute_player = self.user_2_per.player
+        BookingHistoryForGame.objects.create(
+            game=self.game,
+            player=self.cancelled_player,
+            status=StatusChoices.CANCELLED,
+        )
+        BookingHistoryForGame.objects.create(
+            game=self.game,
+            player=self.substitute_player,
+            status=StatusChoices.CONFIRMED,
+        )
+        self.sent_url = reverse("toggle_substitute_payment_sent_url", args=[self.game.id])
+        self.confirmed_url = reverse(
+            "toggle_substitute_payment_confirmed_url", args=[self.game.id]
+        )
+        self.post_data = {
+            "substitute_id": self.substitute_player.id,
+            "cancelled_id": self.cancelled_player.id,
+        }
+
+    def test_substitute_can_mark_payment_as_sent(self):
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+
+        payment = SubstitutePayment.objects.get(
+            game=self.game,
+            cancelled_player=self.cancelled_player,
+            substitute_player=self.substitute_player,
+        )
+        self.assertIsNotNone(payment.sent_at)
+        self.assertIsNone(payment.confirmed_at)
+
+    def test_toggling_sent_again_clears_it(self):
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+        self.client.post(self.sent_url, self.post_data)
+
+        payment = SubstitutePayment.objects.get(
+            game=self.game,
+            cancelled_player=self.cancelled_player,
+            substitute_player=self.substitute_player,
+        )
+        self.assertIsNone(payment.sent_at)
+
+    def test_cancelled_player_can_confirm_payment(self):
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        payment = SubstitutePayment.objects.get(
+            game=self.game,
+            cancelled_player=self.cancelled_player,
+            substitute_player=self.substitute_player,
+        )
+        self.assertIsNotNone(payment.confirmed_at)
+
+    def test_other_player_cannot_mark_sent_on_someones_behalf(self):
+        self.client.force_login(self.user_3_per)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.assertFalse(SubstitutePayment.objects.exists())
+
+    def test_other_player_cannot_confirm_on_someones_behalf(self):
+        self.client.force_login(self.user_3_per)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        self.assertFalse(SubstitutePayment.objects.exists())
+
+    def test_superuser_can_toggle_both_sides(self):
+        self.client.force_login(self.superuser)
+        self.client.post(self.sent_url, self.post_data)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        payment = SubstitutePayment.objects.get(
+            game=self.game,
+            cancelled_player=self.cancelled_player,
+            substitute_player=self.substitute_player,
+        )
+        self.assertIsNotNone(payment.sent_at)
+        self.assertIsNotNone(payment.confirmed_at)
+
+    def test_game_details_shows_status_column_for_played_game(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("game_details_url", args=[self.game.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Awaiting")
+
+        self.client.post(self.sent_url, self.post_data)
+        response = self.client.get(reverse("game_details_url", args=[self.game.id]))
+        self.assertContains(response, "Sent")
+
+        self.client.post(self.confirmed_url, self.post_data)
+        response = self.client.get(reverse("game_details_url", args=[self.game.id]))
+        self.assertContains(response, "Confirmed")
+
+    def test_game_details_hides_player_count_circle_for_played_game(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("game_details_url", args=[self.game.id]))
+
+        self.assertNotContains(response, "radial-progress")
