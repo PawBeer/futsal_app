@@ -395,12 +395,10 @@ def player_details(request, player_id):
     if request.method == "POST":
         form_type = request.POST.get("form_type")
 
+        if not request.user.is_superuser:
+            messages.error(request, "You don't have permission to edit this profile.")
+            return redirect("player_details_url", player_id=player.id)
         if form_type == "profile":
-            if not request.user.is_superuser:
-                messages.error(
-                    request, "You don't have permission to edit this profile."
-                )
-                return redirect("player_details_url", player_id=player.id)
             if profile_form.is_valid():
                 new_username = profile_form.cleaned_data.get("username")
                 if (
@@ -728,7 +726,9 @@ def _period_choices():
     """Year and (number, name) month choices for the period-picker dropdowns."""
     today = timezone.now().date()
     earliest_game = Game.objects.order_by("when").first()
-    start_year = min(earliest_game.when.year, today.year) if earliest_game else today.year
+    start_year = (
+        min(earliest_game.when.year, today.year) if earliest_game else today.year
+    )
     year_choices = list(range(start_year, today.year + 2))
     month_choices = list(enumerate(calendar.month_name))[1:]
     return year_choices, month_choices

@@ -68,7 +68,9 @@ class SettlementCalculationTests(BaseTestCase):
             StatusChoices.AWAITING,
         ]:
             with self.subTest(status=status):
-                game = Game.objects.create(when=date(2026, 3, 8), status=GameStatus.PLAYED)
+                game = Game.objects.create(
+                    when=date(2026, 3, 8), status=GameStatus.PLAYED
+                )
                 BookingHistoryForGame.objects.create(
                     game=game, player=self.user_1_per.player, status=status
                 )
@@ -79,8 +81,12 @@ class SettlementCalculationTests(BaseTestCase):
 
     def test_price_change_mid_period_bills_each_game_at_its_own_price(self):
         GamePrice.objects.create(amount=Decimal("25.00"), valid_from=date(2026, 3, 15))
-        game_before = Game.objects.create(when=date(2026, 3, 10), status=GameStatus.PLAYED)
-        game_after = Game.objects.create(when=date(2026, 3, 20), status=GameStatus.PLAYED)
+        game_before = Game.objects.create(
+            when=date(2026, 3, 10), status=GameStatus.PLAYED
+        )
+        game_after = Game.objects.create(
+            when=date(2026, 3, 20), status=GameStatus.PLAYED
+        )
         for game in (game_before, game_after):
             BookingHistoryForGame.objects.create(
                 game=game, player=self.user_1_per.player, status=StatusChoices.PLANNED
@@ -94,7 +100,9 @@ class SettlementCalculationTests(BaseTestCase):
 
     def test_multiple_qualifying_games_are_summed(self):
         game_1 = Game.objects.create(when=date(2026, 3, 3), status=GameStatus.PLAYED)
-        game_2 = Game.objects.create(when=date(2026, 3, 17), status=GameStatus.CANCELLED)
+        game_2 = Game.objects.create(
+            when=date(2026, 3, 17), status=GameStatus.CANCELLED
+        )
         BookingHistoryForGame.objects.create(
             game=game_1, player=self.user_1_per.player, status=StatusChoices.PLANNED
         )
@@ -266,18 +274,14 @@ class ToggleAndWhoPaidViewTests(BaseTestCase):
         self.charge.save()
 
         self.client.force_login(self.user_4_act)
-        response = self.client.get(
-            reverse("who_paid_url"), {"year": 2026, "month": 5}
-        )
+        response = self.client.get(reverse("who_paid_url"), {"year": 2026, "month": 5})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Paid")
 
     def test_who_paid_empty_state_does_not_error(self):
         self.client.force_login(self.user_4_act)
-        response = self.client.get(
-            reverse("who_paid_url"), {"year": 2099, "month": 1}
-        )
+        response = self.client.get(reverse("who_paid_url"), {"year": 2099, "month": 1})
         self.assertEqual(response.status_code, 200)
 
 
@@ -311,9 +315,7 @@ class SettlementEmailSendingTests(BaseTestCase):
 
         self.assertEqual(len(mail.outbox), 2)
         recipients = {email.to[0] for email in mail.outbox}
-        self.assertEqual(
-            recipients, {self.user_1_per.email, self.user_2_per.email}
-        )
+        self.assertEqual(recipients, {self.user_1_per.email, self.user_2_per.email})
 
     def test_resend_grows_outbox_and_increments_send_count(self):
         self.client.force_login(self.user_1_per)
@@ -334,17 +336,21 @@ class SubstitutePaymentEmailTests(BaseTestCase):
             user.email = f"{user.username}@example.com"
             user.save()
 
-        self.game = Game.objects.create(when=date(2026, 7, 5), status=GameStatus.PLANNED)
+        self.game = Game.objects.create(
+            when=date(2026, 7, 5), status=GameStatus.PLANNED
+        )
         # user_1 cancelled, user_2 confirmed as their substitute
         BookingHistoryForGame.objects.create(
-            game=self.game, player=self.user_1_per.player, status=StatusChoices.CANCELLED
+            game=self.game,
+            player=self.user_1_per.player,
+            status=StatusChoices.CANCELLED,
         )
         BookingHistoryForGame.objects.create(
-            game=self.game, player=self.user_2_per.player, status=StatusChoices.CONFIRMED
+            game=self.game,
+            player=self.user_2_per.player,
+            status=StatusChoices.CONFIRMED,
         )
-        self.status_update_url = reverse(
-            "game_status_update_url", args=[self.game.id]
-        )
+        self.status_update_url = reverse("game_status_update_url", args=[self.game.id])
 
     def test_substitute_gets_email_when_game_marked_played(self):
         self.client.force_login(self.superuser)
@@ -358,7 +364,9 @@ class SubstitutePaymentEmailTests(BaseTestCase):
 
     def test_cancelled_player_without_substitute_gets_no_email(self):
         BookingHistoryForGame.objects.create(
-            game=self.game, player=self.user_3_per.player, status=StatusChoices.CANCELLED
+            game=self.game,
+            player=self.user_3_per.player,
+            status=StatusChoices.CANCELLED,
         )
         self.client.force_login(self.superuser)
         self.client.post(self.status_update_url, {"status": GameStatus.PLAYED})
@@ -400,7 +408,9 @@ class SubstitutePaymentTogglingTests(BaseTestCase):
             player=self.substitute_player,
             status=StatusChoices.CONFIRMED,
         )
-        self.sent_url = reverse("toggle_substitute_payment_sent_url", args=[self.game.id])
+        self.sent_url = reverse(
+            "toggle_substitute_payment_sent_url", args=[self.game.id]
+        )
         self.confirmed_url = reverse(
             "toggle_substitute_payment_confirmed_url", args=[self.game.id]
         )
