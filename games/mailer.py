@@ -157,7 +157,7 @@ def send_substitute_payment_email(
     """
     substitute_display_name = player_helper.get_display_name(substitute)
     cancelled_display_name = player_helper.get_display_name(cancelled_player)
-    subject = f"Rozliczenie za mecz {game.when}"
+    subject = f"Settlement for the game on {game.when}"
     from_email = settings.DEFAULT_FROM_EMAIL
     to = [substitute.user.email]
 
@@ -192,7 +192,7 @@ def send_substitute_payment_confirmation_request_email(
     substitute_display_name = player_helper.get_display_name(payment.substitute_player)
     cancelled_display_name = player_helper.get_display_name(payment.cancelled_player)
     game = payment.game
-    subject = f"Potwierdź płatność za mecz {game.when}"
+    subject = f"Confirm payment for the game on {game.when}"
     from_email = settings.DEFAULT_FROM_EMAIL
     to = [payment.cancelled_player.user.email]
 
@@ -219,7 +219,7 @@ def send_substitute_payment_confirmation_request_email(
 def send_settlement_email(charge: PlayerCharge) -> None:
     run = charge.settlement_run
     player_display_name = player_helper.get_display_name(charge.player)
-    subject = f"Rozliczenie za {run.month:02d}/{run.year}"
+    subject = f"Settlement for {run.month:02d}/{run.year}"
     from_email = settings.DEFAULT_FROM_EMAIL
     to = [charge.player.user.email]
 
