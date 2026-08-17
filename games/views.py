@@ -21,6 +21,7 @@ from games.mailer import (
     send_player_status_update_email,
     send_player_status_update_email_to_admins,
     send_settlement_email,
+    send_substitute_payment_confirmation_request_email,
     send_substitute_payment_email,
     send_welcome_email,
 )
@@ -326,8 +327,17 @@ def toggle_substitute_payment_sent(request, game_id):
     payment, _created = SubstitutePayment.objects.get_or_create(
         game=game, cancelled_player=cancelled_player, substitute_player=substitute
     )
-    payment.sent_at = None if payment.sent_at else timezone.now()
+    marking_as_sent = payment.sent_at is None
+    payment.sent_at = timezone.now() if marking_as_sent else None
     payment.save(update_fields=["sent_at"])
+
+    if (
+        marking_as_sent
+        and not payment.confirmed_at
+        and cancelled_player.user
+        and cancelled_player.user.email
+    ):
+        send_substitute_payment_confirmation_request_email(payment)
 
     return redirect("game_details_url", game_id=game_id)
 
@@ -773,6 +783,8 @@ def send_settlement(request):
 
     sent = 0
     for charge in run.charges.select_related("player__user"):
+        if charge.is_paid:
+            continue
         if not charge.player.user or not charge.player.user.email:
             continue
         send_settlement_email(charge)

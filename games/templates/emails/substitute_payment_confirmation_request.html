@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Potwierdź płatność za mecz</title>
+</head>
+<body>
+    <h3>Potwierdź płatność za mecz {{ game.when|date:"d M Y" }}</h3>
+
+    <p>Hello {{ cancelled_display_name }},</p>
+
+    <p><strong>{{ substitute_display_name }}</strong> marked the payment for the game on
+    {{ game.when|date:"d M Y" }} (the one they played instead of you) as sent.</p>
+
+    <p>Please check whether the payment has arrived, and if so, log in to the app and confirm it.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

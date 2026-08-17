@@ -317,6 +317,19 @@ class SettlementEmailSendingTests(BaseTestCase):
         recipients = {email.to[0] for email in mail.outbox}
         self.assertEqual(recipients, {self.user_1_per.email, self.user_2_per.email})
 
+    def test_send_emails_skips_already_paid_players(self):
+        run = settlement_helper.persist_settlement(2026, 6)
+        charge = run.charges.get(player=self.user_1_per.player)
+        charge.is_paid = True
+        charge.save()
+
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.send_url, {"year": 2026, "month": 6})
+
+        self.assertEqual(len(mail.outbox), 1)
+        recipients = {email.to[0] for email in mail.outbox}
+        self.assertEqual(recipients, {self.user_2_per.email})
+
     def test_resend_grows_outbox_and_increments_send_count(self):
         self.client.force_login(self.user_1_per)
         self.client.post(self.send_url, {"year": 2026, "month": 6})
@@ -499,3 +512,48 @@ class SubstitutePaymentTogglingTests(BaseTestCase):
         response = self.client.get(reverse("game_details_url", args=[self.game.id]))
 
         self.assertNotContains(response, "radial-progress")
+
+    def test_marking_sent_emails_cancelled_player_to_confirm(self):
+        self.user_1_per.email = "bolek@example.com"
+        self.user_1_per.save()
+
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.user_1_per.email])
+        self.assertIn("confirm", mail.outbox[0].body.lower())
+
+    def test_toggling_sent_off_does_not_email(self):
+        self.user_1_per.email = "bolek@example.com"
+        self.user_1_per.save()
+
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_marking_sent_without_cancelled_player_email_sends_no_email(self):
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_resending_after_already_confirmed_does_not_email(self):
+        self.user_1_per.email = "bolek@example.com"
+        self.user_1_per.save()
+
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        mail.outbox.clear()
+
+        self.client.force_login(self.user_2_per)
+        self.client.post(self.sent_url, self.post_data)
+        self.client.post(self.sent_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 0)

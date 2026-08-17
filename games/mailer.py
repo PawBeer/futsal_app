@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 
 from futsal_app import settings
 from games.helpers import game_helper, player_helper
-from games.models import Game, Player, PlayerCharge
+from games.models import Game, Player, PlayerCharge, SubstitutePayment
 
 User = get_user_model()
 
@@ -174,6 +174,40 @@ def send_substitute_payment_email(
             "cancelled_player": cancelled_player,
             "game": game,
             "amount": amount,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_substitute_payment_confirmation_request_email(
+    payment: SubstitutePayment,
+) -> None:
+    """
+    Notify a cancelled player that their substitute marked the game payment
+    as sent, prompting them to confirm receipt in the app.
+    """
+    substitute_display_name = player_helper.get_display_name(payment.substitute_player)
+    cancelled_display_name = player_helper.get_display_name(payment.cancelled_player)
+    game = payment.game
+    subject = f"Potwierdź płatność za mecz {game.when}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [payment.cancelled_player.user.email]
+
+    text_content = (
+        f"Hello {cancelled_display_name}, {substitute_display_name} marked the payment "
+        f"for the game on {game.when} as sent. Please check whether it has arrived, and "
+        f"if so, confirm it in the app."
+    )
+
+    html_content = render_to_string(
+        "emails/substitute_payment_confirmation_request.html",
+        {
+            "substitute_display_name": substitute_display_name,
+            "cancelled_display_name": cancelled_display_name,
+            "game": game,
         },
     )
 
