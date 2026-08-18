@@ -1,0 +1,110 @@
+{% extends 'index.html' %}
+{% load player_extras %}
+{% block page_title %}
+    Accountant panel
+{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-4">
+    <form method="get" class="flex items-center gap-2">
+        <label for="month" class="text-sm text-base-content/70">Month:</label>
+        <select id="month" name="month" class="select select-sm select-bordered w-36">
+            {% for month_number, month_name in month_choices %}
+                <option value="{{ month_number }}" {% if month_number == month %}selected{% endif %}>
+                    {{ month_name }}
+                </option>
+            {% endfor %}
+        </select>
+        <label for="year" class="text-sm text-base-content/70">Year:</label>
+        <select id="year" name="year" class="select select-sm select-bordered w-24">
+            {% for year_choice in year_choices %}
+                <option value="{{ year_choice }}" {% if year_choice == year %}selected{% endif %}>
+                    {{ year_choice }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-secondary">Show</button>
+    </form>
+</div>
+
+{% if missing_price_games %}
+<div class="alert alert-warning mb-4">
+    <span>
+        No price configured for {{ missing_price_games|length }} game(s) in this period
+        (set one in the admin under Payments &rarr; Game prices).
+    </span>
+</div>
+{% endif %}
+
+{% if run %}
+<p class="text-sm text-base-content/50 mb-4">
+    This period was already sent {{ run.send_count }} time(s){% if run.last_sent_at %}, last on {{ run.last_sent_at|date:'d M Y, H:i' }}{% endif %}.
+    Sending again will re-email all currently qualifying players.
+</p>
+{% endif %}
+
+<div class="card shadow-lg mb-6 p-4">
+    <div class="overflow-x-auto">
+        <table class="table w-full">
+            <thead>
+            <tr>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Games</th>
+                <th class="font-semibold text-base-content/70 uppercase tracking-wide">Amount</th>
+                {% if run %}
+                    <th class="font-semibold text-base-content/70 uppercase tracking-wide">Paid</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for settlement in settlements %}
+                <tr class="hover">
+                    <td class="py-2 text-sm">
+                        <a href="{% url 'player_details_url' player_id=settlement.player.id %}"
+                           class="link link-primary font-medium">
+                            {{ settlement.player|get_display_name }}
+                        </a>
+                    </td>
+                    <td class="py-2 text-sm">{{ settlement.game_count }}</td>
+                    <td class="py-2 text-sm">{{ settlement.total }}</td>
+                    {% if run %}
+                        <td class="py-2 text-sm">
+                            {% for charge in charges %}
+                                {% if charge.player_id == settlement.player.id %}
+                                    <form method="post" action="{% url 'toggle_paid_url' charge_id=charge.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="year" value="{{ year }}">
+                                        <input type="hidden" name="month" value="{{ month }}">
+                                        <button type="submit"
+                                                class="btn btn-xs {% if charge.is_paid %}btn-success{% else %}btn-outline{% endif %}">
+                                            {% if charge.is_paid %}Paid{% else %}Unpaid{% endif %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="py-4 text-sm text-center text-base-content/50">
+                        No qualifying games/players for this period.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<form method="post" action="{% url 'send_settlement_url' %}">
+    {% csrf_token %}
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <button type="submit" class="btn btn-primary" {% if not settlements %}disabled{% endif %}>
+        Send settlement
+    </button>
+</form>
+
+{% endblock content %}

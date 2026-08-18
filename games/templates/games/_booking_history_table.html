@@ -1,0 +1,44 @@
+{% load player_extras %}
+<div class="divide-y divide-base-200">
+    <div class="bg-base-200 px-6 py-4 rounded-t-xl">
+        <h3 class="text-xl font-semibold text-base-content text-center">
+            Booking History
+        </h3>
+    </div>
+    <div class="overflow-x-auto rounded-b-xl">
+        <table class="table w-full">
+            <thead>
+            <tr>
+                <th class="w-40 text-left font-semibold text-base-content/70 uppercase tracking-wide">
+                    Player
+                </th>
+                <th class="w-32 text-left font-semibold text-base-content/70 uppercase tracking-wide">
+                    Status
+                </th>
+                <th class="w-40 text-left font-semibold text-base-content/70 uppercase tracking-wide">
+                    Created
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for record in booking_history %}
+                <tr class="hover">
+                    <td class="font-medium py-3">
+                        <a href="{% url 'player_details_url' player_id=record.player.pk %}"
+                           class="link link-primary font-medium">
+                            {{ record.player|get_display_name }}
+                        </a>
+                    </td>
+                    <td class="py-3 font-medium text-base-content/90">
+                        {{ record.status|title }}
+                    </td>
+                    <td class="py-3 text-sm text-base-content/80">
+                        {{ record.creation_date|date:'d M Y, H:i:s' }}
+                    </td>
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

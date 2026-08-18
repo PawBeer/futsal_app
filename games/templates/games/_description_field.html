@@ -1,0 +1,11 @@
+<label for="description" class="label">
+    <span class="label-text font-semibold text-base-content/90">Description</span>
+</label>
+{% if user.is_superuser %}
+    <textarea id="description" name="description" rows="4"
+              class="textarea textarea-bordered w-full resize-vertical">{{ game.description }}</textarea>
+{% else %}
+    <div class="font-medium text-base-content/90 bg-base-200 px-4 py-3 rounded-lg cursor-default select-none min-h-[100px] flex items-start leading-relaxed pt-2">
+        {{ game.description|default:"Upcoming futsal match" }}
+    </div>
+{% endif %}

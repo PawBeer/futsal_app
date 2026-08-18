@@ -7,10 +7,10 @@
 {% block content %}
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {% for game in games %}
-            <div class="card bg-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
+            <div class="card bg-base-100 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
                  data-tile-id="{{ game.id }}">
-                <a href="{% url 'game_details_url' game_id=game.id %}" class="block w-full h-full">
-                    <div class="card-body p-6">
+                <div class="card-body p-6">
+                    <a href="{% url 'game_details_url' game_id=game.id %}" class="block cursor-pointer">
                         <h2 class="card-title text-primary text-xl">{{ game.when|date:'d M Y' }}
                             {% if game.status == 'Cancelled' %}
                                 <div class="badge badge-error badge-lg px-4 py-2 shadow-lg text-error-content font-bold tracking-wide">
@@ -21,20 +21,20 @@
             {{ game.number_of_booked_players }}/10
         </span>
                         </h2>
-                        <p class="text-sm text-gray-600">{{ game.description|default:"Upcoming futsal match" }}</p>
-                        {% if user.is_authenticated and user.is_superuser %}
-                            <div class="card-actions justify-end mt-4">
-                                <a href="{% url 'game_remove_url' game_id=game.id %}"
-                                   class="btn btn-error btn-outline btn-sm px-4 text-center no-underline">
-                                    Remove
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </a>
+                        <p class="text-sm text-base-content/70">{{ game.description|default:"Upcoming futsal match" }}</p>
+                    </a>
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <div class="card-actions justify-end mt-4">
+                            <a href="{% url 'game_remove_url' game_id=game.id %}"
+                               class="btn btn-error btn-outline btn-sm px-4 text-center no-underline">
+                                Remove
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         {% empty %}
-            <p class="col-span-full text-center text-gray-500 py-8">No upcoming games scheduled.</p>
+            <p class="col-span-full text-center text-base-content/60 py-8">No upcoming games scheduled.</p>
         {% endfor %}
     </div>
 {% endblock %}

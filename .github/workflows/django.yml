@@ -30,5 +30,7 @@ jobs:
         black --check .
         pylint --fail-under=9.5 games futsal_app
     - name: Run Tests
+      env:
+        PASSWORD_HASHERS: django.contrib.auth.hashers.MD5PasswordHasher
       run: |
         python manage.py test

@@ -18,12 +18,30 @@ urlpatterns = [
         views.game_player_status_update,
         name="game_player_status_update_url",
     ),
+    path(
+        "game/<int:game_id>/substitute-payment/sent/",
+        views.toggle_substitute_payment_sent,
+        name="toggle_substitute_payment_sent_url",
+    ),
+    path(
+        "game/<int:game_id>/substitute-payment/confirmed/",
+        views.toggle_substitute_payment_confirmed,
+        name="toggle_substitute_payment_confirmed_url",
+    ),
     path("players/", views.all_players, name="all_players_url"),
     path("players/<player_id>/", views.player_details, name="player_details_url"),
     path("add_player", views.add_player, name="add_player_url"),
     path("add_game", views.add_game, name="add_game_url"),
     path("add_absence", views.add_absence, name="add_absence_url"),
     path("booking_history/", views.booking_history, name="booking_history_url"),
+    path("payments/", views.settlement_overview, name="settlement_overview_url"),
+    path("payments/send/", views.send_settlement, name="send_settlement_url"),
+    path(
+        "payments/charge/<int:charge_id>/toggle-paid/",
+        views.toggle_paid,
+        name="toggle_paid_url",
+    ),
+    path("payments/who-paid/", views.who_paid, name="who_paid_url"),
     path("logout/", LogoutView.as_view(next_page="/accounts/login"), name="logout_url"),
     path("login/", LoginView.as_view(next_page="next_games_url"), name="login_url"),
     path(
@@ -31,4 +49,6 @@ urlpatterns = [
         views.check_username_and_email,
         name="check_username_and_email",
     ),
+    path("chat/messages/", views.chat_messages, name="chat_messages_url"),
+    path("chat/send/", views.chat_send, name="chat_send_url"),
 ]
