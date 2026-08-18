@@ -28,6 +28,7 @@ from games.mailer import (
 
 from .models import (
     BookingHistoryForGame,
+    ChatMessage,
     Game,
     GameStatus,
     Player,
@@ -701,6 +702,49 @@ def add_absence(request):
     )
 
 
+CHAT_HISTORY_LIMIT = 50
+CHAT_MESSAGE_MAX_LENGTH = 1000
+
+
+def _serialize_chat_message(chat_message, request_user):
+    return {
+        "id": chat_message.id,
+        "author": player_helper.get_display_name_for_user(chat_message.user),
+        "message": chat_message.message,
+        "created_at": timezone.localtime(chat_message.created_at).strftime("%H:%M"),
+        "is_own": chat_message.user_id == request_user.id,
+    }
+
+
+@login_required
+def chat_messages(request):
+    since_id = request.GET.get("since_id")
+
+    if since_id is None:
+        found_messages = list(
+            ChatMessage.objects.select_related("user", "user__player").order_by("-id")[
+                :CHAT_HISTORY_LIMIT
+            ]
+        )
+        found_messages.reverse()
+    else:
+        try:
+            since_id = int(since_id)
+        except ValueError:
+            since_id = 0
+        found_messages = ChatMessage.objects.select_related(
+            "user", "user__player"
+        ).filter(id__gt=since_id)
+
+    return JsonResponse(
+        {
+            "messages": [
+                _serialize_chat_message(m, request.user) for m in found_messages
+            ]
+        }
+    )
+
+
 def _is_accountant_or_superuser(user):
     if user.is_superuser:
         return True
@@ -772,6 +816,19 @@ def settlement_overview(request):
             "charges": charges,
         },
     )
+
+
+@login_required
+@require_POST
+def chat_send(request):
+    text = request.POST.get("message", "").strip()
+    if not text:
+        return JsonResponse({"error": "Message cannot be empty."}, status=400)
+
+    chat_message = ChatMessage.objects.create(
+        user=request.user, message=text[:CHAT_MESSAGE_MAX_LENGTH]
+    )
+    return JsonResponse(_serialize_chat_message(chat_message, request.user))
 
 
 @login_required

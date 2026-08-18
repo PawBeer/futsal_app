@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     BookingHistoryForGame,
+    ChatMessage,
     Game,
     GamePrice,
     Player,
@@ -14,6 +15,12 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     list_display = ("when", "status", "description")
     date_hierarchy = "when"
+
+
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ("user", "message", "created_at")
+    list_filter = ("user",)
+    date_hierarchy = "created_at"
 
 
 class SettlementRunAdmin(admin.ModelAdmin):
@@ -37,6 +44,7 @@ class PlayerChargeAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Game, GameAdmin)
 admin.site.register(BookingHistoryForGame)
+admin.site.register(ChatMessage, ChatMessageAdmin)
 admin.site.register(Player)
 admin.site.register(GamePrice)
 admin.site.register(SettlementRun, SettlementRunAdmin)

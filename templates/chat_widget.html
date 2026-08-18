@@ -1,0 +1,131 @@
+{% if user.is_authenticated %}
+<div id="team-chat-widget" class="fixed bottom-4 right-4 z-50">
+    <input type="checkbox" id="chat-toggle" class="hidden"/>
+    <label for="chat-toggle" id="chat-toggle-btn" class="btn btn-primary btn-circle shadow-lg relative"
+           aria-label="Open team chat">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.06 0-2.077-.162-3.02-.462L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        <span id="chat-unread-badge" class="badge badge-error badge-sm absolute -top-1 -right-1 hidden">0</span>
+    </label>
+
+    <div id="chat-panel" class="hidden flex-col bg-base-100 border border-base-300 rounded-box shadow-xl w-80 h-96 mb-2 absolute bottom-14 right-0">
+        <div class="flex items-center justify-between p-3 border-b border-base-300">
+            <span class="font-semibold">Team Chat</span>
+            <label for="chat-toggle" class="btn btn-ghost btn-xs btn-circle" aria-label="Close chat">&#10005;</label>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm"></div>
+        <form id="chat-form" class="flex gap-2 p-2 border-t border-base-300">
+            {% csrf_token %}
+            <input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…"
+                   class="input input-sm input-bordered flex-1" autocomplete="off"/>
+            <button type="submit" class="btn btn-sm btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const toggle = document.getElementById('chat-toggle');
+        const panel = document.getElementById('chat-panel');
+        const badge = document.getElementById('chat-unread-badge');
+        const messagesEl = document.getElementById('chat-messages');
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('chat-input');
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        const messagesUrl = "{% url 'chat_messages_url' %}";
+        const sendUrl = "{% url 'chat_send_url' %}";
+        const POLL_INTERVAL_MS = 4000;
+
+        let lastId = null;
+        let unread = 0;
+
+        function scrollToBottom() {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function renderMessage(msg) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'chat ' + (msg.is_own ? 'chat-end' : 'chat-start');
+
+            const header = document.createElement('div');
+            header.className = 'chat-header text-xs opacity-70';
+            header.textContent = msg.author + ' ';
+
+            const time = document.createElement('time');
+            time.className = 'opacity-50';
+            time.textContent = msg.created_at;
+            header.appendChild(time);
+
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble chat-bubble-sm';
+            bubble.textContent = msg.message;
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(bubble);
+            messagesEl.appendChild(wrapper);
+        }
+
+        function poll() {
+            const url = lastId === null ? messagesUrl : `${messagesUrl}?since_id=${lastId}`;
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.messages.length) return;
+                    const panelOpen = toggle.checked;
+                    data.messages.forEach(msg => {
+                        renderMessage(msg);
+                        lastId = msg.id;
+                        if (!panelOpen && !msg.is_own) {
+                            unread += 1;
+                        }
+                    });
+                    if (panelOpen) {
+                        scrollToBottom();
+                    } else if (unread > 0) {
+                        badge.textContent = unread;
+                        badge.classList.remove('hidden');
+                    }
+                });
+        }
+
+        toggle.addEventListener('change', function () {
+            panel.classList.toggle('hidden', !this.checked);
+            panel.classList.toggle('flex', this.checked);
+            if (this.checked) {
+                unread = 0;
+                badge.classList.add('hidden');
+                scrollToBottom();
+                input.focus();
+            }
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            fetch(sendUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: new URLSearchParams({message: text}),
+            })
+                .then(res => res.json())
+                .then(msg => {
+                    if (msg.error) return;
+                    renderMessage(msg);
+                    lastId = msg.id;
+                    scrollToBottom();
+                });
+        });
+
+        poll();
+        setInterval(poll, POLL_INTERVAL_MS);
+    })();
+</script>
+{% endif %}
