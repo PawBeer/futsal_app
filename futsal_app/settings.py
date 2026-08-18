@@ -99,6 +99,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+if env("PASSWORD_HASHERS", default=None):
+    PASSWORD_HASHERS = env("PASSWORD_HASHERS").split(",")
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 

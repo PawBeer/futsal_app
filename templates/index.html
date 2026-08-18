@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
     <script type="module" src="https://unpkg.com/cally"></script>
 </head>
-<body class="dark text-gray-700">
+<body class="min-h-screen bg-base-100 text-base-content">
 
 <div class="flex items-center justify-between p-4 bg-base-100 shadow-sm lg:hidden">
     <div class="flex-none">
@@ -65,6 +65,12 @@
     {% endif %}
     <a href="{% url 'past_games_url' %}" class="block py-2 border-b">Past games</a>
     <a href="{% url 'add_absence_url' %}" class="block py-2 border-b">Add absence</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'who_paid_url' %}" class="block py-2 border-b">Payments</a>
+    {% endif %}
+    {% if user.is_authenticated and user.player.is_accountant or user.is_superuser %}
+        <a href="{% url 'settlement_overview_url' %}" class="block py-2 border-b">Accountant panel</a>
+    {% endif %}
     {% if user.is_authenticated and user.is_superuser %}
         <a href="{% url 'booking_history_url' %}" class="block py-2 border-b">Booking history</a>
         <a href="{% url 'add_game_url' %}" class="block py-2 border-b">Add game</a>
@@ -91,6 +97,8 @@
             <a href="{% url 'add_absence_url' %}"
                class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_absence_url' %}btn-active border-accent-content{% endif %}">Add
                 absence</a>
+            <a href="{% url 'who_paid_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'who_paid_url' %}btn-active border-accent-content{% endif %}">Payments</a>
         {% endif %}
         {% if user.is_authenticated and user.is_superuser %}
             <a href="{% url 'booking_history_url' %}"
@@ -99,6 +107,11 @@
         {% endif %}
     </div>
     <div class="flex gap-2 ml-auto">
+        {% if user.is_authenticated and user.player.is_accountant or user.is_superuser %}
+            <a href="{% url 'settlement_overview_url' %}"
+               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'settlement_overview_url' %}btn-active border-accent-content{% endif %}">Accountant
+                panel</a>
+        {% endif %}
         {% if user.is_authenticated and user.is_superuser %}
             <a href="{% url 'add_game_url' %}"
                class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_game_url' %}btn-active border-accent-content{% endif %}">Add

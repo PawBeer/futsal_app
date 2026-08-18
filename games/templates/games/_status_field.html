@@ -1,0 +1,18 @@
+{% load player_extras %}
+<label for="status" class="label">
+    <span class="label-text font-semibold text-base-content/90">Status</span>
+</label>
+{% if user.is_superuser %}
+    <select id="status" name="status" class="select select-bordered w-full">
+        {% for status_option in status_options %}
+            <option value="{{ status_option }}"
+                    {% if status_option == game.status %}selected{% endif %}>
+                {{ status_option }}
+            </option>
+        {% endfor %}
+    </select>
+{% else %}
+    <div class="font-semibold text-base-content/90 bg-base-200 px-4 py-3 rounded-lg cursor-default select-none">
+        {{ game.status }}
+    </div>
+{% endif %}

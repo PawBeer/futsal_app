@@ -26,5 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
+      env:
+        PASSWORD_HASHERS: django.contrib.auth.hashers.MD5PasswordHasher
       run: |
         python manage.py test

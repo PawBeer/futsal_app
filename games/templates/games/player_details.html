@@ -70,6 +70,16 @@
                 </div>
 
                 {% if user.is_authenticated and user.is_superuser %}
+                <div class="form-control mb-4">
+                    <label class="label cursor-pointer justify-center gap-3">
+                        <span class="label-text font-semibold">Accountant</span>
+                        <input type="checkbox" name="is_accountant" class="checkbox"
+                               {% if player.is_accountant %}checked{% endif %}>
+                    </label>
+                </div>
+                {% endif %}
+
+                {% if user.is_authenticated and user.is_superuser %}
                 <div class="form-control pt-4">
                     <button type="submit" class="btn btn-primary w-full max-w-sm mx-auto block shadow-lg hover:shadow-xl">
                         Save Changes

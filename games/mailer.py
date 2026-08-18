@@ -1,10 +1,12 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from futsal_app import settings
 from games.helpers import game_helper, player_helper
-from games.models import Game, Player
+from games.models import Game, Player, PlayerCharge, SubstitutePayment
 
 User = get_user_model()
 
@@ -144,3 +146,97 @@ def send_player_status_update_email_to_admins(player: Player, game: Game, status
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
+
+
+def send_substitute_payment_email(
+    substitute: Player, cancelled_player: Player, game: Game, amount: Decimal
+) -> None:
+    """
+    Notify a player who was confirmed to fill a cancelled player's slot that
+    they played on the substitute's behalf and owe them the game price.
+    """
+    substitute_display_name = player_helper.get_display_name(substitute)
+    cancelled_display_name = player_helper.get_display_name(cancelled_player)
+    subject = f"Settlement for the game on {game.when}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [substitute.user.email]
+
+    text_content = (
+        f"Hello {substitute_display_name}, on {game.when} you played instead of "
+        f"{cancelled_display_name}. Please send them {amount}."
+    )
+
+    html_content = render_to_string(
+        "emails/substitute_payment.html",
+        {
+            "substitute_display_name": substitute_display_name,
+            "cancelled_display_name": cancelled_display_name,
+            "cancelled_player": cancelled_player,
+            "game": game,
+            "amount": amount,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_substitute_payment_confirmation_request_email(
+    payment: SubstitutePayment,
+) -> None:
+    """
+    Notify a cancelled player that their substitute marked the game payment
+    as sent, prompting them to confirm receipt in the app.
+    """
+    substitute_display_name = player_helper.get_display_name(payment.substitute_player)
+    cancelled_display_name = player_helper.get_display_name(payment.cancelled_player)
+    game = payment.game
+    subject = f"Confirm payment for the game on {game.when}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [payment.cancelled_player.user.email]
+
+    text_content = (
+        f"Hello {cancelled_display_name}, {substitute_display_name} marked the payment "
+        f"for the game on {game.when} as sent. Please check whether it has arrived, and "
+        f"if so, confirm it in the app."
+    )
+
+    html_content = render_to_string(
+        "emails/substitute_payment_confirmation_request.html",
+        {
+            "substitute_display_name": substitute_display_name,
+            "cancelled_display_name": cancelled_display_name,
+            "game": game,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_settlement_email(charge: PlayerCharge) -> None:
+    run = charge.settlement_run
+    player_display_name = player_helper.get_display_name(charge.player)
+    subject = f"Settlement for {run.month:02d}/{run.year}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [charge.player.user.email]
+
+    text_content = (
+        f"Hello {player_display_name}, your settlement for {run.month:02d}/{run.year} "
+        f"is {charge.amount} for {charge.game_count} game(s)."
+    )
+
+    html_content = render_to_string(
+        "emails/settlement_email.html",
+        {
+            "player_display_name": player_display_name,
+            "charge": charge,
+            "run": run,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
