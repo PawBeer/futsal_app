@@ -98,7 +98,9 @@ class BookingHistoryForGame(models.Model):
 
 
 class ChatMessage(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_messages")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="chat_messages"
+    )
     message = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -124,6 +126,8 @@ class GoalEvent(models.Model):
     def __str__(self):
         own_goal = " (OG)" if self.own_goal else ""
         return f"{self.game} | {self.scorer}{own_goal} | {self.created_at.strftime('%H:%M:%S')}"
+
+
 class GamePrice(models.Model):
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     valid_from = models.DateField(unique=True)

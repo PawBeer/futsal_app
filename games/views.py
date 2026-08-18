@@ -737,11 +737,7 @@ def chat_messages(request):
         ).filter(id__gt=since_id)
 
     return JsonResponse(
-        {
-            "messages": [
-                _serialize_chat_message(m, request.user) for m in found_messages
-            ]
-        }
+        {"messages": [_serialize_chat_message(m, request.user) for m in found_messages]}
     )
 
 

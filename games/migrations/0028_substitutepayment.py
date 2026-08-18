@@ -7,22 +7,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('games', '0027_gameprice_settlementrun_playercharge'),
+        ("games", "0027_gameprice_settlementrun_playercharge"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SubstitutePayment',
+            name="SubstitutePayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sent_at', models.DateTimeField(blank=True, null=True)),
-                ('confirmed_at', models.DateTimeField(blank=True, null=True)),
-                ('cancelled_player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='received_substitute_payments', to='games.player')),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='substitute_payments', to='games.game')),
-                ('substitute_player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_substitute_payments', to='games.player')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("confirmed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "cancelled_player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="received_substitute_payments",
+                        to="games.player",
+                    ),
+                ),
+                (
+                    "game",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="substitute_payments",
+                        to="games.game",
+                    ),
+                ),
+                (
+                    "substitute_player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sent_substitute_payments",
+                        to="games.player",
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('game', 'cancelled_player', 'substitute_player'), name='unique_substitute_payment_per_game')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("game", "cancelled_player", "substitute_player"),
+                        name="unique_substitute_payment_per_game",
+                    )
+                ],
             },
         ),
     ]
