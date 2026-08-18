@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -96,6 +97,21 @@ class BookingHistoryForGame(models.Model):
         return f"{self.player} - {self.status} on {self.game}"
 
 
+class TeamChoices(models.TextChoices):
+    BLACK = "black", "Black"
+    WHITE = "white", "White"
+
+
+class GoalEvent(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="goals")
+    team = models.CharField(max_length=10, choices=TeamChoices.choices)
+    scorer = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True)
+    own_goal = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        own_goal = " (OG)" if self.own_goal else ""
+        return f"{self.game} | {self.scorer}{own_goal} | {self.created_at.strftime('%H:%M:%S')}"
 class GamePrice(models.Model):
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     valid_from = models.DateField(unique=True)
