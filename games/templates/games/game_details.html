@@ -5,377 +5,155 @@
 {% endblock %}
 
 {% block content %}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-2 max-w-full bg-base-100 rounded-lg shadow-lg">
+    {% if game.status == 'Played' or game.status == 'Cancelled' %}
+        <div class="flex flex-col gap-8 p-2 max-w-full">
 
-        <div class="flex flex-col items-center space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-            <form method="post" action="{% url 'game_status_update_url' game_id=game.id %}"
-                  class="w-full max-w-md space-y-6">
-                {% csrf_token %}
+            <!-- Game details bar (horizontal) -->
+            <div class="bg-base-100 rounded-xl shadow-lg p-6">
+                <form method="post" action="{% url 'game_status_update_url' game_id=game.id %}"
+                      class="space-y-6">
+                    {% csrf_token %}
 
-                <div class="text-center">
-                    <p class="text-xl md:text-3xl lg:text-4xl text-base-content font-bold tracking-tight mb-4">
-                        {{ game.when|date:'d M Y' }}
-                    </p>
-                    <div class="flex justify-center mb-8">
-                        {% if number_of_booked_players > 10 %}
-                            <div class="radial-progress bg-success/10 text-success font-bold text-xl"
-                                 style="--size:120px; --thickness: 8px; --value:100;"
-                                 role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
-                                10+
-                            </div>
-                        {% elif number_of_booked_players == 10 %}
-                            <div class="radial-progress bg-success/10 text-success font-bold text-xl"
-                                 style="--size:120px; --thickness: 8px; --value:100;"
-                                 role="progressbar" aria-valuenow="10">
-                                10
-                            </div>
-                        {% elif number_of_booked_players >= 8 %}
-                            <div class="radial-progress bg-warning/10 text-warning font-bold text-xl"
-                                 style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
-                                 role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
-                                {{ number_of_booked_players }}
-                            </div>
-                        {% else %}
-                            <div class="radial-progress bg-error/10 text-error font-bold text-xl"
-                                 style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
-                                 role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
-                                {{ number_of_booked_players }}
+                    <div class="flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
+                        <div class="text-center md:text-left">
+                            <p class="text-xl md:text-2xl lg:text-3xl text-base-content font-bold tracking-tight">
+                                {{ game.when|date:'d M Y' }}
+                            </p>
+                            {% if game.status != 'Played' %}
+                                <div class="flex justify-center md:justify-start mt-4">
+                                    {% if number_of_booked_players > 10 %}
+                                        <div class="radial-progress bg-success/10 text-success font-bold text-lg"
+                                             style="--size:90px; --thickness: 6px; --value:100;"
+                                             role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                            10+
+                                        </div>
+                                    {% elif number_of_booked_players == 10 %}
+                                        <div class="radial-progress bg-success/10 text-success font-bold text-lg"
+                                             style="--size:90px; --thickness: 6px; --value:100;"
+                                             role="progressbar" aria-valuenow="10">
+                                            10
+                                        </div>
+                                    {% elif number_of_booked_players >= 8 %}
+                                        <div class="radial-progress bg-warning/10 text-warning font-bold text-lg"
+                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                             role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                            {{ number_of_booked_players }}
+                                        </div>
+                                    {% else %}
+                                        <div class="radial-progress bg-error/10 text-error font-bold text-lg"
+                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                             role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                            {{ number_of_booked_players }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-control flex-1">
+                            {% include 'games/_status_field.html' %}
+                        </div>
+
+                        <div class="form-control flex-[2]">
+                            {% include 'games/_description_field.html' %}
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <div class="flex justify-end">
+                            <button type="submit" class="btn btn-primary shadow-lg hover:shadow-xl">
+                                Update Game Details
+                            </button>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Planned Players + Reserve List | Booking History -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                    {% include 'games/_planned_players_table.html' %}
+                    {% include 'games/_reserve_list_table.html' %}
+                </div>
+
+                <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                    {% include 'games/_booking_history_table.html' %}
+                </div>
+            </div>
+
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-2 max-w-full bg-base-100 rounded-lg shadow-lg">
+
+            <div class="flex flex-col items-center space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                <form method="post" action="{% url 'game_status_update_url' game_id=game.id %}"
+                      class="w-full max-w-md space-y-6">
+                    {% csrf_token %}
+
+                    <div class="text-center">
+                        <p class="text-xl md:text-3xl lg:text-4xl text-base-content font-bold tracking-tight mb-4">
+                            {{ game.when|date:'d M Y' }}
+                        </p>
+                        {% if game.status != 'Played' %}
+                            <div class="flex justify-center mb-8">
+                                {% if number_of_booked_players > 10 %}
+                                    <div class="radial-progress bg-success/10 text-success font-bold text-xl"
+                                         style="--size:120px; --thickness: 8px; --value:100;"
+                                         role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                        10+
+                                    </div>
+                                {% elif number_of_booked_players == 10 %}
+                                    <div class="radial-progress bg-success/10 text-success font-bold text-xl"
+                                         style="--size:120px; --thickness: 8px; --value:100;"
+                                         role="progressbar" aria-valuenow="10">
+                                        10
+                                    </div>
+                                {% elif number_of_booked_players >= 8 %}
+                                    <div class="radial-progress bg-warning/10 text-warning font-bold text-xl"
+                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                         role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                        {{ number_of_booked_players }}
+                                    </div>
+                                {% else %}
+                                    <div class="radial-progress bg-error/10 text-error font-bold text-xl"
+                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                         role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
+                                        {{ number_of_booked_players }}
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endif %}
+
                     </div>
 
-                </div>
+                    <div class="form-control w-full max-w-xs mx-auto">
+                        {% include 'games/_status_field.html' %}
+                    </div>
 
-                <div class="form-control w-full max-w-xs mx-auto">
-                    <label for="status" class="label">
-                        <span class="label-text font-semibold text-base-content/90">Status</span>
-                    </label>
-                    {% if user.is_superuser %}
-                        <select id="status" name="status" class="select select-bordered w-full">
-                            {% for status_option in status_options %}
-                                <option value="{{ status_option }}"
-                                        {% if status_option == game.status %}selected{% endif %}>
-                                    {{ status_option }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    {% else %}
-                        <div class="font-semibold text-base-content/90 bg-base-200 px-4 py-3 rounded-lg cursor-default select-none">
-                            {{ game.status }}
+                    <div class="form-control w-full max-w-xs mx-auto">
+                        {% include 'games/_description_field.html' %}
+                    </div>
+
+
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <div class="pt-4">
+                            <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">
+                                Update Game Details
+                            </button>
                         </div>
                     {% endif %}
-                </div>
-
-                <div class="form-control w-full max-w-xs mx-auto">
-                    <label for="description" class="label">
-                        <span class="label-text font-semibold text-base-content/90">Description</span>
-                    </label>
-                    {% if user.is_superuser %}
-                        <textarea id="description" name="description" rows="4"
-                                  class="textarea textarea-bordered w-full resize-vertical">{{ game.description }}</textarea>
-                    {% else %}
-                        <div class="font-medium text-base-content/90 bg-base-200 px-4 py-3 rounded-lg cursor-default select-none min-h-[100px] flex items-start leading-relaxed pt-2">
-                            {{ game.description|default:"Upcoming futsal match" }}
-                        </div>
-                    {% endif %}
-                </div>
-
-
-                {% if user.is_authenticated and user.is_superuser %}
-                    <div class="pt-4">
-                        <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">
-                            Update Game Details
-                        </button>
-                    </div>
-                {% endif %}
-            </form>
-        </div>
-
-        <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-
-            <!-- Planned players -->
-            <div class="divide-y divide-base-200">
-                <div class="bg-base-200 px-6 py-4 rounded-t-xl">
-                    <h3 class="text-xl font-semibold text-base-content text-center">Planned Players</h3>
-                </div>
-                <div class="overflow-x-auto rounded-b-xl">
-                    <table class="table w-full">
-                        <thead>
-                        <tr>
-                            <th class="w-20 text-center">Play</th>
-                            <th class="w-64 text-left">Player</th>
-                            <th class="w-48 text-center">Substitute</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for planned_player in planned_players_for_game %}
-                            <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                                {% csrf_token %}
-                                <tr class="hover">
-                                    <td class="text-center py-3">
-                                        {% if user.is_superuser or planned_player.user.username == user.username and game.status == 'Planned' %}
-                                            <input type="hidden" name="player_id" value="{{ planned_player.pk }}">
-                                            <input type="hidden" name="checked" value="off">
-                                            <input type="checkbox"
-                                                   name="checked"
-                                                   value="on"
-                                                   id="play_slot_{{ planned_player.pk }}"
-                                                   class="toggle toggle-primary"
-                                                   checked
-                                                   onchange="this.form.submit()">
-                                        {% else %}
-
-                                            <div class="w-6 h-6 bg-success rounded-full flex items-center justify-center text-success text-xs font-bold shadow-md mx-auto">
-                                                ✓
-                                            </div>
-
-                                        {% endif %}
-                                    </td>
-                                    <td class="font-medium">
-                                        <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                                           class="link link-primary">
-                                            {{ planned_player|get_display_name }}
-                                        </a>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge badge-ghost"></span>
-                                    </td>
-                                </tr>
-                            </form>
-                        {% endfor %}
-
-                        {% for cancelled_player, substitute in cancelled_with_substitutes %}
-                            <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                                {% csrf_token %}
-                                <tr class="hover">
-                                    <td class="text-center py-3">
-                                        {% if user.is_superuser or cancelled_player.user.username == user.username and game.status == 'Planned' %}
-                                            <input type="hidden" name="player_id" value="{{ cancelled_player.pk }}">
-                                            <input type="hidden" name="checked" value="off">
-                                            <input type="checkbox"
-                                                   name="checked"
-                                                   value="on"
-                                                   id="play_slot_{{ cancelled_player.pk }}"
-                                                   class="toggle toggle-primary"
-                                                   {% if cancelled_player in confirmed_players_for_game %}checked{% endif %}
-                                                   {% if number_of_cancelled_players <= number_of_confirmed_players %}disabled
-                                                   title="No free slots"{% endif %}
-                                                   onchange="this.form.submit()">
-                                        {% else %}
-                                            <div class="w-6 h-6 bg-error rounded-full flex items-center justify-center text-error text-xs font-bold shadow-md mx-auto">
-                                                ✗
-                                            </div>
-
-                                        {% endif %}
-                                    </td>
-                                    <td class="font-medium">
-                                        <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                                           class="link link-primary">
-                                            {{ cancelled_player|get_display_name }}
-                                        </a>
-                                    </td>
-                                    <td class="text-center">
-                                        {% if substitute %}
-                                            <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                                                <span class="badge badge-success link link-primary">
-                                                    {{ substitute|get_display_name }}
-                                                </span>
-                                            </a>
-                                        {% else %}
-                                            <span class="badge badge-error text-error-content">free slot</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </form>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                </form>
             </div>
 
-            <!-- Reserved/Confirmed/Awaiting players - tylko dla superuser lub gracza z reserved/confirmed/awaiting -->
-            {% if user.is_superuser or player_should_see_reserved_table %}
-                <div class="divide-y divide-base-200">
-                    <div class="bg-base-200 px-6 py-4 rounded-t-xl">
-                        <h3 class="text-xl font-semibold text-base-content text-center">Reserve List</h3>
-                    </div>
-                    <div class="overflow-x-auto rounded-b-xl">
-                        <table class="table w-full">
-                            <thead>
-                            <tr>
-                                <th class="w-20 text-center font-semibold text-base-content/70 uppercase tracking-wide">
-                                    Play
-                                </th>
-                                <th class="w-64 text-left font-semibold text-base-content/70 uppercase tracking-wide">
-                                    Player
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <!-- Confirmed players (wszystkie + własne dla gracza) -->
-                            {% for confirmed_player in confirmed_players_for_game %}
-                                {% if user.is_superuser or confirmed_player.user.username == user.username %}
-                                    <form method="post"
-                                          action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                                        {% csrf_token %}
-                                        <tr class="hover bg-success/10">
-                                            <td class="text-center py-3">
-                                                {% if user.is_superuser or confirmed_player.user.username == user.username and game.status == 'Planned' %}
-                                                    <input type="hidden" name="player_id"
-                                                           value="{{ confirmed_player.pk }}">
-                                                    <input type="hidden" name="checked" value="off">
-                                                    <input type="checkbox"
-                                                           name="checked"
-                                                           value="on"
-                                                           id="play_slot_{{ confirmed_player.pk }}"
-                                                           class="toggle toggle-primary"
-                                                           checked
-                                                           onchange="this.form.submit()">
-                                                {% else %}
-                                                    <div class="w-6 h-6 bg-success rounded-full flex items-center justify-center text-success-content text-xs font-bold shadow-md mx-auto">
-                                                        ✓
-                                                    </div>
-                                                {% endif %}
-                                            </td>
-                                            <td class="font-medium py-3 flex items-center gap-2">
-                                                <a href="{% url 'player_details_url' player_id=confirmed_player.pk %}"
-                                                   class="link link-primary flex-1">
-                                                    {{ confirmed_player|get_display_name }}
-                                                </a>
-                                                <span class="badge badge-success badge-xs">Confirmed</span>
-                                            </td>
-                                        </tr>
-                                    </form>
-                                {% endif %}
-                            {% endfor %}
-
-                            <!-- Awaiting players -->
-                            {% for awaiting_player in awaiting_players_for_game %}
-                                <form method="post" action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                                    {% csrf_token %}
-                                    <tr class="hover bg-success/10">
-                                        <td class="text-center py-3">
-
-                                            {% if user.is_superuser or awaiting_player.user.username == user.username %}
-                                                <input type="hidden" name="player_id" value="{{ awaiting_player.pk }}">
-                                                <input type="hidden" name="checked" value="off">
-                                                <input type="checkbox"
-                                                       name="checked"
-                                                       value="on"
-                                                       id="play_slot_{{ awaiting_player.pk }}"
-                                                       class="toggle toggle-primary"
-                                                       checked
-                                                       onchange="this.form.submit()">
-                                            {% else %}
-                                                <div style="width: 64px; height: 24px;"></div>
-                                            {% endif %}
-                                        </td>
-                                        <td class="font-medium py-3 flex items-center gap-2">
-                                            <a href="{% url 'player_details_url' player_id=awaiting_player.pk %}"
-                                               class="link link-primary flex-1">
-                                                {{ awaiting_player|get_display_name }}
-                                            </a>
-                                            <span class="badge badge-error">Awaiting</span>
-                                        </td>
-
-                                        </td>
-                                    </tr>
-                                </form>
-                            {% endfor %}
-
-                            <!-- Reserved players -->
-                            {% for reserved_player in reserved_players_for_game %}
-                                {% if reserved_player.user.username == user.username or user.is_superuser %}
-                                    <form method="post"
-                                          action="{% url 'game_player_status_update_url' game_id=game.id %}">
-                                        {% csrf_token %}
-                                        <tr class="hover {% if reserved_player.status == 'reserved' %}opacity-75 bg-warning/10{% endif %}">
-                                            <td class="text-center py-3">
-                                                {% if user.is_superuser or reserved_player.user.username == user.username and game.status == 'Planned' %}
-                                                    <input type="hidden" name="player_id"
-                                                           value="{{ reserved_player.pk }}">
-                                                    <input type="hidden" name="checked" value="off">
-                                                    <input type="checkbox"
-                                                           name="checked"
-                                                           value="on"
-                                                           id="play_slot_{{ reserved_player.pk }}"
-                                                           class="toggle toggle-primary"
-                                                           {% if reserved_player in confirmed_players_for_game %}checked{% endif %}
-                                                           onchange="this.form.submit()">
-                                                {% else %}
-                                                    <div class="w-6 h-6 bg-base-200 rounded-full mx-auto"></div>
-                                                {% endif %}
-                                            </td>
-                                            <td class="font-medium py-3 flex items-center gap-2">
-                                                <a href="{% url 'player_details_url' player_id=reserved_player.pk %}"
-                                                   class="link link-primary flex-1">
-                                                    {{ reserved_player|get_display_name }}
-                                                </a>
-                                                {% if reserved_player.status == 'reserved' %}
-                                                    <span class="badge badge-warning badge-xs">Reserve</span>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    </form>
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
-
-
-        </div>
-
-
-        <!-- Booking History -->
-        <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-
-            <div class="divide-y divide-base-200">
-                <div class="bg-base-200 px-6 py-4 rounded-t-xl">
-                    <h3 class="text-xl font-semibold text-base-content text-center underline decoration-primary decoration-2 underline-offset-4">
-                        Booking History
-                    </h3>
-                </div>
-                <div class="overflow-x-auto rounded-b-xl">
-                    <table class="table w-full">
-                        <thead>
-                        <tr>
-                            <th class="w-40 text-left font-semibold text-base-content/70 uppercase tracking-wide">
-                                Player
-                            </th>
-                            <th class="w-32 text-left font-semibold text-base-content/70 uppercase tracking-wide">
-                                Status
-                            </th>
-                            <th class="w-40 text-left font-semibold text-base-content/70 uppercase tracking-wide">
-                                Created
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for record in booking_history %}
-                            <tr class="hover">
-                                <td class="font-medium py-3">
-                                    <a href="{% url 'player_details_url' player_id=record.player.pk %}"
-                                       class="link link-primary font-medium">
-                                        {{ record.player|get_display_name }}
-                                    </a>
-                                </td>
-                                <td class="py-3 font-medium text-base-content/90">
-                                    {{ record.status|title }}
-                                </td>
-                                <td class="py-3 text-sm text-base-content/80">
-                                    {{ record.creation_date|date:'d M Y, H:i:s' }}
-                                </td>
-                            </tr>
-
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                {% include 'games/_planned_players_table.html' %}
+                {% include 'games/_reserve_list_table.html' %}
             </div>
-        </div>
 
-    </div>
+            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                {% include 'games/_booking_history_table.html' %}
+            </div>
+
+        </div>
+    {% endif %}
 {% endblock %}

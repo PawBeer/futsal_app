@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Futsal payment settlement</title>
+</head>
+<body>
+    <h3>Settlement for {{ run.month|stringformat:"02d" }}/{{ run.year }}</h3>
+
+    <p>Hello {{ player_display_name }},</p>
+
+    <p>Here is your settlement for {{ run.month|stringformat:"02d" }}/{{ run.year }}:</p>
+
+    <p>
+        Games: {{ charge.game_count }}<br>
+        Amount due: <strong>{{ charge.amount }}</strong>
+    </p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

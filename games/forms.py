@@ -19,7 +19,7 @@ class PlayerProfileForm(forms.ModelForm):
     class Meta:
         model = Player
         exclude = ["user"]
-        fields = ["mobile_number", "role"]
+        fields = ["mobile_number", "role", "is_accountant"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
