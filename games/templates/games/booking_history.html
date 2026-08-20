@@ -6,8 +6,30 @@
 
 {% block content %}
 
-<div class="flex items-center justify-between mb-4">
-    <form method="get" class="flex items-center gap-2">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+    <form method="get" class="flex flex-wrap items-center gap-2">
+        <label for="player_id" class="text-sm text-base-content/70">Player:</label>
+        <select id="player_id" name="player_id" class="select select-xs select-bordered" onchange="this.form.submit()">
+            <option value="">All players</option>
+            {% for player in players %}
+                <option value="{{ player.id }}" {% if selected_player_id == player.id|stringformat:"s" %}selected{% endif %}>
+                    {{ player|get_display_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="status" class="text-sm text-base-content/70">Status:</label>
+        <select id="status" name="status" class="select select-xs select-bordered" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            {% for key, label in status_choices %}
+                <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        {% if selected_player_id or selected_status %}
+            <a href="?page_size={{ page_size }}" class="btn btn-xs btn-ghost">Clear filters</a>
+        {% endif %}
+
         <label for="page_size" class="text-sm text-base-content/70">Rows:</label>
         <select id="page_size" name="page_size" class="select select-xs select-bordered" onchange="this.form.submit()">
     {% for size in page_sizes %}
@@ -16,10 +38,6 @@
         </option>
     {% endfor %}
 </select>
-
-        {% if booking_history.number %}
-            <input type="hidden" name="page" value="{{ booking_history.number }}">
-        {% endif %}
     </form>
 </div>
 
@@ -63,7 +81,7 @@
 {% if booking_history.has_other_pages %}
 <div class="flex justify-center items-center space-x-2 mt-4">
     {% if booking_history.has_previous %}
-    <a href="?page=1&page_size={{ page_size }}" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page=1&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}" class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -73,7 +91,7 @@
     {% endif %}
 
     {% if booking_history.has_previous %}
-    <a href="?page={{ booking_history.previous_page_number }}&page_size={{ page_size }}"
+    <a href="?page={{ booking_history.previous_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
        class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,7 +106,7 @@
             {% if booking_history.number == num %}
                 <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
             {% elif num > booking_history.number|add:'-2' and num < booking_history.number|add:'2' %}
-                <a href="?page={{ num }}&page_size={{ page_size }}"
+                <a href="?page={{ num }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
                    class="btn btn-sm btn-outline btn-secondary">
                     {{ num }}
                 </a>
@@ -97,7 +115,7 @@
     </div>
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.next_page_number }}&page_size={{ page_size }}"
+    <a href="?page={{ booking_history.next_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
        class="btn btn-sm btn-outline btn-secondary">
         Next
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +126,7 @@
     {% endif %}
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.paginator.num_pages }}&page_size={{ page_size }}"
+    <a href="?page={{ booking_history.paginator.num_pages }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
        class="btn btn-sm btn-outline btn-secondary">
         Last
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

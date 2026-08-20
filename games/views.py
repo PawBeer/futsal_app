@@ -515,7 +515,15 @@ def booking_history(request):
         page_size = 25
     page_size = max(5, min(page_size, 100))
 
+    player_id = request.GET.get("player_id", "")
+    status = request.GET.get("status", "")
+
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
+    if player_id:
+        found_booking_history = found_booking_history.filter(player_id=player_id)
+    if status:
+        found_booking_history = found_booking_history.filter(status=status)
+
     paginator = Paginator(found_booking_history, page_size)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -527,6 +535,10 @@ def booking_history(request):
             "booking_history": page_obj,
             "page_size": page_size,
             "page_sizes": [10, 25, 50, 100],
+            "players": Player.objects.all().order_by("user__first_name", "user__last_name"),
+            "status_choices": StatusChoices.choices,
+            "selected_player_id": player_id,
+            "selected_status": status,
         },
     )
 
@@ -711,7 +723,9 @@ def _serialize_chat_message(chat_message, request_user):
         "id": chat_message.id,
         "author": player_helper.get_display_name_for_user(chat_message.user),
         "message": chat_message.message,
-        "created_at": timezone.localtime(chat_message.created_at).strftime("%H:%M"),
+        "created_at": timezone.localtime(chat_message.created_at).strftime(
+            "%d %b %Y, %H:%M"
+        ),
         "is_own": chat_message.user_id == request_user.id,
     }
 
