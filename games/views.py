@@ -604,35 +604,9 @@ def add_game(request):
                         games_in_range = Game.objects.filter(
                             when__gte=psm.date_start, when__lte=psm.date_end
                         )
-                        for game_in_range in games_in_range:
-                            latest_booking = (
-                                BookingHistoryForGame.objects.filter(
-                                    player=psm.player, game=game_in_range
-                                )
-                                .order_by("-creation_date")
-                                .first()
-                            )
-
-                            if latest_booking:
-                                current_status_key = latest_booking.status
-                                if current_status_key in [
-                                    StatusChoices.PLANNED,
-                                    StatusChoices.CANCELLED,
-                                ]:
-                                    new_status = StatusChoices.CANCELLED
-                                elif current_status_key in [
-                                    StatusChoices.CONFIRMED,
-                                    StatusChoices.RESERVED,
-                                ]:
-                                    new_status = StatusChoices.RESERVED
-                                else:
-                                    new_status = psm.status
-                            else:
-                                new_status = psm.status
-
-                            BookingHistoryForGame.objects.create(
-                                game=game_in_range, player=psm.player, status=new_status
-                            )
+                        game_helper.apply_status_to_games_in_range(
+                            psm.player, games_in_range, psm.status
+                        )
                     else:
                         BookingHistoryForGame.objects.create(
                             game=game, player=psm.player, status=psm.status
@@ -683,39 +657,8 @@ def add_absence(request):
             games_in_range = Game.objects.filter(
                 when__gte=date_start, when__lte=date_end
             )
+            game_helper.apply_status_to_games_in_range(player, games_in_range, status)
 
-            resting_status_key = StatusChoices.RESTING
-
-            for game in games_in_range:
-                latest_booking = (
-                    BookingHistoryForGame.objects.filter(player=player, game=game)
-                    .order_by("-creation_date")
-                    .first()
-                )
-
-                if status == resting_status_key and latest_booking:
-                    current_status_key = latest_booking.status
-                    if current_status_key in [
-                        StatusChoices.PLANNED,
-                        StatusChoices.CANCELLED,
-                    ]:
-                        new_status = StatusChoices.CANCELLED
-                    elif current_status_key in [
-                        StatusChoices.CONFIRMED,
-                        StatusChoices.RESERVED,
-                    ]:
-                        new_status = StatusChoices.RESERVED
-                    else:
-                        new_status = status
-                else:
-                    new_status = status
-
-                BookingHistoryForGame.objects.create(
-                    player=player,
-                    game=game,
-                    status=new_status,
-                    creation_date=timezone.now(),
-                )
             messages.success(
                 request, f"Absence for {player.user.username} has been added."
             )
