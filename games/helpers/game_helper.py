@@ -136,3 +136,35 @@ def pair_cancelled_with_substitutes(game: Game) -> list[tuple[Player, Player | N
         )
         pairs.append((cancelled_player, substitute))
     return pairs
+
+
+def apply_status_to_games_in_range(player: Player, games_in_range, status: str) -> None:
+    """
+    Records `status` as the player's booking for each game in
+    `games_in_range`. When `status` is Resting and the player already has a
+    booking for a game, they're downgraded to Cancelled (if they were
+    Planned/Cancelled) or Reserved (if they were Confirmed/Reserved) instead
+    of being force-marked Resting, so existing slot/substitute bookkeeping
+    for that game isn't clobbered.
+    """
+    for game in games_in_range:
+        latest_booking = (
+            BookingHistoryForGame.objects.filter(player=player, game=game)
+            .order_by("-creation_date")
+            .first()
+        )
+
+        if status == StatusChoices.RESTING and latest_booking:
+            current_status = latest_booking.status
+            if current_status in [StatusChoices.PLANNED, StatusChoices.CANCELLED]:
+                new_status = StatusChoices.CANCELLED
+            elif current_status in [StatusChoices.CONFIRMED, StatusChoices.RESERVED]:
+                new_status = StatusChoices.RESERVED
+            else:
+                new_status = status
+        else:
+            new_status = status
+
+        BookingHistoryForGame.objects.create(
+            game=game, player=player, status=new_status
+        )
