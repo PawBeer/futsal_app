@@ -16,7 +16,7 @@
             <span class="font-semibold">Team Chat</span>
             <label for="chat-toggle" class="btn btn-ghost btn-xs btn-circle" aria-label="Close chat">&#10005;</label>
         </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm"></div>
+        <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 text-sm"></div>
         <form id="chat-form" class="flex gap-2 p-2 border-t border-base-300">
             {% csrf_token %}
             <input id="chat-input" type="text" maxlength="1000" placeholder="Type a message…"
@@ -38,9 +38,29 @@
         const messagesUrl = "{% url 'chat_messages_url' %}";
         const sendUrl = "{% url 'chat_send_url' %}";
         const POLL_INTERVAL_MS = 4000;
+        const lastReadKey = 'chat_last_read_id_{{ user.id }}';
 
         let lastId = null;
-        let unread = 0;
+        let lastReadId = parseInt(localStorage.getItem(lastReadKey) || '0', 10) || 0;
+        let unreadCount = 0;
+
+        function updateBadge() {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function markRead() {
+            if (lastId !== null) {
+                lastReadId = lastId;
+                localStorage.setItem(lastReadKey, String(lastReadId));
+            }
+            unreadCount = 0;
+            updateBadge();
+        }
 
         function scrollToBottom() {
             messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -78,15 +98,15 @@
                     data.messages.forEach(msg => {
                         renderMessage(msg);
                         lastId = msg.id;
-                        if (!panelOpen && !msg.is_own) {
-                            unread += 1;
+                        if (!msg.is_own && msg.id > lastReadId) {
+                            unreadCount += 1;
                         }
                     });
                     if (panelOpen) {
                         scrollToBottom();
-                    } else if (unread > 0) {
-                        badge.textContent = unread;
-                        badge.classList.remove('hidden');
+                        markRead();
+                    } else {
+                        updateBadge();
                     }
                 });
         }
@@ -95,8 +115,7 @@
             panel.classList.toggle('hidden', !this.checked);
             panel.classList.toggle('flex', this.checked);
             if (this.checked) {
-                unread = 0;
-                badge.classList.add('hidden');
+                markRead();
                 scrollToBottom();
                 input.focus();
             }

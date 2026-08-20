@@ -24,3 +24,25 @@
     background-color: #f0f9ff;
     color: #0284c7
 }
+
+@media (prefers-color-scheme: dark) {
+    .bg-players-purple {
+        background-color: #2e1065;
+        color: #c4b5fd
+    }
+
+    .bg-players-green {
+        background-color: #052e2b;
+        color: #6ee7b7
+    }
+
+    .bg-players-red {
+        background-color: #431407;
+        color: #fdba74
+    }
+
+    .bg-players-blue {
+        background-color: #082f49;
+        color: #7dd3fc
+    }
+}
