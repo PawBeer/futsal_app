@@ -21,27 +21,27 @@
                             </p>
                             {% if game.status != 'Played' %}
                                 <div class="flex justify-center md:justify-start mt-4">
-                                    {% if number_of_booked_players > 10 %}
+                                    {% if number_of_booked_players > game.number_of_players %}
                                         <div class="radial-progress bg-success/10 text-success font-bold text-lg"
                                              style="--size:90px; --thickness: 6px; --value:100;"
                                              role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
-                                            10+
+                                            {{ game.number_of_players }}+
                                         </div>
-                                    {% elif number_of_booked_players == 10 %}
+                                    {% elif number_of_booked_players == game.number_of_players %}
                                         <div class="radial-progress bg-success/10 text-success font-bold text-lg"
                                              style="--size:90px; --thickness: 6px; --value:100;"
-                                             role="progressbar" aria-valuenow="10">
-                                            10
+                                             role="progressbar" aria-valuenow="{{ game.number_of_players }}">
+                                            {{ game.number_of_players }}
                                         </div>
-                                    {% elif number_of_booked_players >= 8 %}
+                                    {% elif number_of_booked_players >= warning_threshold %}
                                         <div class="radial-progress bg-warning/10 text-warning font-bold text-lg"
-                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players game.number_of_players 100 %};"
                                              role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
                                             {{ number_of_booked_players }}
                                         </div>
                                     {% else %}
                                         <div class="radial-progress bg-error/10 text-error font-bold text-lg"
-                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                             style="--size:90px; --thickness: 6px; --value:{% widthratio number_of_booked_players game.number_of_players 100 %};"
                                              role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
                                             {{ number_of_booked_players }}
                                         </div>
@@ -96,27 +96,27 @@
                         </p>
                         {% if game.status != 'Played' %}
                             <div class="flex justify-center mb-8">
-                                {% if number_of_booked_players > 10 %}
+                                {% if number_of_booked_players > game.number_of_players %}
                                     <div class="radial-progress bg-success/10 text-success font-bold text-xl"
                                          style="--size:120px; --thickness: 8px; --value:100;"
                                          role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
-                                        10+
+                                        {{ game.number_of_players }}+
                                     </div>
-                                {% elif number_of_booked_players == 10 %}
+                                {% elif number_of_booked_players == game.number_of_players %}
                                     <div class="radial-progress bg-success/10 text-success font-bold text-xl"
                                          style="--size:120px; --thickness: 8px; --value:100;"
-                                         role="progressbar" aria-valuenow="10">
-                                        10
+                                         role="progressbar" aria-valuenow="{{ game.number_of_players }}">
+                                        {{ game.number_of_players }}
                                     </div>
-                                {% elif number_of_booked_players >= 8 %}
+                                {% elif number_of_booked_players >= warning_threshold %}
                                     <div class="radial-progress bg-warning/10 text-warning font-bold text-xl"
-                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players game.number_of_players 100 %};"
                                          role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
                                         {{ number_of_booked_players }}
                                     </div>
                                 {% else %}
                                     <div class="radial-progress bg-error/10 text-error font-bold text-xl"
-                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players 10 100 %};"
+                                         style="--size:120px; --thickness: 8px; --value:{% widthratio number_of_booked_players game.number_of_players 100 %};"
                                          role="progressbar" aria-valuenow="{{ number_of_booked_players }}">
                                         {{ number_of_booked_players }}
                                     </div>

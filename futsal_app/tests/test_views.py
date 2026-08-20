@@ -71,6 +71,9 @@ class AddGameViewTests(BaseTestCase):
             "status": "Planned",
             "description": "Test game with reserved player",
             "set_players": "yes",
+            # capacity matches the permanent roster so only a cancellation,
+            # not spare capacity, opens up a confirm slot
+            "number_of_players": "3",
         }
 
         # Login as superuser and make POST using test client
@@ -111,6 +114,9 @@ class AddGameViewTests(BaseTestCase):
             "status": "Planned",
             "description": "Test game with reserved player",
             "set_players": "yes",
+            # capacity matches the permanent roster so only a cancellation,
+            # not spare capacity, opens up a confirm slot
+            "number_of_players": "3",
         }
 
         # Login as superuser and make POST using test client

@@ -350,9 +350,11 @@ class SubstitutePaymentEmailTests(BaseTestCase):
             user.save()
 
         self.game = Game.objects.create(
-            when=date(2026, 7, 5), status=GameStatus.PLANNED
+            when=date(2026, 7, 5), status=GameStatus.PLANNED, number_of_players=1
         )
         # user_1 cancelled, user_2 confirmed as their substitute
+        # (capacity matches the single cancelled slot so the confirmed
+        # player pairs with the cancellation instead of filling spare capacity)
         BookingHistoryForGame.objects.create(
             game=self.game,
             player=self.user_1_per.player,
@@ -408,7 +410,11 @@ class SubstitutePaymentEmailTests(BaseTestCase):
 class SubstitutePaymentTogglingTests(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.game = Game.objects.create(when=date(2026, 7, 5), status=GameStatus.PLAYED)
+        # capacity matches the single cancelled slot so the confirmed
+        # player pairs with the cancellation instead of filling spare capacity
+        self.game = Game.objects.create(
+            when=date(2026, 7, 5), status=GameStatus.PLAYED, number_of_players=1
+        )
         self.cancelled_player = self.user_1_per.player
         self.substitute_player = self.user_2_per.player
         BookingHistoryForGame.objects.create(

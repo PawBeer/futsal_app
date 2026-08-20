@@ -18,7 +18,7 @@
                                 </div>
                             {% endif %}
                             <span class="badge badge-info ml-2">
-            {{ game.number_of_booked_players }}/10
+            {{ game.number_of_booked_players }}/{{ game.number_of_players }}
         </span>
                         </h2>
                         <p class="text-sm text-base-content/70">{{ game.description|default:"Upcoming futsal match" }}</p>
