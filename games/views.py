@@ -535,7 +535,9 @@ def booking_history(request):
             "booking_history": page_obj,
             "page_size": page_size,
             "page_sizes": [10, 25, 50, 100],
-            "players": Player.objects.all().order_by("user__first_name", "user__last_name"),
+            "players": Player.objects.all().order_by(
+                "user__first_name", "user__last_name"
+            ),
             "status_choices": StatusChoices.choices,
             "selected_player_id": player_id,
             "selected_status": status,
