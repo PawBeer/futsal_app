@@ -76,16 +76,63 @@ def get_number_of_booked_players(game):
     return booked_count
 
 
+def has_open_slot(game: Game) -> bool:
+    """
+    A slot is open whenever fewer players are currently committed (planned
+    permanents + already-confirmed reserves) than the game's configured
+    capacity - this covers both cancellation replacements and extra
+    capacity beyond the permanent roster.
+    """
+    planned_count = len(get_players_by_status([StatusChoices.PLANNED], game))
+    confirmed_count = len(get_players_by_status([StatusChoices.CONFIRMED], game))
+    return planned_count + confirmed_count < game.number_of_players
+
+
+def _get_extra_slot_count(game: Game, cancelled_count: int) -> int:
+    planned_count = len(get_players_by_status([StatusChoices.PLANNED], game))
+    permanent_roster_size = planned_count + cancelled_count
+    return max(0, game.number_of_players - permanent_roster_size)
+
+
+def get_extra_capacity_slots(game: Game) -> list[Player | None]:
+    """
+    Returns one entry per capacity slot beyond the game's original permanent
+    roster (planned + cancelled players). Confirmed reserves fill these
+    slots first, in confirmation order - only confirmations beyond that are
+    used to replace a cancelled permanent (see pair_cancelled_with_substitutes).
+    """
+    cancelled_players = get_players_by_status([StatusChoices.CANCELLED], game)
+    extra_slot_count = _get_extra_slot_count(game, len(cancelled_players))
+    if extra_slot_count == 0:
+        return []
+
+    confirmed_players = get_players_by_status([StatusChoices.CONFIRMED], game)
+
+    return [
+        confirmed_players[idx] if idx < len(confirmed_players) else None
+        for idx in range(extra_slot_count)
+    ]
+
+
 def pair_cancelled_with_substitutes(game: Game) -> list[tuple[Player, Player | None]]:
     """
     Pairs each cancelled player for the game with the confirmed player who
     took their slot (matched by order), or None if the slot is still free.
+    Confirmed reserves are assigned to extra-capacity slots first (see
+    get_extra_capacity_slots), so only the confirmations beyond that are
+    available here to replace a cancellation.
     """
     cancelled_players = get_players_by_status([StatusChoices.CANCELLED], game)
+    extra_slot_count = _get_extra_slot_count(game, len(cancelled_players))
     confirmed_players = get_players_by_status([StatusChoices.CONFIRMED], game)
+    remaining_confirmed_players = confirmed_players[extra_slot_count:]
 
     pairs = []
     for idx, cancelled_player in enumerate(cancelled_players):
-        substitute = confirmed_players[idx] if idx < len(confirmed_players) else None
+        substitute = (
+            remaining_confirmed_players[idx]
+            if idx < len(remaining_confirmed_players)
+            else None
+        )
         pairs.append((cancelled_player, substitute))
     return pairs

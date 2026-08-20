@@ -34,9 +34,17 @@
 
                 <div class="form-control mb-4">
                     <label class="label">
+                        <span class="label-text font-semibold">Number of players</span>
+                    </label>
+                    <input type="number" name="number_of_players" min="1" value="10"
+                           class="input input-bordered w-full max-w-sm mx-auto block" required>
+                </div>
+
+                <div class="form-control mb-4">
+                    <label class="label">
                         <span class="label-text font-semibold">Description (optional)</span>
                     </label>
-                    <textarea name="description" class="textarea textarea-bordered w-full max-w-sm mx-auto block" rows="3" 
+                    <textarea name="description" class="textarea textarea-bordered w-full max-w-sm mx-auto block" rows="3"
                               placeholder="Game notes..."></textarea>
                 </div>
 

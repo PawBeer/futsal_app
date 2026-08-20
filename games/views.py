@@ -144,10 +144,13 @@ def game_details(request, game_id):
             "number_of_booked_players": len(planned_players)
             + len(confirmed_players)
             + len(awaiting_players),
+            "warning_threshold": max(1, round(game.number_of_players * 0.8)),
             "number_of_confirmed_players": len(confirmed_players),
             "cancelled_with_substitutes": _pair_cancelled_with_substitutes_and_payment(
                 game
             ),
+            "extra_capacity_slots": game_helper.get_extra_capacity_slots(game),
+            "has_open_slot": game_helper.has_open_slot(game),
             "number_of_cancelled_players": len(cancelled_players),
             "booking_history": BookingHistoryForGame.objects.filter(game=game).order_by(
                 "-creation_date"
@@ -213,25 +216,27 @@ def game_status_update(request, game_id):
 
 
 def _check_if_empty_slots(game):
-    # function to determine if there are empty slots
-    cancelled_count = len(
-        game_helper.get_players_by_status([StatusChoices.CANCELLED], game)
-    )
-    confirmed_count = len(
-        game_helper.get_players_by_status([StatusChoices.CONFIRMED], game)
-    )
-
-    if cancelled_count > confirmed_count:
+    if game_helper.has_open_slot(game):
         return StatusChoices.CONFIRMED
 
     return StatusChoices.AWAITING
 
 
+def _uncancel_if_slot_available(game):
+    # a permanent who cancelled can only switch back to Planned if a slot
+    # is still open - if substitutes already confirmed into every open
+    # slot, they stay Cancelled
+    if game_helper.has_open_slot(game):
+        return StatusChoices.PLANNED
+
+    return StatusChoices.CANCELLED
+
+
 def _apply_status_change_logic(current_status, checked, game):
     status_handler = {
         (StatusChoices.PLANNED, False): lambda game: StatusChoices.CANCELLED,
-        (StatusChoices.CANCELLED, True): lambda game: StatusChoices.PLANNED,
-        (StatusChoices.RESERVED, True): lambda game: StatusChoices.AWAITING,
+        (StatusChoices.CANCELLED, True): _uncancel_if_slot_available,
+        (StatusChoices.RESERVED, True): _check_if_empty_slots,
         (StatusChoices.AWAITING, True): _check_if_empty_slots,
         (StatusChoices.AWAITING, False): lambda game: StatusChoices.RESERVED,
         (StatusChoices.CONFIRMED, False): lambda game: StatusChoices.RESERVED,
@@ -303,6 +308,11 @@ def game_player_status_update(request, game_id):
         )
         send_player_status_update_email(player, found_game, new_status)
         send_player_status_update_email_to_admins(player, found_game, new_status)
+    elif current_status == StatusChoices.CANCELLED and checked:
+        messages.error(
+            request,
+            "No free slot available - a substitute has already taken this spot.",
+        )
 
     _apply_transition_from_awaiting_to_confirmed(found_game)
 
@@ -536,14 +546,27 @@ def _create_booking_for_players(game: Game, players: Iterable[Player], status):
         BookingHistoryForGame.objects.create(game=game, player=player, status=status)
 
 
+def _parse_number_of_players(raw_value):
+    try:
+        number_of_players = int(raw_value)
+    except (TypeError, ValueError):
+        return 10
+    return max(1, number_of_players)
+
+
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def add_game(request):
     if request.method == "POST":
+        number_of_players = _parse_number_of_players(
+            request.POST.get("number_of_players", 10)
+        )
+
         game = Game.objects.create(
             when=datetime.strptime(request.POST.get("when", ""), "%Y-%m-%d"),
             status=request.POST.get("status", GameStatus.PLANNED),
             description=request.POST.get("description", ""),
+            number_of_players=number_of_players,
         )
         if request.POST.get("set_players"):
 

@@ -46,6 +46,7 @@ class Game(models.Model):
         max_length=100, choices=GameStatus.choices, default=GameStatus.PLANNED
     )
     description = models.TextField(null=True, blank=True)
+    number_of_players = models.PositiveIntegerField(default=10)
 
     def __str__(self):
         return f"{self.when} - {self.status}"
