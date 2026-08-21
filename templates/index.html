@@ -170,13 +170,8 @@
 
 
 
-<div class="mx-auto px-2 my-12">
-    {% block content %}
-    {% endblock %}
-</div>
-
 {% if messages %}
-    <div class="px-4">
+    <div class="px-4 pt-4">
         {% for message in messages %}
             <div class="alert mb-4 {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% endif %} shadow-lg">
                 <div class="flex items-center">
@@ -211,6 +206,11 @@
         {% endfor %}
     </div>
 {% endif %}
+
+<div class="mx-auto px-2 my-12">
+    {% block content %}
+    {% endblock %}
+</div>
 
 <footer class="text-xs text-right p-2">Futsal App v0.1.2</footer>
 

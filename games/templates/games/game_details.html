@@ -16,9 +16,18 @@
 
                     <div class="flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
                         <div class="text-center md:text-left">
-                            <p class="text-xl md:text-2xl lg:text-3xl text-base-content font-bold tracking-tight">
-                                {{ game.when|date:'d M Y' }}
-                            </p>
+                            {% if user.is_superuser %}
+                                <label for="when" class="label justify-center md:justify-start">
+                                    <span class="label-text font-semibold text-base-content/90">Date</span>
+                                </label>
+                                <input type="date" id="when" name="when" value="{{ game.when|date:'Y-m-d' }}"
+                                       class="input input-bordered text-xl font-bold tracking-tight w-full max-w-[220px]"
+                                       required>
+                            {% else %}
+                                <p class="text-xl md:text-2xl lg:text-3xl text-base-content font-bold tracking-tight">
+                                    {{ game.when|date:'d M Y' }}
+                                </p>
+                            {% endif %}
                             {% if game.status != 'Played' %}
                                 <div class="flex justify-center md:justify-start mt-4">
                                     {% if number_of_booked_players > game.number_of_players %}
@@ -91,9 +100,18 @@
                     {% csrf_token %}
 
                     <div class="text-center">
-                        <p class="text-xl md:text-3xl lg:text-4xl text-base-content font-bold tracking-tight mb-4">
-                            {{ game.when|date:'d M Y' }}
-                        </p>
+                        {% if user.is_superuser %}
+                            <label for="when" class="label justify-center">
+                                <span class="label-text font-semibold text-base-content/90">Date</span>
+                            </label>
+                            <input type="date" id="when" name="when" value="{{ game.when|date:'Y-m-d' }}"
+                                   class="input input-bordered input-lg text-2xl font-bold tracking-tight w-full max-w-xs mx-auto mb-4"
+                                   required>
+                        {% else %}
+                            <p class="text-xl md:text-3xl lg:text-4xl text-base-content font-bold tracking-tight mb-4">
+                                {{ game.when|date:'d M Y' }}
+                            </p>
+                        {% endif %}
                         {% if game.status != 'Played' %}
                             <div class="flex justify-center mb-8">
                                 {% if number_of_booked_players > game.number_of_players %}
