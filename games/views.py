@@ -195,18 +195,42 @@ def _notify_substitutes_of_payment(game: Game) -> None:
         send_substitute_payment_email(substitute, cancelled_player, game, amount)
 
 
+def _date_has_game(when_date, exclude_game_id=None) -> bool:
+    """Whether a game (regardless of status) already exists on `when_date`."""
+    conflicting = Game.objects.filter(when=when_date)
+    if exclude_game_id is not None:
+        conflicting = conflicting.exclude(id=exclude_game_id)
+    return conflicting.exists()
+
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     status_value = request.POST.get("status")
     description = request.POST.get("description")
+    when_value = request.POST.get("when")
     previous_status = game.status
 
     if status_value:
         game.status = status_value
     if description is not None:
         game.description = description
+    if when_value and request.user.is_superuser:
+        try:
+            when_date = datetime.strptime(when_value, "%Y-%m-%d")
+        except ValueError:
+            messages.error(request, "Invalid date.")
+            return redirect("game_details_url", game_id=game_id)
+
+        if _date_has_game(when_date, exclude_game_id=game.id):
+            messages.error(
+                request,
+                f"A game is already scheduled on {when_date:%d %b %Y}.",
+            )
+            return redirect("game_details_url", game_id=game_id)
+
+        game.when = when_date
     game.save()
 
     if previous_status != GameStatus.PLAYED and game.status == GameStatus.PLAYED:
@@ -572,12 +596,25 @@ def _parse_number_of_players(raw_value):
 @user_passes_test(lambda u: u.is_superuser)
 def add_game(request):
     if request.method == "POST":
+        when_date = datetime.strptime(request.POST.get("when", ""), "%Y-%m-%d")
+
+        if _date_has_game(when_date):
+            messages.error(
+                request,
+                f"A game is already scheduled on {when_date:%d %b %Y}.",
+            )
+            return render(
+                request,
+                "games/add_game.html",
+                {"role_choices": GameStatus.choices},
+            )
+
         number_of_players = _parse_number_of_players(
             request.POST.get("number_of_players", 10)
         )
 
         game = Game.objects.create(
-            when=datetime.strptime(request.POST.get("when", ""), "%Y-%m-%d"),
+            when=when_date,
             status=request.POST.get("status", GameStatus.PLANNED),
             description=request.POST.get("description", ""),
             number_of_players=number_of_players,
