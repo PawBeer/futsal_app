@@ -53,6 +53,14 @@
 
     {% endwith %}
 
+    <form method="get" action="{% url 'all_players_url' %}" class="mb-4">
+        {% if request.GET.status %}
+            <input type="hidden" name="status" value="{{ request.GET.status }}">
+        {% endif %}
+        <input type="text" name="name" value="{{ filter }}" placeholder="Search players..."
+               class="input input-bordered w-full max-w-sm mx-auto block">
+    </form>
+
     <div class="card shadow-lg mb-8 p-4">
         <div class="overflow-x-auto">
             <table class="table w-full">
