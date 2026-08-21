@@ -419,6 +419,9 @@ def all_players(request):
     if status and status in ["permanent", "active", "inactive"]:
         players = players.filter(role=status.capitalize())
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return render(request, "games/_players_table.html", {"players": players})
+
     return render(
         request,
         "games/all_players.html",

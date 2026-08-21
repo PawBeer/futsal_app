@@ -57,36 +57,38 @@
         {% if request.GET.status %}
             <input type="hidden" name="status" value="{{ request.GET.status }}">
         {% endif %}
-        <input type="text" name="name" value="{{ filter }}" placeholder="Search players..."
+        <input type="text" name="name" id="player-search" value="{{ filter }}" placeholder="Search players..."
+               autocomplete="off"
                class="input input-bordered w-full max-w-sm mx-auto block">
     </form>
 
-    <div class="card shadow-lg mb-8 p-4">
-        <div class="overflow-x-auto">
-            <table class="table w-full">
-                <thead>
-                <tr>
-                    <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
-                    <th class="px-1 text-center font-semibold text-base-content/70 uppercase tracking-wide">Player
-                        role
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for player in players %}
-                    <tr class="hover">
-                        <td class="px-1 text-center py-3">
-                            <a href="{% url 'player_details_url' player_id=player.id %}"
-                               class="link link-primary font-medium">
-                                {{ player|get_display_name }}
-                            </a>
-                        </td>
-                        <td class="px-1 text-center py-3">{{ player.role }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    {% include 'games/_players_table.html' %}
+
+    <script>
+        (function () {
+            const input = document.getElementById('player-search');
+            const status = '{{ request.GET.status|default:"" }}';
+            let debounceTimer;
+
+            input.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(search, 300);
+            });
+
+            function search() {
+                const params = new URLSearchParams();
+                if (input.value.trim()) params.set('name', input.value.trim());
+                if (status) params.set('status', status);
+                const url = '{% url "all_players_url" %}?' + params.toString();
+
+                fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('players-table').outerHTML = html;
+                        history.replaceState(null, '', url);
+                    });
+            }
+        })();
+    </script>
 
 {% endblock content %}
