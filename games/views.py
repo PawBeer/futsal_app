@@ -251,7 +251,9 @@ def game_status_update(request, game_id):
 
         game.when = when_date
 
-    if request.user.is_superuser and request.POST.get("notifications_enabled_submitted"):
+    if request.user.is_superuser and request.POST.get(
+        "notifications_enabled_submitted"
+    ):
         game.notifications_enabled = "on" == request.POST.get("notifications_enabled")
 
     game.save()
