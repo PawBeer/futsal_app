@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Count, Q
@@ -48,6 +49,24 @@ class Breadcrumb:
     def __init__(self, path, label):
         self.path = path
         self.label = label
+
+
+def method_not_allowed(request, exception=None):
+    """Handles requests using a disallowed HTTP method (e.g. a bookmarked
+    or shared GET link to a POST-only view such as logout) instead of
+    letting the user land on a blank 405 response."""
+    messages.info(request, "Ta strona nie obsługuje takiego żądania.")
+    redirect_url = "next_games_url" if request.user.is_authenticated else "login_url"
+    return redirect(redirect_url)
+
+
+class LogoutView(DjangoLogoutView):
+    """Logout is only allowed via POST (see DjangoLogoutView). Visiting the
+    logout URL directly, e.g. via a bookmarked or shared link, previously
+    resulted in a blank 405 response; redirect the user instead."""
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        return method_not_allowed(request)
 
 
 @login_required
