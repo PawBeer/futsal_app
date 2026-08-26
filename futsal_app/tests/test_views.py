@@ -1,3 +1,5 @@
+from django.core import mail
+
 from games.helpers import game_helper
 from games.helpers.game_helper import get_total_players_for_game
 from games.models import (
@@ -174,3 +176,127 @@ class AddGameViewTests(BaseTestCase):
             len(game_helper.get_players_by_status([StatusChoices.CANCELLED], game)), 1
         )
         self.assertEqual(get_total_players_for_game(game), 3)
+
+    def test_promoting_awaiting_player_emails_both_players_and_one_admin_mail(self):
+        # cancelling a permanent while a substitute is awaiting a slot
+        # auto-promotes that substitute - both players should be emailed
+        # about their own status change, and admins should get a single
+        # combined email rather than one per change.
+        self.user_1_per.email = "bolek@example.com"
+        self.user_1_per.save()
+        self.user_4_act.email = "reksio@example.com"
+        self.user_4_act.save()
+
+        data = {
+            "when": "2025-03-03",
+            "status": "Planned",
+            "description": "Test game with reserved player",
+            "set_players": "yes",
+            "number_of_players": "3",
+        }
+        self.client.force_login(self.superuser)
+        self.client.post("/games/add_game", data)
+
+        game = Game.objects.get(when="2025-03-03")
+
+        reserved_player = (
+            BookingHistoryForGame.objects.filter(
+                game=game, status=StatusChoices.RESERVED
+            )
+            .order_by("-creation_date")
+            .first()
+        ).player
+        self.client.post(
+            f"/games/game/{game.id}/update-player-status/",
+            {"player_id": reserved_player.id, "checked": "on"},
+        )
+
+        mail.outbox.clear()
+
+        bolek_player = Player.objects.get(user=self.user_1_per)
+        self.client.post(
+            f"/games/game/{game.id}/update-player-status/",
+            {"player_id": bolek_player.id, "checked": "off"},
+        )
+
+        player_emails = [m for m in mail.outbox if m.to == ["bolek@example.com"]]
+        player_emails += [m for m in mail.outbox if m.to == ["reksio@example.com"]]
+        admin_emails = [m for m in mail.outbox if m.to == ["admin@example.com"]]
+
+        self.assertEqual(len(player_emails), 2)
+        self.assertEqual(len(admin_emails), 1)
+        self.assertEqual(len(mail.outbox), 3)
+
+    def test_notifications_enabled_toggle_is_saved_by_superuser(self):
+        data = {
+            "when": "2025-04-04",
+            "status": "Planned",
+            "description": "Test game",
+        }
+        self.client.force_login(self.superuser)
+        self.client.post("/games/add_game", data)
+        game = Game.objects.get(when="2025-04-04")
+        self.assertTrue(game.notifications_enabled)
+
+        # the "Update Game Details" form always submits this hidden marker
+        # alongside the checkbox, so a POST missing it (e.g. from another
+        # caller) leaves notifications_enabled untouched
+        self.client.post(
+            f"/games/game/{game.id}/update-status/",
+            {"status": "Planned", "description": "Test game"},
+        )
+        game.refresh_from_db()
+        self.assertTrue(game.notifications_enabled)
+
+        self.client.post(
+            f"/games/game/{game.id}/update-status/",
+            {
+                "status": "Planned",
+                "description": "Test game",
+                "notifications_enabled_submitted": "1",
+            },
+        )
+        game.refresh_from_db()
+        self.assertFalse(game.notifications_enabled)
+
+        self.client.post(
+            f"/games/game/{game.id}/update-status/",
+            {
+                "status": "Planned",
+                "description": "Test game",
+                "notifications_enabled_submitted": "1",
+                "notifications_enabled": "on",
+            },
+        )
+        game.refresh_from_db()
+        self.assertTrue(game.notifications_enabled)
+
+    def test_no_emails_sent_when_notifications_disabled_for_game(self):
+        self.user_1_per.email = "bolek@example.com"
+        self.user_1_per.save()
+
+        data = {
+            "when": "2025-05-05",
+            "status": "Planned",
+            "description": "Test game",
+            "set_players": "yes",
+            "number_of_players": "3",
+        }
+        self.client.force_login(self.superuser)
+        self.client.post("/games/add_game", data)
+        game = Game.objects.get(when="2025-05-05")
+        game.notifications_enabled = False
+        game.save()
+
+        mail.outbox.clear()
+
+        bolek_player = Player.objects.get(user=self.user_1_per)
+        self.client.post(
+            f"/games/game/{game.id}/update-player-status/",
+            {"player_id": bolek_player.id, "checked": "off"},
+        )
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(
+            len(game_helper.get_players_by_status([StatusChoices.CANCELLED], game)), 1
+        )

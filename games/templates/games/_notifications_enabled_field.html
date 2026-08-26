@@ -1,0 +1,8 @@
+<label class="label cursor-pointer justify-start gap-3">
+    <input type="hidden" name="notifications_enabled_submitted" value="1">
+    <input type="checkbox" name="notifications_enabled" class="checkbox"
+           {% if game.notifications_enabled %}checked{% endif %}>
+    <span class="label-text font-semibold text-base-content/90">
+        Send emails for changes to this game
+    </span>
+</label>

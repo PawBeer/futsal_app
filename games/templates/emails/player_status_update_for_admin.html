@@ -11,7 +11,11 @@
     <p>The change datails:<br>
     - Date: {{ game.when|date:"l, F j, Y" }}</p>
 
-    <p>The status for the player {{player_display_name}} for the game has changed to: {{ status }}.</p>
+    <ul>
+    {% for description in change_descriptions %}
+        <li>{{ description }}.</li>
+    {% endfor %}
+    </ul>
 
     <p>Current number of players for this game: {{ no_players }}.</p>
 

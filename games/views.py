@@ -20,7 +20,7 @@ from games.forms import PlayerProfileForm
 from games.helpers import game_helper, player_helper, settlement_helper
 from games.mailer import (
     send_player_status_update_email,
-    send_player_status_update_email_to_admins,
+    send_player_status_updates_email_to_admins,
     send_settlement_email,
     send_substitute_payment_confirmation_request_email,
     send_substitute_payment_email,
@@ -250,9 +250,19 @@ def game_status_update(request, game_id):
             return redirect("game_details_url", game_id=game_id)
 
         game.when = when_date
+
+    if request.user.is_superuser and request.POST.get(
+        "notifications_enabled_submitted"
+    ):
+        game.notifications_enabled = "on" == request.POST.get("notifications_enabled")
+
     game.save()
 
-    if previous_status != GameStatus.PLAYED and game.status == GameStatus.PLAYED:
+    if (
+        previous_status != GameStatus.PLAYED
+        and game.status == GameStatus.PLAYED
+        and game.notifications_enabled
+    ):
         _notify_substitutes_of_payment(game)
 
     return redirect("game_details_url", game_id=game_id)
@@ -292,6 +302,10 @@ def _apply_status_change_logic(current_status, checked, game):
 
 
 def _apply_transition_from_awaiting_to_confirmed(game):
+    """If cancelling/unchecking a player freed up a slot, promote the
+    longest-waiting awaiting player to confirmed. Returns the (player,
+    status) change so the caller can include it in a single admin email
+    instead of sending a separate one here."""
     awaiting_players = game_helper.get_players_by_status(
         [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
@@ -305,12 +319,13 @@ def _apply_transition_from_awaiting_to_confirmed(game):
                 status=StatusChoices.CONFIRMED,
                 creation_date=timezone.now(),
             )
-            send_player_status_update_email(
-                player_to_confirm, game, StatusChoices.CONFIRMED
-            )
-            send_player_status_update_email_to_admins(
-                player_to_confirm, game, StatusChoices.CONFIRMED
-            )
+            if game.notifications_enabled:
+                send_player_status_update_email(
+                    player_to_confirm, game, StatusChoices.CONFIRMED
+                )
+            return player_to_confirm, StatusChoices.CONFIRMED
+
+    return None
 
 
 @login_required
@@ -342,6 +357,8 @@ def game_player_status_update(request, game_id):
 
     new_status = _apply_status_change_logic(current_status, checked, found_game)
 
+    changes = []
+
     if current_status != new_status:
         BookingHistoryForGame.objects.create(
             player=player,
@@ -349,15 +366,21 @@ def game_player_status_update(request, game_id):
             status=new_status,
             creation_date=timezone.now(),
         )
-        send_player_status_update_email(player, found_game, new_status)
-        send_player_status_update_email_to_admins(player, found_game, new_status)
+        if found_game.notifications_enabled:
+            send_player_status_update_email(player, found_game, new_status)
+        changes.append((player, new_status))
     elif current_status == StatusChoices.CANCELLED and checked:
         messages.error(
             request,
             "No free slot available - a substitute has already taken this spot.",
         )
 
-    _apply_transition_from_awaiting_to_confirmed(found_game)
+    promoted_change = _apply_transition_from_awaiting_to_confirmed(found_game)
+    if promoted_change:
+        changes.append(promoted_change)
+
+    if changes and found_game.notifications_enabled:
+        send_player_status_updates_email_to_admins(changes, found_game)
 
     return redirect("game_details_url", game_id=game_id)
 

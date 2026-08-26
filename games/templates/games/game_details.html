@@ -69,7 +69,8 @@
                     </div>
 
                     {% if user.is_authenticated and user.is_superuser %}
-                        <div class="flex justify-end">
+                        <div class="flex justify-between items-center">
+                            {% include 'games/_notifications_enabled_field.html' %}
                             <button type="submit" class="btn btn-primary shadow-lg hover:shadow-xl">
                                 Update Game Details
                             </button>
@@ -155,6 +156,9 @@
 
                     {% if user.is_authenticated and user.is_superuser %}
                         <div class="pt-4">
+                            {% include 'games/_notifications_enabled_field.html' %}
+                        </div>
+                        <div class="pt-2">
                             <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">
                                 Update Game Details
                             </button>
