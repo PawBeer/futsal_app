@@ -47,6 +47,7 @@ class Game(models.Model):
     )
     description = models.TextField(null=True, blank=True)
     number_of_players = models.PositiveIntegerField(default=10)
+    notifications_enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.when} - {self.status}"
