@@ -26,3 +26,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("api/", include("games.api.urls")),
 ]
+
+handler405 = "games.views.method_not_allowed"
