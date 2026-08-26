@@ -88,36 +88,36 @@
                     </form>
                 {% endfor %}
 
-                <!-- Reserved players -->
-                {% for reserved_player in reserved_players_for_game %}
-                    {% if reserved_player.user.username == user.username or user.is_superuser %}
+                <!-- Standby players -->
+                {% for standby_player in standby_players_for_game %}
+                    {% if standby_player.user.username == user.username or user.is_superuser %}
                         <form method="post"
                               action="{% url 'game_player_status_update_url' game_id=game.id %}">
                             {% csrf_token %}
-                            <tr class="hover {% if reserved_player.status == 'reserved' %}opacity-75 bg-warning/10{% endif %}">
+                            <tr class="hover {% if standby_player.status == 'standby' %}opacity-75 bg-warning/10{% endif %}">
                                 <td class="text-center py-3">
-                                    {% if user.is_superuser or reserved_player.user.username == user.username and game.status == 'Planned' %}
+                                    {% if user.is_superuser or standby_player.user.username == user.username and game.status == 'Planned' %}
                                         <input type="hidden" name="player_id"
-                                               value="{{ reserved_player.pk }}">
+                                               value="{{ standby_player.pk }}">
                                         <input type="hidden" name="checked" value="off">
                                         <input type="checkbox"
                                                name="checked"
                                                value="on"
-                                               id="play_slot_{{ reserved_player.pk }}"
+                                               id="play_slot_{{ standby_player.pk }}"
                                                class="toggle toggle-primary"
-                                               {% if reserved_player in confirmed_players_for_game %}checked{% endif %}
+                                               {% if standby_player in confirmed_players_for_game %}checked{% endif %}
                                                onchange="this.form.submit()">
                                     {% else %}
                                         <div class="w-6 h-6 bg-base-200 rounded-full mx-auto"></div>
                                     {% endif %}
                                 </td>
                                 <td class="font-medium py-3 flex items-center gap-2">
-                                    <a href="{% url 'player_details_url' player_id=reserved_player.pk %}"
+                                    <a href="{% url 'player_details_url' player_id=standby_player.pk %}"
                                        class="link link-primary flex-1">
-                                        {{ reserved_player|get_display_name }}
+                                        {{ standby_player|get_display_name }}
                                     </a>
-                                    {% if reserved_player.status == 'reserved' %}
-                                        <span class="badge badge-warning badge-xs">Reserve</span>
+                                    {% if standby_player.status == 'standby' %}
+                                        <span class="badge badge-warning badge-xs">Standby</span>
                                     {% endif %}
                                 </td>
                             </tr>

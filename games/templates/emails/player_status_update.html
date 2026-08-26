@@ -22,7 +22,7 @@
         <p>New Status: <span style="color: orange;">AWAITING</span></p>
         <p>You are now QUEUED for the game, though your booking has not been confirmed yet.</p>
         <p>We will notify you as soon as a slot becomes available.</p>
-    {% elif status == "cancelled" or status == "reserved" %}
+    {% elif status == "cancelled" or status == "standby" %}
         <p>New Status: <span style="color: red;">CANCELLED</span></p>
         <p>Your participation has been cancelled. If this is a mistake, please contact the admin.</p>
     {% endif %}

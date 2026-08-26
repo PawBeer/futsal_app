@@ -76,12 +76,12 @@ class BookingModelTests(BaseTestCase):
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_3_per.player,
-            status=StatusChoices.RESERVED,
+            status=StatusChoices.STANDBY,
         )
         BookingHistoryForGame.objects.create(
             game=game,
             player=self.user_4_act.player,
-            status=StatusChoices.RESERVED,
+            status=StatusChoices.STANDBY,
         )
 
         total_players = game_helper.get_total_players_for_game(game)
