@@ -64,7 +64,7 @@ class SettlementCalculationTests(BaseTestCase):
         for status in [
             StatusChoices.CONFIRMED,
             StatusChoices.RESTING,
-            StatusChoices.RESERVED,
+            StatusChoices.STANDBY,
             StatusChoices.AWAITING,
         ]:
             with self.subTest(status=status):

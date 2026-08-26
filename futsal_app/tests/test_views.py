@@ -44,7 +44,7 @@ class AddGameViewTests(BaseTestCase):
         )
         self.assertEqual(
             BookingHistoryForGame.objects.filter(
-                game=game, status=StatusChoices.RESERVED
+                game=game, status=StatusChoices.STANDBY
             ).count(),
             1,
         )
@@ -89,7 +89,7 @@ class AddGameViewTests(BaseTestCase):
         # get a reserved player
         reserved_player = (
             BookingHistoryForGame.objects.filter(
-                game=game, status=StatusChoices.RESERVED
+                game=game, status=StatusChoices.STANDBY
             )
             .order_by("-creation_date")
             .first()
@@ -132,7 +132,7 @@ class AddGameViewTests(BaseTestCase):
         # get a reserved player
         reserved_player = (
             BookingHistoryForGame.objects.filter(
-                game=game, status=StatusChoices.RESERVED
+                game=game, status=StatusChoices.STANDBY
             )
             .order_by("-creation_date")
             .first()
@@ -201,7 +201,7 @@ class AddGameViewTests(BaseTestCase):
 
         reserved_player = (
             BookingHistoryForGame.objects.filter(
-                game=game, status=StatusChoices.RESERVED
+                game=game, status=StatusChoices.STANDBY
             )
             .order_by("-creation_date")
             .first()

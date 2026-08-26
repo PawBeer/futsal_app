@@ -58,7 +58,7 @@ class StatusChoices(models.TextChoices):
     PLANNED = "planned", "Planned"
     CANCELLED = "cancelled", "Cancelled"
     CONFIRMED = "confirmed", "Confirmed"
-    RESERVED = "reserved", "Reserved"
+    STANDBY = "standby", "Standby"
     RESTING = "resting", "Resting"
     # the player is happy to play (responded positive) but the booking is not yet confirmed
     AWAITING = "awaiting", "Awaiting"

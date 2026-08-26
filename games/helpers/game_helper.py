@@ -143,7 +143,7 @@ def apply_status_to_games_in_range(player: Player, games_in_range, status: str) 
     Records `status` as the player's booking for each game in
     `games_in_range`. When `status` is Resting and the player already has a
     booking for a game, they're downgraded to Cancelled (if they were
-    Planned/Cancelled) or Reserved (if they were Confirmed/Reserved) instead
+    Planned/Cancelled) or Standby (if they were Confirmed/Standby) instead
     of being force-marked Resting, so existing slot/substitute bookkeeping
     for that game isn't clobbered.
     """
@@ -158,8 +158,8 @@ def apply_status_to_games_in_range(player: Player, games_in_range, status: str) 
             current_status = latest_booking.status
             if current_status in [StatusChoices.PLANNED, StatusChoices.CANCELLED]:
                 new_status = StatusChoices.CANCELLED
-            elif current_status in [StatusChoices.CONFIRMED, StatusChoices.RESERVED]:
-                new_status = StatusChoices.RESERVED
+            elif current_status in [StatusChoices.CONFIRMED, StatusChoices.STANDBY]:
+                new_status = StatusChoices.STANDBY
             else:
                 new_status = status
         else:

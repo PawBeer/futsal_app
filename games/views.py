@@ -131,7 +131,7 @@ def game_details(request, game_id):
     cancelled_players = game_helper.get_players_by_status(
         [StatusChoices.CANCELLED], game
     )
-    reserved_players = game_helper.get_players_by_status([StatusChoices.RESERVED], game)
+    standby_players = game_helper.get_players_by_status([StatusChoices.STANDBY], game)
     confirmed_players = game_helper.get_players_by_status(
         [StatusChoices.CONFIRMED], game
     )
@@ -157,7 +157,7 @@ def game_details(request, game_id):
         {
             "game": game,
             "planned_players_for_game": planned_players,
-            "reserved_players_for_game": reserved_players,
+            "standby_players_for_game": standby_players,
             "confirmed_players_for_game": confirmed_players,
             "awaiting_players_for_game": awaiting_players,
             "number_of_booked_players": len(planned_players)
@@ -178,7 +178,7 @@ def game_details(request, game_id):
             "breadcrumbs": breadcrumbs,
             "player_should_see_reserved_table": _player_should_see_reserved_table(
                 request.user,
-                reserved_players + confirmed_players + awaiting_players,
+                standby_players + confirmed_players + awaiting_players,
             ),
         },
     )
@@ -289,10 +289,10 @@ def _apply_status_change_logic(current_status, checked, game):
     status_handler = {
         (StatusChoices.PLANNED, False): lambda game: StatusChoices.CANCELLED,
         (StatusChoices.CANCELLED, True): _uncancel_if_slot_available,
-        (StatusChoices.RESERVED, True): _check_if_empty_slots,
+        (StatusChoices.STANDBY, True): _check_if_empty_slots,
         (StatusChoices.AWAITING, True): _check_if_empty_slots,
-        (StatusChoices.AWAITING, False): lambda game: StatusChoices.RESERVED,
-        (StatusChoices.CONFIRMED, False): lambda game: StatusChoices.RESERVED,
+        (StatusChoices.AWAITING, False): lambda game: StatusChoices.STANDBY,
+        (StatusChoices.CONFIRMED, False): lambda game: StatusChoices.STANDBY,
         (StatusChoices.PLANNED, True): lambda game: StatusChoices.PLANNED,
     }
     try:
@@ -674,7 +674,7 @@ def add_game(request):
             _create_booking_for_players(
                 game,
                 Player.objects.filter(role=PlayerRole.ACTIVE),
-                StatusChoices.RESERVED,
+                StatusChoices.STANDBY,
             )
 
             psm_list = PlayerStatus.objects.all().order_by("date_start")
