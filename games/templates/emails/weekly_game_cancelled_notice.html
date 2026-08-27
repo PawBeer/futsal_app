@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The game on {{ game.when|date:"l, F j" }} is cancelled</title>
+</head>
+<body>
+    <h3>The game on {{ game.when|date:"l, F j" }} is cancelled</h3>
+
+    <p>Hello {{ player_display_name }},</p>
+
+    <p>Game Details:<br>
+    - Date: {{ game.when|date:"l, F j, Y" }}</p>
+
+    <p>Just a heads up: this game will not take place. No action is needed on your part.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

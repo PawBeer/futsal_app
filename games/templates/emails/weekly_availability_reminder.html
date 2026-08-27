@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Who can't play on {{ game.when|date:"l, F j" }}?</title>
+</head>
+<body>
+    <h3>Who can't play on {{ game.when|date:"l, F j" }}?</h3>
+
+    <p>Hello {{ player_display_name }},</p>
+
+    <p>Game Details:<br>
+    - Date: {{ game.when|date:"l, F j, Y" }}</p>
+
+    <p>You are currently planned to play. If you can't make it this week, please let us know by clicking below:</p>
+
+    <p><a href="{{ cancel_url }}">I can't play on {{ game.when|date:"l, F j" }}</a></p>
+
+    <p>If you can still play, no action is needed.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

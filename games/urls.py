@@ -20,6 +20,11 @@ urlpatterns = [
         name="game_player_status_update_url",
     ),
     path(
+        "game/cancel/<str:token>/",
+        views.cancel_participation_via_link,
+        name="cancel_participation_url",
+    ),
+    path(
         "game/<int:game_id>/substitute-payment/sent/",
         views.toggle_substitute_payment_sent,
         name="toggle_substitute_payment_sent_url",

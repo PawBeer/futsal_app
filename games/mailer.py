@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
+from django.template.defaultfilters import date as date_filter
 from django.template.loader import render_to_string
 
 from futsal_app import settings
@@ -71,6 +72,67 @@ def send_player_status_update_email(player: Player, game, status: str):
             "player_display_name": player_display_name,
             "game": game,
             "status": status,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_weekly_availability_reminder_email(
+    player: Player, game: Game, cancel_url: str
+) -> None:
+    """
+    Weekly nudge to a still-planned player asking whether they can make the
+    upcoming game, with a one-click link to cancel their participation.
+    """
+    game_day = date_filter(game.when, "l, F j")
+    subject = f"Who can't play on {game_day}?"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [player.user.email]
+    player_display_name = player_helper.get_display_name(player)
+
+    text_content = (
+        f"Hello {player_display_name}, who can't play on {game_day}? "
+        f"If you can't make it, cancel your participation here: {cancel_url}"
+    )
+
+    html_content = render_to_string(
+        "emails/weekly_availability_reminder.html",
+        {
+            "player_display_name": player_display_name,
+            "game": game,
+            "cancel_url": cancel_url,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_weekly_game_cancelled_notice_email(player: Player, game: Game) -> None:
+    """
+    Weekly notice to a still-planned player that the upcoming game they were
+    expecting to play has been cancelled. Purely informational - there's
+    nothing to opt out of, so no cancel link is included.
+    """
+    game_day = date_filter(game.when, "l, F j")
+    subject = f"The game on {game_day} is cancelled"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [player.user.email]
+    player_display_name = player_helper.get_display_name(player)
+
+    text_content = (
+        f"Hello {player_display_name}, the game on {game_day} will not take place."
+    )
+
+    html_content = render_to_string(
+        "emails/weekly_game_cancelled_notice.html",
+        {
+            "player_display_name": player_display_name,
+            "game": game,
         },
     )
 
