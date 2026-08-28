@@ -279,7 +279,7 @@ def game_status_update(request, game_id):
         if when_date.date() != game.when:
             game.reminder_sent_at = None
             game.standby_reminder_sent_at = None
-        game.when = when_date
+        game.when = when_date.date()
 
     if request.user.is_superuser and request.POST.get(
         "notifications_enabled_submitted"
