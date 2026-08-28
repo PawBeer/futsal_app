@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Want to play on {{ game.when|date:"l, F j" }}?</title>
+</head>
+<body>
+    <h3>Want to play on {{ game.when|date:"l, F j" }}?</h3>
+
+    <p>Hello {{ player_display_name }},</p>
+
+    <p>Game Details:<br>
+    - Date: {{ game.when|date:"l, F j, Y" }}</p>
+
+    <p>You're currently on the standby list for this game. Would you like to play? Let us know by clicking below:</p>
+
+    <p><a href="{{ confirm_url }}">I want to play on {{ game.when|date:"l, F j" }}</a></p>
+
+    <p><strong>Please note:</strong> this email is not an automatic sign-up for the game. Only once a free slot becomes available will your booking go through, and it will be confirmed in a separate email.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

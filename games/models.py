@@ -51,6 +51,9 @@ class Game(models.Model):
     reminder_enabled = models.BooleanField(default=True)
     reminder_send_at = models.DateTimeField(null=True, blank=True)
     reminder_sent_at = models.DateTimeField(null=True, blank=True)
+    standby_reminder_enabled = models.BooleanField(default=True)
+    standby_reminder_send_at = models.DateTimeField(null=True, blank=True)
+    standby_reminder_sent_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.when} - {self.status}"

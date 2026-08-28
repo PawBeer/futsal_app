@@ -18,7 +18,13 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from games.forms import PlayerProfileForm
-from games.helpers import game_helper, player_helper, settlement_helper, token_helper
+from games.helpers import (
+    game_helper,
+    notification_helper,
+    player_helper,
+    settlement_helper,
+    token_helper,
+)
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_updates_email_to_admins,
@@ -234,6 +240,15 @@ def _default_reminder_send_at(when_date):
     )
 
 
+def _default_standby_reminder_send_at(when_date):
+    """Default standby-invite send time: 1 day before the game, in the
+    morning. Editable afterwards via 'Update Game Details'."""
+    when_only = when_date.date() if hasattr(when_date, "date") else when_date
+    return timezone.make_aware(
+        datetime.combine(when_only - timedelta(days=1), time(8, 0))
+    )
+
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
@@ -263,6 +278,7 @@ def game_status_update(request, game_id):
 
         if when_date.date() != game.when:
             game.reminder_sent_at = None
+            game.standby_reminder_sent_at = None
         game.when = when_date
 
     if request.user.is_superuser and request.POST.get(
@@ -281,6 +297,22 @@ def game_status_update(request, game_id):
                 )
             except ValueError:
                 messages.error(request, "Invalid reminder send date/time.")
+
+    if request.user.is_superuser and request.POST.get(
+        "standby_reminder_enabled_submitted"
+    ):
+        game.standby_reminder_enabled = "on" == request.POST.get(
+            "standby_reminder_enabled"
+        )
+
+        standby_reminder_send_at = request.POST.get("standby_reminder_send_at")
+        if standby_reminder_send_at:
+            try:
+                game.standby_reminder_send_at = timezone.make_aware(
+                    datetime.strptime(standby_reminder_send_at, "%Y-%m-%dT%H:%M")
+                )
+            except ValueError:
+                messages.error(request, "Invalid standby reminder send date/time.")
 
     game.save()
 
@@ -467,6 +499,69 @@ def cancel_participation_via_link(request, token):
         "games/cancel_participation_result.html",
         {"game": game, "player": player},
     )
+
+
+def confirm_participation_via_link(request, token):
+    """
+    One-click, no-login link sent in the standby availability invite email,
+    letting a standby player register interest in playing. This does not
+    book them immediately - see _apply_status_change_logic for
+    (STANDBY, True), which only confirms them if a slot is currently free,
+    otherwise queues them as Awaiting until one opens up. The token is
+    scoped to a specific game+player (see games.helpers.token_helper) and
+    stops working once the game date passes.
+    """
+    try:
+        payload = token_helper.read_confirm_token(token)
+        game = get_object_or_404(Game, id=payload["game_id"])
+        player = get_object_or_404(Player, id=payload["player_id"])
+    except (BadSignature, KeyError):
+        return render(
+            request, "games/confirm_participation_result.html", {"invalid": True}
+        )
+
+    if game.when < timezone.now().date():
+        return render(
+            request,
+            "games/confirm_participation_result.html",
+            {"expired": True, "game": game},
+        )
+
+    current_booking = player_helper.get_latest_booking_for_game(player, game)
+    current_status = current_booking.status if current_booking else None
+
+    if current_status != StatusChoices.STANDBY:
+        return render(
+            request,
+            "games/confirm_participation_result.html",
+            {"already_requested": True, "game": game, "player": player},
+        )
+
+    new_status, _changes = _apply_player_status_change(
+        game, player, current_status, checked=True
+    )
+
+    return render(
+        request,
+        "games/confirm_participation_result.html",
+        {"game": game, "player": player, "new_status": new_status},
+    )
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def send_standby_reminders_now(request, game_id):
+    """Manually triggers the standby availability invite for one game right
+    now, independent of Game.standby_reminder_send_at."""
+    game = get_object_or_404(Game, id=game_id)
+
+    sent_count = notification_helper.send_standby_availability_reminders(game)
+    game.standby_reminder_sent_at = timezone.now()
+    game.save(update_fields=["standby_reminder_sent_at"])
+
+    messages.success(request, f"Standby invite sent to {sent_count} player(s).")
+    return redirect("game_details_url", game_id=game_id)
 
 
 def _get_substitute_payment_pair(request):
@@ -748,6 +843,7 @@ def add_game(request):
             description=request.POST.get("description", ""),
             number_of_players=number_of_players,
             reminder_send_at=_default_reminder_send_at(when_date),
+            standby_reminder_send_at=_default_standby_reminder_send_at(when_date),
         )
         if request.POST.get("set_players"):
 

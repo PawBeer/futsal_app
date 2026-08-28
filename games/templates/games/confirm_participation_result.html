@@ -1,0 +1,29 @@
+{% extends 'index.html' %}
+{% block page_title %}
+    Confirm participation
+{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col items-center gap-6 p-6 bg-base-100 rounded-xl shadow-lg max-w-md mx-auto text-center">
+        {% if invalid %}
+            <h2 class="text-xl font-bold">Invalid link</h2>
+            <p>This link is not valid.</p>
+        {% elif expired %}
+            <h2 class="text-xl font-bold">Link expired</h2>
+            <p>This game on {{ game.when|date:"l, F j, Y" }} has already happened, so this link can no longer be used.</p>
+        {% elif already_requested %}
+            <h2 class="text-xl font-bold">Already requested</h2>
+            <p>You had already let us know you'd like to play on {{ game.when|date:"l, F j, Y" }}.</p>
+        {% elif new_status == "confirmed" %}
+            <h2 class="text-xl font-bold">You're confirmed!</h2>
+            <p>A slot was free, so you're now confirmed to play on {{ game.when|date:"l, F j, Y" }}.</p>
+        {% else %}
+            <h2 class="text-xl font-bold">Request received</h2>
+            <p>Thanks! We've noted that you'd like to play on {{ game.when|date:"l, F j, Y" }}.</p>
+            <p>This is not an automatic sign-up - only once a free slot becomes available will your booking go through, and it will be confirmed in a separate email.</p>
+        {% endif %}
+        {% if game %}
+            <a href="{% url 'game_details_url' game_id=game.id %}" class="btn btn-primary">View game details</a>
+        {% endif %}
+    </div>
+{% endblock %}
