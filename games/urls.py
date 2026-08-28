@@ -25,6 +25,16 @@ urlpatterns = [
         name="cancel_participation_url",
     ),
     path(
+        "game/confirm/<str:token>/",
+        views.confirm_participation_via_link,
+        name="confirm_participation_url",
+    ),
+    path(
+        "game/<int:game_id>/send-standby-reminders/",
+        views.send_standby_reminders_now,
+        name="send_standby_reminders_url",
+    ),
+    path(
         "game/<int:game_id>/substitute-payment/sent/",
         views.toggle_substitute_payment_sent,
         name="toggle_substitute_payment_sent_url",

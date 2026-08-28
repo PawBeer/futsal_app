@@ -112,6 +112,43 @@ def send_weekly_availability_reminder_email(
     msg.send()
 
 
+def send_standby_availability_email(
+    player: Player, game: Game, confirm_url: str
+) -> None:
+    """
+    Invite to a standby player asking whether they'd like to play the
+    upcoming game, with a one-click link to register interest. Clearly
+    states this is not an automatic sign-up: a slot must free up first, and
+    that will be confirmed separately (see send_player_status_update_email).
+    """
+    game_day = date_filter(game.when, "l, F j")
+    subject = f"Want to play on {game_day}?"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [player.user.email]
+    player_display_name = player_helper.get_display_name(player)
+
+    text_content = (
+        f"Hello {player_display_name}, would you like to play on {game_day}? "
+        f"Let us know here: {confirm_url} "
+        f"This email is not an automatic sign-up for the game - only once a "
+        f"free slot becomes available will your booking go through, and it "
+        f"will be confirmed in a separate email."
+    )
+
+    html_content = render_to_string(
+        "emails/standby_availability_reminder.html",
+        {
+            "player_display_name": player_display_name,
+            "game": game,
+            "confirm_url": confirm_url,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
 def send_weekly_game_cancelled_notice_email(player: Player, game: Game) -> None:
     """
     Weekly notice to a still-planned player that the upcoming game they were

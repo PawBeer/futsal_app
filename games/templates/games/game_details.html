@@ -163,6 +163,7 @@
                         <div class="pt-4 flex flex-col gap-3">
                             {% include 'games/_notifications_enabled_field.html' %}
                             {% include 'games/_reminder_settings_fields.html' %}
+                            {% include 'games/_standby_reminder_settings_fields.html' %}
                         </div>
                         <div class="pt-2">
                             <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">
@@ -171,6 +172,16 @@
                         </div>
                     {% endif %}
                 </form>
+
+                {% if user.is_authenticated and user.is_superuser %}
+                    <form method="post" action="{% url 'send_standby_reminders_url' game_id=game.id %}"
+                          class="w-full max-w-md">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline btn-secondary w-full shadow-lg hover:shadow-xl">
+                            Send standby invite now
+                        </button>
+                    </form>
+                {% endif %}
             </div>
 
             <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
