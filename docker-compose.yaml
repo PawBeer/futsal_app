@@ -14,6 +14,18 @@ services:
     env_file:
       - .env
 
+  futsal_reminder_cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./cron_entrypoint.sh"]
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - futsal_gunicorn
+
   futsal_nginx:
     image: nginx:latest
     volumes:

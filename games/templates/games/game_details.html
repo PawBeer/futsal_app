@@ -70,7 +70,12 @@
 
                     {% if user.is_authenticated and user.is_superuser %}
                         <div class="flex justify-between items-center">
-                            {% include 'games/_notifications_enabled_field.html' %}
+                            <div class="flex flex-col gap-3">
+                                {% include 'games/_notifications_enabled_field.html' %}
+                                {% if game.status != 'Played' and not is_past_game %}
+                                    {% include 'games/_reminder_settings_fields.html' %}
+                                {% endif %}
+                            </div>
                             <button type="submit" class="btn btn-primary shadow-lg hover:shadow-xl">
                                 Update Game Details
                             </button>
@@ -155,8 +160,9 @@
 
 
                     {% if user.is_authenticated and user.is_superuser %}
-                        <div class="pt-4">
+                        <div class="pt-4 flex flex-col gap-3">
                             {% include 'games/_notifications_enabled_field.html' %}
+                            {% include 'games/_reminder_settings_fields.html' %}
                         </div>
                         <div class="pt-2">
                             <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">

@@ -143,3 +143,7 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="user")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="password")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="admin")
+
+# Base URL used to build absolute links (e.g. cancel-participation links) in
+# emails sent outside a request/response cycle, such as from a management command.
+SITE_URL = env("SITE_URL", default="http://localhost:8000")

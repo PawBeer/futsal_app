@@ -1,5 +1,5 @@
 import calendar
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from typing import Iterable
 
 from django.contrib import messages
@@ -8,6 +8,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.core.paginator import Paginator
+from django.core.signing import BadSignature
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -17,7 +18,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from games.forms import PlayerProfileForm
-from games.helpers import game_helper, player_helper, settlement_helper
+from games.helpers import game_helper, player_helper, settlement_helper, token_helper
 from games.mailer import (
     send_player_status_update_email,
     send_player_status_updates_email_to_admins,
@@ -139,7 +140,8 @@ def game_details(request, game_id):
         [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
 
-    if game.when < timezone.now().date():
+    is_past_game = game.when < timezone.now().date()
+    if is_past_game:
         active_link = "Past games"
         active_url = reverse("past_games_url")
     else:
@@ -175,6 +177,7 @@ def game_details(request, game_id):
                 "-creation_date"
             ),
             "status_options": GameStatus.labels,
+            "is_past_game": is_past_game,
             "breadcrumbs": breadcrumbs,
             "player_should_see_reserved_table": _player_should_see_reserved_table(
                 request.user,
@@ -222,6 +225,15 @@ def _date_has_game(when_date, exclude_game_id=None) -> bool:
     return conflicting.exists()
 
 
+def _default_reminder_send_at(when_date):
+    """Default weekly-reminder send time: 2 days before the game, in the
+    morning. Editable afterwards via 'Update Game Details'."""
+    when_only = when_date.date() if hasattr(when_date, "date") else when_date
+    return timezone.make_aware(
+        datetime.combine(when_only - timedelta(days=2), time(8, 0))
+    )
+
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
@@ -249,12 +261,26 @@ def game_status_update(request, game_id):
             )
             return redirect("game_details_url", game_id=game_id)
 
+        if when_date.date() != game.when:
+            game.reminder_sent_at = None
         game.when = when_date
 
     if request.user.is_superuser and request.POST.get(
         "notifications_enabled_submitted"
     ):
         game.notifications_enabled = "on" == request.POST.get("notifications_enabled")
+
+    if request.user.is_superuser and request.POST.get("reminder_enabled_submitted"):
+        game.reminder_enabled = "on" == request.POST.get("reminder_enabled")
+
+        reminder_send_at = request.POST.get("reminder_send_at")
+        if reminder_send_at:
+            try:
+                game.reminder_send_at = timezone.make_aware(
+                    datetime.strptime(reminder_send_at, "%Y-%m-%dT%H:%M")
+                )
+            except ValueError:
+                messages.error(request, "Invalid reminder send date/time.")
 
     game.save()
 
@@ -328,6 +354,40 @@ def _apply_transition_from_awaiting_to_confirmed(game):
     return None
 
 
+def _apply_player_status_change(game: Game, player: Player, current_status, checked):
+    """
+    Shared core of a player status change: computes the new status, records
+    it, promotes an awaiting player into any freed slot, and sends the
+    relevant notification emails. Returns (new_status, changes) so callers
+    with different failure/redirect handling (an authenticated form post vs.
+    an anonymous one-click cancel link) can each report the outcome their
+    own way.
+    """
+    new_status = _apply_status_change_logic(current_status, checked, game)
+
+    changes = []
+
+    if current_status != new_status:
+        BookingHistoryForGame.objects.create(
+            player=player,
+            game=game,
+            status=new_status,
+            creation_date=timezone.now(),
+        )
+        if game.notifications_enabled:
+            send_player_status_update_email(player, game, new_status)
+        changes.append((player, new_status))
+
+    promoted_change = _apply_transition_from_awaiting_to_confirmed(game)
+    if promoted_change:
+        changes.append(promoted_change)
+
+    if changes and game.notifications_enabled:
+        send_player_status_updates_email_to_admins(changes, game)
+
+    return new_status, changes
+
+
 @login_required
 @require_POST
 def game_player_status_update(request, game_id):
@@ -355,34 +415,58 @@ def game_player_status_update(request, game_id):
     current_booking = player_helper.get_latest_booking_for_game(player, found_game)
     current_status = current_booking.status if current_booking else None
 
-    new_status = _apply_status_change_logic(current_status, checked, found_game)
+    new_status, _changes = _apply_player_status_change(
+        found_game, player, current_status, checked
+    )
 
-    changes = []
-
-    if current_status != new_status:
-        BookingHistoryForGame.objects.create(
-            player=player,
-            game=found_game,
-            status=new_status,
-            creation_date=timezone.now(),
-        )
-        if found_game.notifications_enabled:
-            send_player_status_update_email(player, found_game, new_status)
-        changes.append((player, new_status))
-    elif current_status == StatusChoices.CANCELLED and checked:
+    if current_status == new_status == StatusChoices.CANCELLED and checked:
         messages.error(
             request,
             "No free slot available - a substitute has already taken this spot.",
         )
 
-    promoted_change = _apply_transition_from_awaiting_to_confirmed(found_game)
-    if promoted_change:
-        changes.append(promoted_change)
-
-    if changes and found_game.notifications_enabled:
-        send_player_status_updates_email_to_admins(changes, found_game)
-
     return redirect("game_details_url", game_id=game_id)
+
+
+def cancel_participation_via_link(request, token):
+    """
+    One-click, no-login cancel link sent in the weekly availability reminder
+    email. The token is scoped to a specific game+player (see
+    games.helpers.token_helper) and stops working once the game date passes.
+    """
+    try:
+        payload = token_helper.read_cancel_token(token)
+        game = get_object_or_404(Game, id=payload["game_id"])
+        player = get_object_or_404(Player, id=payload["player_id"])
+    except (BadSignature, KeyError):
+        return render(
+            request, "games/cancel_participation_result.html", {"invalid": True}
+        )
+
+    if game.when < timezone.now().date():
+        return render(
+            request,
+            "games/cancel_participation_result.html",
+            {"expired": True, "game": game},
+        )
+
+    current_booking = player_helper.get_latest_booking_for_game(player, game)
+    current_status = current_booking.status if current_booking else None
+
+    if current_status == StatusChoices.CANCELLED:
+        return render(
+            request,
+            "games/cancel_participation_result.html",
+            {"already_cancelled": True, "game": game, "player": player},
+        )
+
+    _apply_player_status_change(game, player, current_status, checked=False)
+
+    return render(
+        request,
+        "games/cancel_participation_result.html",
+        {"game": game, "player": player},
+    )
 
 
 def _get_substitute_payment_pair(request):
@@ -663,6 +747,7 @@ def add_game(request):
             status=request.POST.get("status", GameStatus.PLANNED),
             description=request.POST.get("description", ""),
             number_of_players=number_of_players,
+            reminder_send_at=_default_reminder_send_at(when_date),
         )
         if request.POST.get("set_players"):
 
