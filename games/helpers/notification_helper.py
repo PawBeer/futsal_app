@@ -1,8 +1,7 @@
-from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
-from games.helpers import game_helper, token_helper
+from games.helpers import game_helper, token_helper, url_helper
 from games.mailer import (
     send_standby_availability_email,
     send_weekly_availability_reminder_email,
@@ -11,13 +10,14 @@ from games.mailer import (
 from games.models import Game, GameStatus, NotificationType, StatusChoices
 
 
-def send_standby_availability_reminders(game: Game) -> int:
+def send_standby_availability_reminders(game: Game, request=None) -> int:
     """
     Emails every player currently on the standby list for `game`, inviting
     them to register interest in playing (see mailer.send_standby_availability_email
     for the "not an automatic booking" disclaimer). Shared by the daily
-    management command and the manual "send now" trigger. Returns how many
-    emails were sent.
+    management command (no request) and the manual "send now" trigger
+    (request available - see url_helper.build_absolute_url). Returns how
+    many emails were sent.
     """
     standby_players = game_helper.get_players_by_status([StatusChoices.STANDBY], game)
 
@@ -27,8 +27,8 @@ def send_standby_availability_reminders(game: Game) -> int:
             continue
 
         token = token_helper.make_confirm_token(game, player)
-        confirm_url = settings.SITE_URL + reverse(
-            "confirm_participation_url", args=[token]
+        confirm_url = url_helper.build_absolute_url(
+            reverse("confirm_participation_url", args=[token]), request=request
         )
         send_standby_availability_email(player, game, confirm_url)
         sent_count += 1
@@ -36,12 +36,13 @@ def send_standby_availability_reminders(game: Game) -> int:
     return sent_count
 
 
-def send_weekly_reminders_now(game: Game) -> int:
+def send_weekly_reminders_now(game: Game, request=None) -> int:
     """
     Emails every still-Planned player either the "who can't play"
     availability nudge (game still Planned) or the cancellation notice
-    (game now Cancelled). Shared by the cron job and the manual "send now"
-    trigger. Returns how many emails were sent.
+    (game now Cancelled). Shared by the cron job (no request) and the
+    manual "send now" trigger (request available - see
+    url_helper.build_absolute_url). Returns how many emails were sent.
     """
     planned_players = game_helper.get_players_by_status([StatusChoices.PLANNED], game)
 
@@ -54,8 +55,8 @@ def send_weekly_reminders_now(game: Game) -> int:
             send_weekly_game_cancelled_notice_email(player, game)
         else:
             token = token_helper.make_cancel_token(game, player)
-            cancel_url = settings.SITE_URL + reverse(
-                "cancel_participation_url", args=[token]
+            cancel_url = url_helper.build_absolute_url(
+                reverse("cancel_participation_url", args=[token]), request=request
             )
             send_weekly_availability_reminder_email(player, game, cancel_url)
         sent_count += 1

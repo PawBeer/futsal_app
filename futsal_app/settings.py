@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
@@ -144,6 +145,11 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="user")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="password")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="admin")
 
-# Base URL used to build absolute links (e.g. cancel-participation links) in
-# emails sent outside a request/response cycle, such as from a management command.
-SITE_URL = env("SITE_URL", default="http://localhost:8000")
+# Used to build absolute links (e.g. cancel-participation links) in emails
+# sent outside a request/response cycle, such as from a management command,
+# the same way Django's own password reset flow determines its host - see
+# games.helpers.url_helper.build_absolute_url. The domain itself lives on
+# the Site row (SITE_ID) in the database, editable at /admin/sites/site/,
+# instead of a hardcoded setting.
+SITE_ID = 1
+SITE_USE_HTTPS = env.bool("SITE_USE_HTTPS", default=False)
