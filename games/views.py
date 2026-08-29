@@ -26,10 +26,12 @@ from games.helpers import (
     token_helper,
 )
 from games.mailer import (
+    send_payment_confirmation_email,
     send_player_status_update_email,
     send_player_status_updates_email_to_admins,
     send_settlement_email,
     send_substitute_payment_confirmation_request_email,
+    send_substitute_payment_confirmed_email,
     send_substitute_payment_email,
     send_welcome_email,
 )
@@ -687,8 +689,12 @@ def toggle_substitute_payment_confirmed(request, game_id):
     payment, _created = SubstitutePayment.objects.get_or_create(
         game=game, cancelled_player=cancelled_player, substitute_player=substitute
     )
-    payment.confirmed_at = None if payment.confirmed_at else timezone.now()
+    marking_as_confirmed = payment.confirmed_at is None
+    payment.confirmed_at = timezone.now() if marking_as_confirmed else None
     payment.save(update_fields=["confirmed_at"])
+
+    if marking_as_confirmed and substitute.user and substitute.user.email:
+        send_substitute_payment_confirmed_email(payment)
 
     return redirect("game_details_url", game_id=game_id)
 
@@ -1190,10 +1196,14 @@ def send_settlement(request):
 @require_POST
 def toggle_paid(request, charge_id):
     charge = get_object_or_404(PlayerCharge, id=charge_id)
-    charge.is_paid = not charge.is_paid
-    charge.paid_at = timezone.now() if charge.is_paid else None
+    marking_as_paid = not charge.is_paid
+    charge.is_paid = marking_as_paid
+    charge.paid_at = timezone.now() if marking_as_paid else None
     charge.marked_by = request.user
     charge.save()
+
+    if marking_as_paid and charge.player.user and charge.player.user.email:
+        send_payment_confirmation_email(charge)
 
     year, month = _resolve_period(request, source=request.POST)
     return redirect(f"{reverse('settlement_overview_url')}?year={year}&month={month}")

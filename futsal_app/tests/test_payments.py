@@ -284,6 +284,40 @@ class ToggleAndWhoPaidViewTests(BaseTestCase):
         response = self.client.get(reverse("who_paid_url"), {"year": 2099, "month": 1})
         self.assertEqual(response.status_code, 200)
 
+    def test_toggle_marks_charge_paid_emails_the_player(self):
+        self.user_2_per.email = "lolek@example.com"
+        self.user_2_per.save()
+
+        self.client.force_login(self.user_1_per)
+        self.client.post(
+            reverse("toggle_paid_url", args=[self.charge.id]),
+            {"year": 2026, "month": 5},
+        )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.user_2_per.email])
+        self.assertIn("payment received", mail.outbox[0].subject.lower())
+
+    def test_toggling_unpaid_does_not_email(self):
+        self.user_2_per.email = "lolek@example.com"
+        self.user_2_per.save()
+
+        self.client.force_login(self.user_1_per)
+        toggle_url = reverse("toggle_paid_url", args=[self.charge.id])
+        self.client.post(toggle_url, {"year": 2026, "month": 5})
+        self.client.post(toggle_url, {"year": 2026, "month": 5})
+
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_toggle_marks_charge_paid_without_player_email_sends_no_email(self):
+        self.client.force_login(self.user_1_per)
+        self.client.post(
+            reverse("toggle_paid_url", args=[self.charge.id]),
+            {"year": 2026, "month": 5},
+        )
+
+        self.assertEqual(len(mail.outbox), 0)
+
 
 class SettlementEmailSendingTests(BaseTestCase):
     def setUp(self):
@@ -561,5 +595,32 @@ class SubstitutePaymentTogglingTests(BaseTestCase):
         self.client.force_login(self.user_2_per)
         self.client.post(self.sent_url, self.post_data)
         self.client.post(self.sent_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_confirming_payment_emails_the_substitute(self):
+        self.user_2_per.email = "lolek@example.com"
+        self.user_2_per.save()
+
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.user_2_per.email])
+        self.assertIn("confirmed", mail.outbox[0].subject.lower())
+
+    def test_unconfirming_payment_does_not_email(self):
+        self.user_2_per.email = "lolek@example.com"
+        self.user_2_per.save()
+
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.confirmed_url, self.post_data)
+        self.client.post(self.confirmed_url, self.post_data)
+
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_confirming_payment_without_substitute_email_sends_no_email(self):
+        self.client.force_login(self.user_1_per)
+        self.client.post(self.confirmed_url, self.post_data)
 
         self.assertEqual(len(mail.outbox), 0)

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payment received</title>
+</head>
+<body>
+    <h3>Payment received for {{ run.month|stringformat:"02d" }}/{{ run.year }}</h3>
+
+    <p>Hello {{ player_display_name }},</p>
+
+    <p>We've received your payment of <strong>{{ charge.amount }}</strong>
+    for {{ run.month|stringformat:"02d" }}/{{ run.year }}.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>
