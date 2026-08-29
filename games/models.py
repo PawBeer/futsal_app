@@ -48,15 +48,51 @@ class Game(models.Model):
     description = models.TextField(null=True, blank=True)
     number_of_players = models.PositiveIntegerField(default=10)
     notifications_enabled = models.BooleanField(default=True)
-    reminder_enabled = models.BooleanField(default=True)
-    reminder_send_at = models.DateTimeField(null=True, blank=True)
-    reminder_sent_at = models.DateTimeField(null=True, blank=True)
-    standby_reminder_enabled = models.BooleanField(default=True)
-    standby_reminder_send_at = models.DateTimeField(null=True, blank=True)
-    standby_reminder_sent_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.when} - {self.status}"
+
+    @property
+    def weekly_reminder(self):
+        return self.notifications.get(notification_type=NotificationType.WEEKLY)
+
+    @property
+    def standby_reminder(self):
+        return self.notifications.get(notification_type=NotificationType.STANDBY)
+
+
+class NotificationType(models.TextChoices):
+    WEEKLY = "weekly", "Weekly"
+    STANDBY = "standby", "Standby"
+
+
+class GameNotification(models.Model):
+    """
+    Scheduling/idempotency state for one kind of automated email tied to a
+    Game (see NotificationType) - whether it's enabled, when it's due, and
+    whether it's already been sent. One row per (game, notification_type).
+    """
+
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="notifications"
+    )
+    notification_type = models.CharField(
+        max_length=20, choices=NotificationType.choices
+    )
+    enabled = models.BooleanField(default=True)
+    send_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["game", "notification_type"],
+                name="unique_notification_per_game_and_type",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.game} - {self.notification_type}"
 
 
 # pylint: disable=too-many-ancestors

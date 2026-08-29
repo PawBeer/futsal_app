@@ -7,12 +7,12 @@
         <table class="table w-full [&_th]:px-2 [&_td]:px-2">
             <thead>
             <tr>
-                <th class="w-16 text-center whitespace-normal break-words">{% if game.status == 'Played' %}Confirm Payment{% else %}Play{% endif %}</th>
-                <th class="w-24 text-left">Player</th>
-                <th class="w-24 text-center">Substitute</th>
+                <th class="w-16 text-center whitespace-normal break-words font-semibold text-base-content/70 uppercase tracking-wide">{% if game.status == 'Played' %}Confirm Payment{% else %}Play{% endif %}</th>
+                <th class="w-24 text-left font-semibold text-base-content/70 uppercase tracking-wide">Player</th>
+                <th class="w-24 text-center font-semibold text-base-content/70 uppercase tracking-wide">Substitute</th>
                 {% if game.status == 'Played' %}
-                    <th class="w-16 text-center">Paid</th>
-                    <th class="w-24 text-center whitespace-normal break-words">Status</th>
+                    <th class="w-16 text-center font-semibold text-base-content/70 uppercase tracking-wide">Paid</th>
+                    <th class="w-24 text-center whitespace-normal break-words font-semibold text-base-content/70 uppercase tracking-wide">Status</th>
                 {% endif %}
             </tr>
             </thead>
@@ -27,7 +27,7 @@
                         </td>
                         <td class="font-medium">
                             <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                               class="link link-primary">
+                               class="link link-info">
                                 {{ planned_player|get_display_name }}
                             </a>
                         </td>
@@ -67,7 +67,7 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                                   class="link link-primary">
+                                   class="link link-info">
                                     {{ planned_player|get_display_name }}
                                 </a>
                             </td>
@@ -102,14 +102,14 @@
                         </td>
                         <td class="font-medium">
                             <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                               class="link link-primary">
+                               class="link link-info">
                                 {{ cancelled_player|get_display_name }}
                             </a>
                         </td>
                         <td class="text-center">
                             {% if substitute %}
                                 <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                                    <span class="badge badge-success link link-primary h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
+                                    <span class="badge badge-success link link-info h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
                                         {{ substitute|get_display_name }}
                                     </span>
                                 </a>
@@ -174,14 +174,14 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                                   class="link link-primary">
+                                   class="link link-info">
                                     {{ cancelled_player|get_display_name }}
                                 </a>
                             </td>
                             <td class="text-center">
                                 {% if substitute %}
                                     <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                                        <span class="badge badge-success link link-primary h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
+                                        <span class="badge badge-success link link-info h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
                                             {{ substitute|get_display_name }}
                                         </span>
                                     </a>
@@ -209,7 +209,7 @@
                         <td class="font-medium">
                             {% if extra_slot_player %}
                                 <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                                   class="link link-primary">
+                                   class="link link-info">
                                     {{ extra_slot_player|get_display_name }}
                                 </a>
                             {% else %}
@@ -249,7 +249,7 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                                   class="link link-primary">
+                                   class="link link-info">
                                     {{ extra_slot_player|get_display_name }}
                                 </a>
                             </td>

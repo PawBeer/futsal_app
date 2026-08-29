@@ -38,7 +38,9 @@ from .models import (
     BookingHistoryForGame,
     ChatMessage,
     Game,
+    GameNotification,
     GameStatus,
+    NotificationType,
     Player,
     PlayerCharge,
     PlayerRole,
@@ -277,8 +279,7 @@ def game_status_update(request, game_id):
             return redirect("game_details_url", game_id=game_id)
 
         if when_date.date() != game.when:
-            game.reminder_sent_at = None
-            game.standby_reminder_sent_at = None
+            game.notifications.update(sent_at=None)
         game.when = when_date.date()
 
     if request.user.is_superuser and request.POST.get(
@@ -286,13 +287,17 @@ def game_status_update(request, game_id):
     ):
         game.notifications_enabled = "on" == request.POST.get("notifications_enabled")
 
+    weekly_reminder = None
+    standby_reminder = None
+
     if request.user.is_superuser and request.POST.get("reminder_enabled_submitted"):
-        game.reminder_enabled = "on" == request.POST.get("reminder_enabled")
+        weekly_reminder = game.weekly_reminder
+        weekly_reminder.enabled = "on" == request.POST.get("reminder_enabled")
 
         reminder_send_at = request.POST.get("reminder_send_at")
         if reminder_send_at:
             try:
-                game.reminder_send_at = timezone.make_aware(
+                weekly_reminder.send_at = timezone.make_aware(
                     datetime.strptime(reminder_send_at, "%Y-%m-%dT%H:%M")
                 )
             except ValueError:
@@ -301,20 +306,23 @@ def game_status_update(request, game_id):
     if request.user.is_superuser and request.POST.get(
         "standby_reminder_enabled_submitted"
     ):
-        game.standby_reminder_enabled = "on" == request.POST.get(
-            "standby_reminder_enabled"
-        )
+        standby_reminder = game.standby_reminder
+        standby_reminder.enabled = "on" == request.POST.get("standby_reminder_enabled")
 
         standby_reminder_send_at = request.POST.get("standby_reminder_send_at")
         if standby_reminder_send_at:
             try:
-                game.standby_reminder_send_at = timezone.make_aware(
+                standby_reminder.send_at = timezone.make_aware(
                     datetime.strptime(standby_reminder_send_at, "%Y-%m-%dT%H:%M")
                 )
             except ValueError:
                 messages.error(request, "Invalid standby reminder send date/time.")
 
     game.save()
+    if weekly_reminder is not None:
+        weekly_reminder.save()
+    if standby_reminder is not None:
+        standby_reminder.save()
 
     if (
         previous_status != GameStatus.PLAYED
@@ -557,8 +565,9 @@ def send_standby_reminders_now(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
     sent_count = notification_helper.send_standby_availability_reminders(game)
-    game.standby_reminder_sent_at = timezone.now()
-    game.save(update_fields=["standby_reminder_sent_at"])
+    standby_reminder = game.standby_reminder
+    standby_reminder.sent_at = timezone.now()
+    standby_reminder.save(update_fields=["sent_at"])
 
     messages.success(request, f"Standby invite sent to {sent_count} player(s).")
     return redirect("game_details_url", game_id=game_id)
@@ -842,8 +851,16 @@ def add_game(request):
             status=request.POST.get("status", GameStatus.PLANNED),
             description=request.POST.get("description", ""),
             number_of_players=number_of_players,
-            reminder_send_at=_default_reminder_send_at(when_date),
-            standby_reminder_send_at=_default_standby_reminder_send_at(when_date),
+        )
+        GameNotification.objects.create(
+            game=game,
+            notification_type=NotificationType.WEEKLY,
+            send_at=_default_reminder_send_at(when_date),
+        )
+        GameNotification.objects.create(
+            game=game,
+            notification_type=NotificationType.STANDBY,
+            send_at=_default_standby_reminder_send_at(when_date),
         )
         if request.POST.get("set_players"):
 

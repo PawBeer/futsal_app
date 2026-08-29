@@ -8,17 +8,18 @@ from games.mailer import (
     send_weekly_availability_reminder_email,
     send_weekly_game_cancelled_notice_email,
 )
-from games.models import Game, GameStatus, StatusChoices
+from games.models import Game, GameStatus, NotificationType, StatusChoices
 
 
 class Command(BaseCommand):
     help = (
         "Sends the weekly reminder for the single nearest upcoming game whose "
-        "configured send date/time (Game.reminder_send_at, editable per game, "
-        "default 2 days before kickoff) has arrived and hasn't already been "
-        "sent: a 'who can't play' availability nudge for Planned games, or a "
-        "cancellation notice for Cancelled games. Intended to be triggered "
-        "once daily by an external cron."
+        "configured send date/time (GameNotification.send_at for the weekly "
+        "type, editable per game, default 2 days before kickoff) has arrived "
+        "and hasn't already been sent: a 'who can't play' availability nudge "
+        "for Planned games, or a cancellation notice for Cancelled games. "
+        "Intended to be polled every few minutes (e.g. by cron_entrypoint.sh); "
+        "safe to run more often since it no-ops once already sent."
     )
 
     def handle(self, *args, **options):
@@ -28,10 +29,11 @@ class Command(BaseCommand):
             Game.objects.filter(
                 status__in=[GameStatus.PLANNED, GameStatus.CANCELLED],
                 when__gte=now.date(),
-                reminder_enabled=True,
-                reminder_send_at__isnull=False,
-                reminder_send_at__lte=now,
-                reminder_sent_at__isnull=True,
+                notifications__notification_type=NotificationType.WEEKLY,
+                notifications__enabled=True,
+                notifications__send_at__isnull=False,
+                notifications__send_at__lte=now,
+                notifications__sent_at__isnull=True,
             )
             .order_by("when")
             .first()
@@ -60,8 +62,9 @@ class Command(BaseCommand):
                 send_weekly_availability_reminder_email(player, game, cancel_url)
             sent_count += 1
 
-        game.reminder_sent_at = timezone.now()
-        game.save(update_fields=["reminder_sent_at"])
+        weekly_reminder = game.weekly_reminder
+        weekly_reminder.sent_at = timezone.now()
+        weekly_reminder.save(update_fields=["sent_at"])
 
         self.stdout.write(
             self.style.SUCCESS(

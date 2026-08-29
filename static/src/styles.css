@@ -5,6 +5,23 @@
 @source "../../templates";
 @source "../../games/templates";
 
+/* Soften the light theme's stark pure-white surfaces with a touch of cool grey. */
+@layer base {
+  @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+    :root:not([data-theme]) {
+      --color-base-100: oklch(98.5% 0.003 250);
+      --color-base-200: oklch(96% 0.005 250);
+      --color-base-300: oklch(91.5% 0.006 250);
+    }
+  }
+
+  [data-theme="light"] {
+    --color-base-100: oklch(98.5% 0.003 250);
+    --color-base-200: oklch(96% 0.005 250);
+    --color-base-300: oklch(91.5% 0.006 250);
+  }
+}
+
 .bg-players-purple {
     background-color: #f3f0ff;
     color: #7c3aed

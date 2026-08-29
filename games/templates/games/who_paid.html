@@ -45,7 +45,12 @@
             <tbody>
             {% for charge in charges %}
                 <tr class="hover">
-                    <td class="py-2 text-sm">{{ charge.player|get_display_name }}</td>
+                    <td class="py-2 text-sm">
+                        <a href="{% url 'player_details_url' player_id=charge.player.pk %}"
+                           class="link link-info font-medium">
+                            {{ charge.player|get_display_name }}
+                        </a>
+                    </td>
                     <td class="py-2 text-sm">{{ charge.game_count }}</td>
                     <td class="py-2 text-sm">{{ charge.amount }}</td>
                     <td class="py-2 text-sm">

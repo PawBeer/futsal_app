@@ -44,7 +44,7 @@
                                 </td>
                                 <td class="font-medium py-3 flex items-center gap-2">
                                     <a href="{% url 'player_details_url' player_id=confirmed_player.pk %}"
-                                       class="link link-primary flex-1">
+                                       class="link link-info flex-1">
                                         {{ confirmed_player|get_display_name }}
                                     </a>
                                     <span class="badge badge-success badge-xs">Confirmed</span>
@@ -77,7 +77,7 @@
                             </td>
                             <td class="font-medium py-3 flex items-center gap-2">
                                 <a href="{% url 'player_details_url' player_id=awaiting_player.pk %}"
-                                   class="link link-primary flex-1">
+                                   class="link link-info flex-1">
                                     {{ awaiting_player|get_display_name }}
                                 </a>
                                 <span class="badge badge-error">Awaiting</span>
@@ -113,7 +113,7 @@
                                 </td>
                                 <td class="font-medium py-3 flex items-center gap-2">
                                     <a href="{% url 'player_details_url' player_id=standby_player.pk %}"
-                                       class="link link-primary flex-1">
+                                       class="link link-info flex-1">
                                         {{ standby_player|get_display_name }}
                                     </a>
                                     {% if standby_player.status == 'standby' %}

@@ -2,7 +2,7 @@
     <label class="label cursor-pointer justify-start gap-3">
         <input type="hidden" name="standby_reminder_enabled_submitted" value="1">
         <input type="checkbox" name="standby_reminder_enabled" class="checkbox"
-               {% if game.standby_reminder_enabled %}checked{% endif %}>
+               {% if game.standby_reminder.enabled %}checked{% endif %}>
         <span class="label-text font-semibold text-base-content/90">
             Send "want to play?" invite to standby players
         </span>
@@ -10,7 +10,7 @@
     <div class="flex items-center gap-3">
         <span class="label-text">Sent at</span>
         <input type="datetime-local" name="standby_reminder_send_at"
-               value="{{ game.standby_reminder_send_at|date:'Y-m-d\TH:i' }}"
+               value="{{ game.standby_reminder.send_at|date:'Y-m-d\TH:i' }}"
                class="input input-bordered">
     </div>
 </div>
