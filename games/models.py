@@ -73,7 +73,9 @@ class GameNotification(models.Model):
     whether it's already been sent. One row per (game, notification_type).
     """
 
-    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="notifications")
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="notifications"
+    )
     notification_type = models.CharField(
         max_length=20, choices=NotificationType.choices
     )

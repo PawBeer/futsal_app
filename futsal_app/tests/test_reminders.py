@@ -16,7 +16,9 @@ from games.models import (
 from .base import BaseTestCase
 
 
-def _make_notification(game, notification_type, *, enabled=True, send_at=None, sent_at=None):
+def _make_notification(
+    game, notification_type, *, enabled=True, send_at=None, sent_at=None
+):
     return GameNotification.objects.create(
         game=game,
         notification_type=notification_type,
@@ -109,14 +111,22 @@ class SendWeeklyRemindersTests(BaseTestCase):
 
     def test_only_nearest_due_game_is_processed(self):
         nearer_game = Game.objects.create(when=self.game_day, status=GameStatus.PLANNED)
-        farther_game = Game.objects.create(when=self.farther_game_day, status=GameStatus.PLANNED)
-        BookingHistoryForGame.objects.create(
-            game=nearer_game, player=self.user_1_per.player, status=StatusChoices.PLANNED
+        farther_game = Game.objects.create(
+            when=self.farther_game_day, status=GameStatus.PLANNED
         )
         BookingHistoryForGame.objects.create(
-            game=farther_game, player=self.user_2_per.player, status=StatusChoices.PLANNED
+            game=nearer_game,
+            player=self.user_1_per.player,
+            status=StatusChoices.PLANNED,
         )
-        _make_notification(nearer_game, NotificationType.WEEKLY, send_at=self.past_send_at)
+        BookingHistoryForGame.objects.create(
+            game=farther_game,
+            player=self.user_2_per.player,
+            status=StatusChoices.PLANNED,
+        )
+        _make_notification(
+            nearer_game, NotificationType.WEEKLY, send_at=self.past_send_at
+        )
         farther_notification = _make_notification(
             farther_game, NotificationType.WEEKLY, send_at=self.past_send_at
         )

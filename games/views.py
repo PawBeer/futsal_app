@@ -307,9 +307,7 @@ def game_status_update(request, game_id):
         "standby_reminder_enabled_submitted"
     ):
         standby_reminder = game.standby_reminder
-        standby_reminder.enabled = "on" == request.POST.get(
-            "standby_reminder_enabled"
-        )
+        standby_reminder.enabled = "on" == request.POST.get("standby_reminder_enabled")
 
         standby_reminder_send_at = request.POST.get("standby_reminder_send_at")
         if standby_reminder_send_at:
