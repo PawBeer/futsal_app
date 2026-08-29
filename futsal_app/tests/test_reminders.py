@@ -55,6 +55,9 @@ class SendWeeklyRemindersTests(BaseTestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Who can't play on", mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.user_1_per.email])
+        # No request in a management command - the cancel link falls back to
+        # the current Site's domain (see games.helpers.url_helper).
+        self.assertIn("http://example.com/games/game/cancel/", mail.outbox[0].body)
         notification.refresh_from_db()
         self.assertIsNotNone(notification.sent_at)
 
@@ -228,6 +231,10 @@ class SendWeeklyReminderNowViewTests(BaseTestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Who can't play on", mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.user_1_per.email])
+        # Triggered from a view - the cancel link is built from the live
+        # request host (Django's test client uses "testserver"), same as
+        # request.build_absolute_uri (see games.helpers.url_helper).
+        self.assertIn("http://testserver/games/game/cancel/", mail.outbox[0].body)
         self.weekly_reminder.refresh_from_db()
         self.assertIsNotNone(self.weekly_reminder.sent_at)
 
