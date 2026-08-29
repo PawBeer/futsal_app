@@ -48,6 +48,7 @@ class Game(models.Model):
     description = models.TextField(null=True, blank=True)
     number_of_players = models.PositiveIntegerField(default=10)
     notifications_enabled = models.BooleanField(default=True)
+    minimum_players = models.PositiveIntegerField(default=8)
 
     def __str__(self):
         return f"{self.when} - {self.status}"
@@ -60,10 +61,17 @@ class Game(models.Model):
     def standby_reminder(self):
         return self.notifications.get(notification_type=NotificationType.STANDBY)
 
+    @property
+    def min_players_check(self):
+        return self.notifications.get(
+            notification_type=NotificationType.MIN_PLAYERS_CHECK
+        )
+
 
 class NotificationType(models.TextChoices):
     WEEKLY = "weekly", "Weekly"
     STANDBY = "standby", "Standby"
+    MIN_PLAYERS_CHECK = "min_players_check", "Minimum players check"
 
 
 class GameNotification(models.Model):
