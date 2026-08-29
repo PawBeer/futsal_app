@@ -4,6 +4,7 @@ from .models import (
     BookingHistoryForGame,
     ChatMessage,
     Game,
+    GameNotification,
     GamePrice,
     Player,
     PlayerCharge,
@@ -11,10 +12,16 @@ from .models import (
 )
 
 
+class GameNotificationInline(admin.TabularInline):
+    model = GameNotification
+    extra = 0
+
+
 class GameAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     list_display = ("when", "status", "description")
     date_hierarchy = "when"
+    inlines = [GameNotificationInline]
 
 
 class ChatMessageAdmin(admin.ModelAdmin):
