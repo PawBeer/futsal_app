@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payment confirmed for the game</title>
+</head>
+<body>
+    <h3>Payment confirmed for the game on {{ game.when|date:"d M Y" }}</h3>
+
+    <p>Hello {{ substitute_display_name }},</p>
+
+    <p><strong>{{ cancelled_display_name }}</strong> confirmed that they received your payment
+    for the game on {{ game.when|date:"d M Y" }} (the one you played instead of them).</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

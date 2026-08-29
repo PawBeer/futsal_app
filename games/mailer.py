@@ -290,6 +290,67 @@ def send_substitute_payment_confirmation_request_email(
     msg.send()
 
 
+def send_substitute_payment_confirmed_email(payment: SubstitutePayment) -> None:
+    """
+    Notify the substitute that the cancelled player confirmed receiving
+    their payment for the game, closing out the settlement between them.
+    """
+    substitute_display_name = player_helper.get_display_name(payment.substitute_player)
+    cancelled_display_name = player_helper.get_display_name(payment.cancelled_player)
+    game = payment.game
+    subject = f"Payment confirmed for the game on {game.when}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [payment.substitute_player.user.email]
+
+    text_content = (
+        f"Hello {substitute_display_name}, {cancelled_display_name} confirmed "
+        f"receiving your payment for the game on {game.when}. Thank you!"
+    )
+
+    html_content = render_to_string(
+        "emails/substitute_payment_confirmed.html",
+        {
+            "substitute_display_name": substitute_display_name,
+            "cancelled_display_name": cancelled_display_name,
+            "game": game,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
+def send_payment_confirmation_email(charge: PlayerCharge) -> None:
+    """
+    Notify a player that the accountant marked their settlement charge for
+    the month as paid.
+    """
+    run = charge.settlement_run
+    player_display_name = player_helper.get_display_name(charge.player)
+    subject = f"Payment received for {run.month:02d}/{run.year}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [charge.player.user.email]
+
+    text_content = (
+        f"Hello {player_display_name}, we've received your payment of "
+        f"{charge.amount} for {run.month:02d}/{run.year}. Thank you!"
+    )
+
+    html_content = render_to_string(
+        "emails/payment_confirmation.html",
+        {
+            "player_display_name": player_display_name,
+            "charge": charge,
+            "run": run,
+        },
+    )
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+
+
 def send_settlement_email(charge: PlayerCharge) -> None:
     run = charge.settlement_run
     player_display_name = player_helper.get_display_name(charge.player)
