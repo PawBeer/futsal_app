@@ -58,14 +58,14 @@
                 <tr class="hover">
                     <td class="py-2 text-sm">
                         <a href="{% url 'game_details_url' game_id=record.game.id %}"
-                           class="link link-primary font-medium">
+                           class="link link-info font-medium">
                             {{ record.game.when|date:'d M Y' }}
                         </a>
                     </td>
                     <td class="py-2 text-sm">{{ record.game.status }}</td>
                     <td class="py-2 text-sm">
                         <a href="{% url 'player_details_url' player_id=record.player.id %}"
-                           class="link link-primary font-medium">
+                           class="link link-info font-medium">
                             {{ record.player|get_display_name }}
                         </a>
                     </td>
