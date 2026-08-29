@@ -11,7 +11,7 @@
             <!-- Game details bar (horizontal) -->
             <div class="bg-base-100 rounded-xl shadow-lg p-6">
                 <form method="post" action="{% url 'game_status_update_url' game_id=game.id %}"
-                      class="space-y-6">
+                      id="game-details-form" class="space-y-6">
                     {% csrf_token %}
 
                     <div class="flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
@@ -102,7 +102,7 @@
 
             <div class="flex flex-col items-center space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
                 <form method="post" action="{% url 'game_status_update_url' game_id=game.id %}"
-                      class="w-full max-w-md space-y-6">
+                      id="game-details-form" class="w-full max-w-md space-y-6">
                     {% csrf_token %}
 
                     <div class="text-center">
@@ -164,6 +164,7 @@
                             {% include 'games/_notifications_enabled_field.html' %}
                             {% include 'games/_reminder_settings_fields.html' %}
                             {% include 'games/_standby_reminder_settings_fields.html' %}
+                            {% include 'games/_min_players_check_settings_fields.html' %}
                         </div>
                         <div class="pt-2">
                             <button type="submit" class="btn btn-primary w-full shadow-lg hover:shadow-xl">
@@ -174,6 +175,13 @@
                 </form>
 
                 {% if user.is_authenticated and user.is_superuser %}
+                    <form method="post" action="{% url 'send_weekly_reminder_url' game_id=game.id %}"
+                          class="w-full max-w-md">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline btn-secondary w-full shadow-lg hover:shadow-xl">
+                            Send "who can't play" reminder now
+                        </button>
+                    </form>
                     <form method="post" action="{% url 'send_standby_reminders_url' game_id=game.id %}"
                           class="w-full max-w-md">
                         {% csrf_token %}
@@ -195,4 +203,25 @@
 
         </div>
     {% endif %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('game-details-form');
+        const statusSelect = document.getElementById('status');
+        if (!form || !statusSelect) return;
+
+        const initialStatus = '{{ game.status|escapejs }}';
+
+        form.addEventListener('submit', function (event) {
+            if (statusSelect.value === 'Cancelled' && initialStatus !== 'Cancelled') {
+                const confirmed = window.confirm(
+                    'Cancelling this game will immediately email every planned and confirmed player a cancellation notice. Continue?'
+                );
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            }
+        });
+    });
+    </script>
 {% endblock %}

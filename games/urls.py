@@ -35,6 +35,11 @@ urlpatterns = [
         name="send_standby_reminders_url",
     ),
     path(
+        "game/<int:game_id>/send-weekly-reminder/",
+        views.send_weekly_reminder_now,
+        name="send_weekly_reminder_url",
+    ),
+    path(
         "game/<int:game_id>/substitute-payment/sent/",
         views.toggle_substitute_payment_sent,
         name="toggle_substitute_payment_sent_url",

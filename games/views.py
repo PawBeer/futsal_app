@@ -251,6 +251,13 @@ def _default_standby_reminder_send_at(when_date):
     )
 
 
+def _default_min_players_check_send_at(when_date):
+    """Default minimum-players check time: game day at 13:00. Editable
+    afterwards via 'Update Game Details'."""
+    when_only = when_date.date() if hasattr(when_date, "date") else when_date
+    return timezone.make_aware(datetime.combine(when_only, time(13, 0)))
+
+
 @login_required
 @require_POST
 def game_status_update(request, game_id):
@@ -287,8 +294,16 @@ def game_status_update(request, game_id):
     ):
         game.notifications_enabled = "on" == request.POST.get("notifications_enabled")
 
+    minimum_players = request.POST.get("minimum_players")
+    if request.user.is_superuser and minimum_players:
+        try:
+            game.minimum_players = max(1, int(minimum_players))
+        except ValueError:
+            messages.error(request, "Invalid minimum players value.")
+
     weekly_reminder = None
     standby_reminder = None
+    min_players_check = None
 
     if request.user.is_superuser and request.POST.get("reminder_enabled_submitted"):
         weekly_reminder = game.weekly_reminder
@@ -318,11 +333,30 @@ def game_status_update(request, game_id):
             except ValueError:
                 messages.error(request, "Invalid standby reminder send date/time.")
 
+    if request.user.is_superuser and request.POST.get(
+        "min_players_check_enabled_submitted"
+    ):
+        min_players_check = game.min_players_check
+        min_players_check.enabled = "on" == request.POST.get(
+            "min_players_check_enabled"
+        )
+
+        min_players_check_send_at = request.POST.get("min_players_check_send_at")
+        if min_players_check_send_at:
+            try:
+                min_players_check.send_at = timezone.make_aware(
+                    datetime.strptime(min_players_check_send_at, "%Y-%m-%dT%H:%M")
+                )
+            except ValueError:
+                messages.error(request, "Invalid minimum players check date/time.")
+
     game.save()
     if weekly_reminder is not None:
         weekly_reminder.save()
     if standby_reminder is not None:
         standby_reminder.save()
+    if min_players_check is not None:
+        min_players_check.save()
 
     if (
         previous_status != GameStatus.PLAYED
@@ -331,7 +365,22 @@ def game_status_update(request, game_id):
     ):
         _notify_substitutes_of_payment(game)
 
+    if (
+        previous_status != GameStatus.CANCELLED
+        and game.status == GameStatus.CANCELLED
+        and game.notifications_enabled
+    ):
+        _notify_players_of_cancellation(request, game)
+
     return redirect("game_details_url", game_id=game_id)
+
+
+def _notify_players_of_cancellation(request, game: Game) -> None:
+    sent_count = notification_helper.notify_players_of_cancellation(game)
+    if sent_count:
+        messages.success(
+            request, f"Cancellation notice sent to {sent_count} player(s)."
+        )
 
 
 def _check_if_empty_slots(game):
@@ -570,6 +619,24 @@ def send_standby_reminders_now(request, game_id):
     standby_reminder.save(update_fields=["sent_at"])
 
     messages.success(request, f"Standby invite sent to {sent_count} player(s).")
+    return redirect("game_details_url", game_id=game_id)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def send_weekly_reminder_now(request, game_id):
+    """Manually triggers the weekly reminder (the "who can't play" nudge, or
+    the cancellation notice if the game is Cancelled) for one game right
+    now, independent of GameNotification.send_at."""
+    game = get_object_or_404(Game, id=game_id)
+
+    sent_count = notification_helper.send_weekly_reminders_now(game)
+    weekly_reminder = game.weekly_reminder
+    weekly_reminder.sent_at = timezone.now()
+    weekly_reminder.save(update_fields=["sent_at"])
+
+    messages.success(request, f"Reminder sent to {sent_count} player(s).")
     return redirect("game_details_url", game_id=game_id)
 
 
@@ -861,6 +928,11 @@ def add_game(request):
             game=game,
             notification_type=NotificationType.STANDBY,
             send_at=_default_standby_reminder_send_at(when_date),
+        )
+        GameNotification.objects.create(
+            game=game,
+            notification_type=NotificationType.MIN_PLAYERS_CHECK,
+            send_at=_default_min_players_check_send_at(when_date),
         )
         if request.POST.get("set_players"):
 
