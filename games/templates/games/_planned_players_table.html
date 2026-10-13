@@ -27,7 +27,7 @@
                         </td>
                         <td class="font-medium">
                             <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                               class="link link-info">
+                               class="link text-base-content">
                                 {{ planned_player|get_display_name }}
                             </a>
                         </td>
@@ -67,7 +67,7 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                                   class="link link-info">
+                                   class="link text-base-content">
                                     {{ planned_player|get_display_name }}
                                 </a>
                             </td>
@@ -102,14 +102,14 @@
                         </td>
                         <td class="font-medium">
                             <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                               class="link link-info">
+                               class="link text-base-content">
                                 {{ cancelled_player|get_display_name }}
                             </a>
                         </td>
                         <td class="text-center">
                             {% if substitute %}
                                 <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                                    <span class="badge badge-success link link-info h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
+                                    <span class="badge badge-success link h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
                                         {{ substitute|get_display_name }}
                                     </span>
                                 </a>
@@ -174,14 +174,14 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                                   class="link link-info">
+                                   class="link text-base-content">
                                     {{ cancelled_player|get_display_name }}
                                 </a>
                             </td>
                             <td class="text-center">
                                 {% if substitute %}
                                     <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                                        <span class="badge badge-success link link-info h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
+                                        <span class="badge badge-success link h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
                                             {{ substitute|get_display_name }}
                                         </span>
                                     </a>
@@ -209,7 +209,7 @@
                         <td class="font-medium">
                             {% if extra_slot_player %}
                                 <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                                   class="link link-info">
+                                   class="link text-base-content">
                                     {{ extra_slot_player|get_display_name }}
                                 </a>
                             {% else %}
@@ -249,7 +249,7 @@
                             </td>
                             <td class="font-medium">
                                 <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                                   class="link link-info">
+                                   class="link text-base-content">
                                     {{ extra_slot_player|get_display_name }}
                                 </a>
                             </td>
