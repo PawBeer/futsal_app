@@ -56,8 +56,8 @@ class SendWeeklyRemindersTests(BaseTestCase):
         self.assertIn("Who can't play on", mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.user_1_per.email])
         # No request in a management command - the cancel link falls back to
-        # the current Site's domain (see games.helpers.url_helper).
-        self.assertIn("http://example.com/games/game/cancel/", mail.outbox[0].body)
+        # settings.SITE_URL (see games.helpers.url_helper).
+        self.assertIn("http://localhost:8000/games/game/cancel/", mail.outbox[0].body)
         notification.refresh_from_db()
         self.assertIsNotNone(notification.sent_at)
 
