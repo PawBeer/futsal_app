@@ -84,17 +84,34 @@
                 </form>
             </div>
 
-            <!-- Planned Players + Reserve List | Booking History -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% if user.is_superuser %}
+                <!-- Planned Players + Reserve List | Booking History -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_planned_players_table.html' %}
+                        {% include 'games/_reserve_list_table.html' %}
+                    </div>
+
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_booking_history_table.html' %}
+                    </div>
+                </div>
+            {% elif player_should_see_reserved_table %}
+                <!-- Planned Players | Reserve List -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_planned_players_table.html' %}
+                    </div>
+
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_reserve_list_table.html' %}
+                    </div>
+                </div>
+            {% else %}
                 <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
                     {% include 'games/_planned_players_table.html' %}
-                    {% include 'games/_reserve_list_table.html' %}
                 </div>
-
-                <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-                    {% include 'games/_booking_history_table.html' %}
-                </div>
-            </div>
+            {% endif %}
 
         </div>
     {% else %}
@@ -192,14 +209,16 @@
                 {% endif %}
             </div>
 
-            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg{% if not user.is_superuser %} md:col-span-2{% endif %}">
                 {% include 'games/_planned_players_table.html' %}
                 {% include 'games/_reserve_list_table.html' %}
             </div>
 
-            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-                {% include 'games/_booking_history_table.html' %}
-            </div>
+            {% if user.is_superuser %}
+                <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                    {% include 'games/_booking_history_table.html' %}
+                </div>
+            {% endif %}
 
         </div>
     {% endif %}
