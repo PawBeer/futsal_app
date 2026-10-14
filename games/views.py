@@ -134,6 +134,66 @@ def _pair_cancelled_with_substitutes_and_payment(game: Game):
     ]
 
 
+def _row(template: str, **fields) -> dict:
+    return {"template": f"games/{template}", **fields}
+
+
+def _current_player_first(rows: list[dict], player: Player | None) -> list[dict]:
+    """
+    Moves the rows involving the given player to the top, keeping the order
+    of the remaining rows (sorted() is stable).
+    """
+    if player is None:
+        return rows
+    return sorted(rows, key=lambda row: player not in row["players"])
+
+
+def _planned_players_rows(
+    planned_players, cancelled_with_substitutes, extra_capacity_slots, player
+) -> list[dict]:
+    rows = (
+        [
+            _row("_planned_player_row.html", player=planned, players=[planned])
+            for planned in planned_players
+        ]
+        + [
+            _row(
+                "_cancelled_player_row.html",
+                cancelled_player=cancelled,
+                substitute=substitute,
+                payment=payment,
+                players=[cancelled, substitute],
+            )
+            for cancelled, substitute, payment in cancelled_with_substitutes
+        ]
+        + [
+            _row("_extra_slot_row.html", player=extra, players=[extra])
+            for extra in extra_capacity_slots
+        ]
+    )
+    return _current_player_first(rows, player)
+
+
+def _reserve_list_rows(
+    confirmed_players, awaiting_players, standby_players, player
+) -> list[dict]:
+    rows = (
+        [
+            _row("_confirmed_player_row.html", player=confirmed, players=[confirmed])
+            for confirmed in confirmed_players
+        ]
+        + [
+            _row("_awaiting_player_row.html", player=awaiting, players=[awaiting])
+            for awaiting in awaiting_players
+        ]
+        + [
+            _row("_standby_player_row.html", player=standby, players=[standby])
+            for standby in standby_players
+        ]
+    )
+    return _current_player_first(rows, player)
+
+
 @login_required
 def game_details(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -149,6 +209,8 @@ def game_details(request, game_id):
     awaiting_players = game_helper.get_players_by_status(
         [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
+
+    current_player = getattr(request.user, "player", None)
 
     is_past_game = game.when < timezone.now().date()
     if is_past_game:
@@ -168,19 +230,21 @@ def game_details(request, game_id):
         "games/game_details.html",
         {
             "game": game,
-            "planned_players_for_game": planned_players,
-            "standby_players_for_game": standby_players,
+            "planned_players_rows": _planned_players_rows(
+                planned_players,
+                _pair_cancelled_with_substitutes_and_payment(game),
+                game_helper.get_extra_capacity_slots(game),
+                current_player,
+            ),
+            "reserve_list_rows": _reserve_list_rows(
+                confirmed_players, awaiting_players, standby_players, current_player
+            ),
             "confirmed_players_for_game": confirmed_players,
-            "awaiting_players_for_game": awaiting_players,
             "number_of_booked_players": len(planned_players)
             + len(confirmed_players)
             + len(awaiting_players),
             "warning_threshold": max(1, round(game.number_of_players * 0.8)),
             "number_of_confirmed_players": len(confirmed_players),
-            "cancelled_with_substitutes": _pair_cancelled_with_substitutes_and_payment(
-                game
-            ),
-            "extra_capacity_slots": game_helper.get_extra_capacity_slots(game),
             "has_open_slot": game_helper.has_open_slot(game),
             "number_of_cancelled_players": len(cancelled_players),
             "booking_history": BookingHistoryForGame.objects.filter(game=game).order_by(
