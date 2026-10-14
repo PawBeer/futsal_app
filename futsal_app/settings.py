@@ -144,6 +144,10 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="user")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="password")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="admin")
 
-# Base URL used to build absolute links (e.g. cancel-participation links) in
-# emails sent outside a request/response cycle, such as from a management command.
+# Base URL (scheme + host) for absolute links (e.g. cancel-participation
+# links) in emails sent outside a request/response cycle, such as from a
+# cron-driven management command, where there is no request to read the
+# host from. Emails sent while handling a request build their links from
+# the request itself, like Django's password reset - see
+# games.helpers.url_helper.build_absolute_url.
 SITE_URL = env("SITE_URL", default="http://localhost:8000")

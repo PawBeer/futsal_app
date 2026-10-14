@@ -615,7 +615,9 @@ def send_standby_reminders_now(request, game_id):
     now, independent of Game.standby_reminder_send_at."""
     game = get_object_or_404(Game, id=game_id)
 
-    sent_count = notification_helper.send_standby_availability_reminders(game)
+    sent_count = notification_helper.send_standby_availability_reminders(
+        game, request=request
+    )
     standby_reminder = game.standby_reminder
     standby_reminder.sent_at = timezone.now()
     standby_reminder.save(update_fields=["sent_at"])
@@ -633,7 +635,7 @@ def send_weekly_reminder_now(request, game_id):
     now, independent of GameNotification.send_at."""
     game = get_object_or_404(Game, id=game_id)
 
-    sent_count = notification_helper.send_weekly_reminders_now(game)
+    sent_count = notification_helper.send_weekly_reminders_now(game, request=request)
     weekly_reminder = game.weekly_reminder
     weekly_reminder.sent_at = timezone.now()
     weekly_reminder.save(update_fields=["sent_at"])
