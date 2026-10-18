@@ -8,10 +8,7 @@
                 </div>
             </td>
             <td class="font-medium">
-                <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                   class="link text-base-content">
-                    {{ planned_player|get_display_name }}
-                </a>
+                {% include "games/_player_link.html" with player=planned_player classes="text-base-content" %}
             </td>
             <td class="text-center">
                 <span class="badge badge-ghost"></span>
@@ -48,10 +45,7 @@
                     {% endif %}
                 </td>
                 <td class="font-medium">
-                    <a href="{% url 'player_details_url' player_id=planned_player.pk %}"
-                       class="link text-base-content">
-                        {{ planned_player|get_display_name }}
-                    </a>
+                    {% include "games/_player_link.html" with player=planned_player classes="text-base-content" %}
                 </td>
                 <td class="text-center">
                     <span class="badge badge-ghost"></span>

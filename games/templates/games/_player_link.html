@@ -1,0 +1,6 @@
+{% load player_extras %}
+{% if is_squad_member %}
+    <a href="{% url 'player_details_url' player_id=player.pk %}" class="link {{ classes }}">{{ player|get_display_name }}</a>
+{% else %}
+    <span class="{{ classes }}">{{ player|get_display_name }}</span>
+{% endif %}

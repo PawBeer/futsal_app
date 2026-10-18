@@ -1,9 +1,9 @@
 {% load player_extras %}
-{% with cancelled_player=row.cancelled_player substitute=row.substitute payment=row.payment %}
+{% with cancelled_player=row.cancelled_player substitute=row.substitute payment=row.payment can_see_payment=row.can_see_payment %}
     {% if game.status == 'Played' %}
         <tr class="hover">
             <td class="text-center py-3">
-                {% if substitute %}
+                {% if can_see_payment %}
                     <form method="post"
                           action="{% url 'toggle_substitute_payment_confirmed_url' game_id=game.id %}">
                         {% csrf_token %}
@@ -21,24 +21,17 @@
                 {% endif %}
             </td>
             <td class="font-medium">
-                <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                   class="link text-base-content">
-                    {{ cancelled_player|get_display_name }}
-                </a>
+                {% include "games/_player_link.html" with player=cancelled_player classes="text-base-content" %}
             </td>
             <td class="text-center">
                 {% if substitute %}
-                    <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                        <span class="badge badge-success link h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
-                            {{ substitute|get_display_name }}
-                        </span>
-                    </a>
+                    {% include "games/_player_link.html" with player=substitute classes="badge badge-soft badge-success font-medium h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center" %}
                 {% else %}
-                    <span class="badge badge-error text-error-content">free slot</span>
+                    <span class="badge badge-soft badge-error font-medium w-24">free slot</span>
                 {% endif %}
             </td>
             <td class="text-center">
-                {% if substitute %}
+                {% if can_see_payment %}
                     <form method="post"
                           action="{% url 'toggle_substitute_payment_sent_url' game_id=game.id %}"
                           class="flex items-center justify-center">
@@ -57,14 +50,14 @@
                 {% endif %}
             </td>
             <td class="text-center">
-                {% if not substitute %}
+                {% if not can_see_payment %}
                     <span class="badge badge-ghost">&mdash;</span>
                 {% elif payment.confirmed_at %}
-                    <span class="badge badge-success">Confirmed</span>
+                    <span class="badge badge-soft badge-success font-medium">Confirmed</span>
                 {% elif payment.sent_at %}
-                    <span class="badge badge-info">Sent</span>
+                    <span class="badge badge-soft badge-info font-medium">Sent</span>
                 {% else %}
-                    <span class="badge badge-warning">Awaiting</span>
+                    <span class="badge badge-soft badge-warning font-medium">Awaiting</span>
                 {% endif %}
             </td>
         </tr>
@@ -93,20 +86,13 @@
                     {% endif %}
                 </td>
                 <td class="font-medium">
-                    <a href="{% url 'player_details_url' player_id=cancelled_player.pk %}"
-                       class="link text-base-content">
-                        {{ cancelled_player|get_display_name }}
-                    </a>
+                    {% include "games/_player_link.html" with player=cancelled_player classes="text-base-content" %}
                 </td>
                 <td class="text-center">
                     {% if substitute %}
-                        <a href="{% url 'player_details_url' player_id=substitute.pk %}">
-                            <span class="badge badge-success link h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center">
-                                {{ substitute|get_display_name }}
-                            </span>
-                        </a>
+                        {% include "games/_player_link.html" with player=substitute classes="badge badge-soft badge-success font-medium h-auto min-h-10 w-24 whitespace-normal break-words leading-tight py-1 text-center" %}
                     {% else %}
-                        <span class="badge badge-error text-error-content">free slot</span>
+                        <span class="badge badge-soft badge-error font-medium w-24">free slot</span>
                     {% endif %}
                 </td>
             </tr>

@@ -23,12 +23,11 @@
                         </div>
                     {% endif %}
                 </td>
-                <td class="font-medium py-3 flex items-center gap-2">
-                    <a href="{% url 'player_details_url' player_id=confirmed_player.pk %}"
-                       class="link text-base-content flex-1">
-                        {{ confirmed_player|get_display_name }}
-                    </a>
-                    <span class="badge badge-success">Confirmed</span>
+                <td class="font-medium py-3">
+                    <div class="flex items-center gap-2">
+                        {% include "games/_player_link.html" with player=confirmed_player classes="text-base-content flex-1" %}
+                        <span class="badge badge-soft badge-success font-medium">Confirmed</span>
+                    </div>
                 </td>
             </tr>
         </form>

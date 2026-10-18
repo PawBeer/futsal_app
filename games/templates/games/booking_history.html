@@ -6,10 +6,22 @@
 
 {% block content %}
 
-<div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-    <form method="get" class="flex flex-wrap items-center gap-2">
-        <label for="player_id" class="text-sm text-base-content/70">Player:</label>
-        <select id="player_id" name="player_id" class="select select-xs select-bordered" onchange="this.form.submit()">
+<form method="get" class="flex flex-col gap-2 mb-4 md:flex-row md:flex-wrap md:items-center md:gap-x-6 md:gap-y-2">
+    <div class="flex items-center gap-2 md:gap-1">
+        <label for="game_id" class="w-16 shrink-0 text-sm text-base-content/70 md:w-auto">Game:</label>
+        <select id="game_id" name="game_id" class="select select-xs select-bordered w-auto max-w-full" data-equal-width onchange="this.form.submit()">
+            <option value="">All games</option>
+            {% for game in games %}
+                <option value="{{ game.id }}" {% if selected_game_id == game.id|stringformat:"s" %}selected{% endif %}>
+                    {{ game.when|date:'d M Y' }} ({{ game.status }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="flex items-center gap-2 md:gap-1">
+        <label for="player_id" class="w-16 shrink-0 text-sm text-base-content/70 md:w-auto">Player:</label>
+        <select id="player_id" name="player_id" class="select select-xs select-bordered w-auto max-w-full" data-equal-width onchange="this.form.submit()">
             <option value="">All players</option>
             {% for player in players %}
                 <option value="{{ player.id }}" {% if selected_player_id == player.id|stringformat:"s" %}selected{% endif %}>
@@ -17,29 +29,43 @@
                 </option>
             {% endfor %}
         </select>
+    </div>
 
-        <label for="status" class="text-sm text-base-content/70">Status:</label>
-        <select id="status" name="status" class="select select-xs select-bordered" onchange="this.form.submit()">
+    <div class="flex items-center gap-2 md:gap-1">
+        <label for="status" class="w-16 shrink-0 text-sm text-base-content/70 md:w-auto">Status:</label>
+        <select id="status" name="status" class="select select-xs select-bordered w-auto max-w-full" data-equal-width onchange="this.form.submit()">
             <option value="">All statuses</option>
             {% for key, label in status_choices %}
                 <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
+    </div>
 
-        {% if selected_player_id or selected_status %}
-            <a href="?page_size={{ page_size }}" class="btn btn-xs btn-ghost">Clear filters</a>
-        {% endif %}
+    <div class="flex items-center gap-2 md:gap-1">
+        <label for="page_size" class="w-16 shrink-0 text-sm text-base-content/70 md:w-auto">Rows:</label>
+        <select id="page_size" name="page_size" class="select select-xs select-bordered w-auto max-w-full" data-equal-width onchange="this.form.submit()">
+            {% for size in page_sizes %}
+                <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>
+                    {{ size }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-        <label for="page_size" class="text-sm text-base-content/70">Rows:</label>
-        <select id="page_size" name="page_size" class="select select-xs select-bordered" onchange="this.form.submit()">
-    {% for size in page_sizes %}
-        <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>
-            {{ size }}
-        </option>
-    {% endfor %}
-</select>
-    </form>
-</div>
+    {% if selected_game_id or selected_player_id or selected_status %}
+        <a href="?page_size={{ page_size }}" class="btn btn-xs btn-ghost self-start md:self-auto">Clear filters</a>
+    {% endif %}
+</form>
+
+<script>
+    // Give every filter the width of the widest one, which the browser
+    // already sized (w-auto) to fit its longest option.
+    (function () {
+        const selects = document.querySelectorAll('[data-equal-width]');
+        const width = Math.max(...Array.from(selects, select => select.offsetWidth));
+        selects.forEach(select => { select.style.width = width + 'px'; });
+    })();
+</script>
 
 <div class="card shadow-lg mb-6 p-4">
     <div class="overflow-x-auto">
@@ -81,7 +107,7 @@
 {% if booking_history.has_other_pages %}
 <div class="flex justify-center items-center space-x-2 mt-4">
     {% if booking_history.has_previous %}
-    <a href="?page=1&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}" class="btn btn-sm btn-outline btn-secondary">
+    <a href="?page=1&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}&game_id={{ selected_game_id }}" class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -91,7 +117,7 @@
     {% endif %}
 
     {% if booking_history.has_previous %}
-    <a href="?page={{ booking_history.previous_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
+    <a href="?page={{ booking_history.previous_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}&game_id={{ selected_game_id }}"
        class="btn btn-sm btn-outline btn-secondary">
         <svg class="w-4 h-4 -ml-1 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -106,7 +132,7 @@
             {% if booking_history.number == num %}
                 <span class="btn btn-sm btn-primary no-animation">{{ num }}</span>
             {% elif num > booking_history.number|add:'-2' and num < booking_history.number|add:'2' %}
-                <a href="?page={{ num }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
+                <a href="?page={{ num }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}&game_id={{ selected_game_id }}"
                    class="btn btn-sm btn-outline btn-secondary">
                     {{ num }}
                 </a>
@@ -115,7 +141,7 @@
     </div>
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.next_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
+    <a href="?page={{ booking_history.next_page_number }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}&game_id={{ selected_game_id }}"
        class="btn btn-sm btn-outline btn-secondary">
         Next
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +152,7 @@
     {% endif %}
 
     {% if booking_history.has_next %}
-    <a href="?page={{ booking_history.paginator.num_pages }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}"
+    <a href="?page={{ booking_history.paginator.num_pages }}&page_size={{ page_size }}&player_id={{ selected_player_id }}&status={{ selected_status }}&game_id={{ selected_game_id }}"
        class="btn btn-sm btn-outline btn-secondary">
         Last
         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

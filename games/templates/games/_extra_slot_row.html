@@ -13,12 +13,9 @@
             </td>
             <td class="font-medium">
                 {% if extra_slot_player %}
-                    <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                       class="link text-base-content">
-                        {{ extra_slot_player|get_display_name }}
-                    </a>
+                    {% include "games/_player_link.html" with player=extra_slot_player classes="badge badge-soft badge-success font-medium h-auto min-h-8 whitespace-normal break-words leading-tight py-1" %}
                 {% else %}
-                    <span class="badge badge-error text-error-content">free slot</span>
+                    <span class="badge badge-soft badge-error font-medium w-24">free slot</span>
                 {% endif %}
             </td>
             <td class="text-center">
@@ -53,10 +50,7 @@
                     {% endif %}
                 </td>
                 <td class="font-medium">
-                    <a href="{% url 'player_details_url' player_id=extra_slot_player.pk %}"
-                       class="link text-base-content">
-                        {{ extra_slot_player|get_display_name }}
-                    </a>
+                    {% include "games/_player_link.html" with player=extra_slot_player classes="badge badge-soft badge-success font-medium h-auto min-h-8 whitespace-normal break-words leading-tight py-1" %}
                 </td>
                 <td class="text-center">
                     <span class="badge badge-ghost"></span>
@@ -69,7 +63,7 @@
                 <span class="badge badge-ghost">&mdash;</span>
             </td>
             <td class="font-medium">
-                <span class="badge badge-error text-error-content">free slot</span>
+                <span class="badge badge-soft badge-error font-medium w-24">free slot</span>
             </td>
             <td class="text-center">
                 <span class="badge badge-ghost"></span>

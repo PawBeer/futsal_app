@@ -21,14 +21,13 @@
                         <div class="w-6 h-6 bg-base-200 rounded-full mx-auto"></div>
                     {% endif %}
                 </td>
-                <td class="font-medium py-3 flex items-center gap-2">
-                    <a href="{% url 'player_details_url' player_id=standby_player.pk %}"
-                       class="link text-base-content flex-1">
-                        {{ standby_player|get_display_name }}
-                    </a>
-                    {% if standby_player.status == 'standby' %}
-                        <span class="badge badge-warning">Standby</span>
-                    {% endif %}
+                <td class="font-medium py-3">
+                    <div class="flex items-center gap-2">
+                        {% include "games/_player_link.html" with player=standby_player classes="text-base-content flex-1" %}
+                        {% if standby_player.status == 'standby' %}
+                            <span class="badge badge-soft badge-warning font-medium">Standby</span>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         </form>

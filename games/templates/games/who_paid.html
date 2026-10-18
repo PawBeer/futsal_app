@@ -28,7 +28,7 @@
     </form>
 </div>
 
-{% if not run %}
+{% if not charges %}
 <p class="text-sm text-base-content/50">No settlement has been generated for this period yet.</p>
 {% else %}
 <div class="card shadow-lg mb-6 p-4">
@@ -46,16 +46,20 @@
             {% for charge in charges %}
                 <tr class="hover">
                     <td class="py-2 text-sm">
-                        <a href="{% url 'player_details_url' player_id=charge.player.pk %}"
-                           class="link text-base-content font-medium">
-                            {{ charge.player|get_display_name }}
-                        </a>
+                        {% include "games/_player_link.html" with player=charge.player classes="text-base-content font-medium" %}
                     </td>
                     <td class="py-2 text-sm">{{ charge.game_count }}</td>
                     <td class="py-2 text-sm">{{ charge.amount }}</td>
                     <td class="py-2 text-sm">
                         {% if charge.is_paid %}
                             <span class="badge badge-success">Paid</span>
+                        {% elif charge.sent_at %}
+                            <span class="badge badge-info" title="Sent {{ charge.sent_at|date:'d M Y, H:i' }}">Sent, awaiting confirmation</span>
+                        {% elif charge.player.user_id == user.id %}
+                            <form method="post" action="{% url 'mark_charge_sent_url' charge_id=charge.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-xs btn-primary">I've sent the money</button>
+                            </form>
                         {% else %}
                             <span class="badge badge-outline">Unpaid</span>
                         {% endif %}

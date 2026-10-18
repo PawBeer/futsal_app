@@ -379,3 +379,42 @@ class GameDetailsCurrentPlayerFirstTests(BaseTestCase):
             self._row_players(response, "planned_players_rows"),
             [self.user_1_per.player, self.user_2_per.player, self.user_3_per.player],
         )
+
+
+class BookingHistoryViewTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.player = Player.objects.get(user=self.user_1_per)
+        self.game_1 = Game.objects.create(when=date(2026, 3, 5))
+        self.game_2 = Game.objects.create(when=date(2026, 3, 12))
+        self.booking_1 = BookingHistoryForGame.objects.create(
+            game=self.game_1, player=self.player, status=StatusChoices.PLANNED
+        )
+        self.booking_2 = BookingHistoryForGame.objects.create(
+            game=self.game_2, player=self.player, status=StatusChoices.CANCELLED
+        )
+        self.client.force_login(self.superuser)
+
+    def test_filters_by_game(self):
+        response = self.client.get(
+            reverse("booking_history_url"), {"game_id": self.game_1.id}
+        )
+
+        self.assertEqual(list(response.context["booking_history"]), [self.booking_1])
+
+    def test_lists_only_games_with_booking_history_newest_first(self):
+        Game.objects.create(when=date(2026, 3, 19))
+
+        response = self.client.get(reverse("booking_history_url"))
+
+        self.assertEqual(list(response.context["games"]), [self.game_2, self.game_1])
+
+    def test_game_details_links_to_filtered_history_for_admin_only(self):
+        link = f'{reverse("booking_history_url")}?game_id={self.game_1.id}'
+
+        response = self.client.get(reverse("game_details_url", args=[self.game_1.id]))
+        self.assertContains(response, link)
+
+        self.client.force_login(self.user_1_per)
+        response = self.client.get(reverse("game_details_url", args=[self.game_1.id]))
+        self.assertNotContains(response, link)
