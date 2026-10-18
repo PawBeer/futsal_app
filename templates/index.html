@@ -60,12 +60,12 @@
 
 <div id="mobile-menu" class="hidden bg-base-100 p-4 lg:hidden">
     <a href="{% url 'next_games_url' %}" class="block py-2 border-b">Next games</a>
-    {% if user.is_authenticated %}
+    {% if is_squad_member %}
         <a href="{% url 'all_players_url' %}" class="block py-2 border-b">Players</a>
     {% endif %}
     <a href="{% url 'past_games_url' %}" class="block py-2 border-b">Past games</a>
     <a href="{% url 'add_absence_url' %}" class="block py-2 border-b">Add absence</a>
-    {% if user.is_authenticated %}
+    {% if is_squad_member %}
         <a href="{% url 'who_paid_url' %}" class="block py-2 border-b">Payments</a>
     {% endif %}
     {% if user.is_authenticated and user.player.is_accountant or user.is_superuser %}
@@ -89,16 +89,20 @@
            class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'next_games_url' %}btn-active border-accent-content{% endif %}">Next
             games</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'all_players_url' %}"
-               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
+            {% if is_squad_member %}
+                <a href="{% url 'all_players_url' %}"
+                   class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'all_players_url' %}btn-active border-accent-content{% endif %}">Players</a>
+            {% endif %}
             <a href="{% url 'past_games_url' %}"
                class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'past_games_url' %}btn-active border-accent-content{% endif %}">Past
                 games</a>
             <a href="{% url 'add_absence_url' %}"
                class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'add_absence_url' %}btn-active border-accent-content{% endif %}">Add
                 absence</a>
-            <a href="{% url 'who_paid_url' %}"
-               class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'who_paid_url' %}btn-active border-accent-content{% endif %}">Payments</a>
+            {% if is_squad_member %}
+                <a href="{% url 'who_paid_url' %}"
+                   class="btn btn-ghost text-xl {% if request.resolver_match.url_name == 'who_paid_url' %}btn-active border-accent-content{% endif %}">Payments</a>
+            {% endif %}
         {% endif %}
         {% if user.is_authenticated and user.is_superuser %}
             <a href="{% url 'booking_history_url' %}"
@@ -169,6 +173,21 @@
 {% endif %}
 
 
+
+{% if pending_payment_charges %}
+    <div class="px-4 pt-4">
+        {% for charge in pending_payment_charges %}
+            <div role="alert" class="alert alert-warning mb-4 shadow-lg flex flex-wrap justify-between gap-2">
+                <span>
+                    Please pay <strong>{{ charge.amount }}</strong> for
+                    {{ charge.settlement_run.month|stringformat:"02d" }}/{{ charge.settlement_run.year }}.
+                </span>
+                <a href="{% url 'who_paid_url' %}?year={{ charge.settlement_run.year }}&month={{ charge.settlement_run.month }}"
+                   class="btn btn-sm">Go to Payments</a>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
 {% if messages %}
     <div class="px-4 pt-4">

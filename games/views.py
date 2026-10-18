@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime, time, timedelta
+from decimal import Decimal, InvalidOperation
 from typing import Iterable
 
 from django.contrib import messages
@@ -26,6 +27,7 @@ from games.helpers import (
     token_helper,
 )
 from games.mailer import (
+    send_charge_sent_email_to_accountants,
     send_payment_confirmation_email,
     send_player_status_update_email,
     send_player_status_updates_email_to_admins,
@@ -113,7 +115,7 @@ def _player_should_see_reserved_table(
     user: AbstractBaseUser, players: Iterable[Player]
 ) -> bool:
     player = getattr(user, "player", None)
-    if player is None:
+    if user.is_superuser or player is None:
         return True  # admins may not have a player
     return player in players
 
@@ -134,6 +136,85 @@ def _pair_cancelled_with_substitutes_and_payment(game: Game):
     ]
 
 
+def _row(template: str, **fields) -> dict:
+    return {"template": f"games/{template}", **fields}
+
+
+def _current_player_first(rows: list[dict], player: Player | None) -> list[dict]:
+    """
+    Moves the rows involving the given player to the top, keeping the order
+    of the remaining rows (sorted() is stable).
+    """
+    if player is None:
+        return rows
+    return sorted(rows, key=lambda row: player not in row["players"])
+
+
+def _can_see_substitute_payment(
+    cancelled: Player, substitute: Player | None, player: Player | None, is_admin: bool
+) -> bool:
+    """
+    A substitute payment is private to the two players settling it (and
+    admins), so other players don't see who paid whom.
+    """
+    if substitute is None:
+        return False
+    return is_admin or player in (cancelled, substitute)
+
+
+def _planned_players_rows(
+    planned_players,
+    cancelled_with_substitutes,
+    extra_capacity_slots,
+    player,
+    is_admin: bool,
+) -> list[dict]:
+    rows = (
+        [
+            _row("_planned_player_row.html", player=planned, players=[planned])
+            for planned in planned_players
+        ]
+        + [
+            _row(
+                "_cancelled_player_row.html",
+                cancelled_player=cancelled,
+                substitute=substitute,
+                payment=payment,
+                can_see_payment=_can_see_substitute_payment(
+                    cancelled, substitute, player, is_admin
+                ),
+                players=[cancelled, substitute],
+            )
+            for cancelled, substitute, payment in cancelled_with_substitutes
+        ]
+        + [
+            _row("_extra_slot_row.html", player=extra, players=[extra])
+            for extra in extra_capacity_slots
+        ]
+    )
+    return _current_player_first(rows, player)
+
+
+def _reserve_list_rows(
+    confirmed_players, awaiting_players, standby_players, player
+) -> list[dict]:
+    rows = (
+        [
+            _row("_confirmed_player_row.html", player=confirmed, players=[confirmed])
+            for confirmed in confirmed_players
+        ]
+        + [
+            _row("_awaiting_player_row.html", player=awaiting, players=[awaiting])
+            for awaiting in awaiting_players
+        ]
+        + [
+            _row("_standby_player_row.html", player=standby, players=[standby])
+            for standby in standby_players
+        ]
+    )
+    return _current_player_first(rows, player)
+
+
 @login_required
 def game_details(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -149,6 +230,8 @@ def game_details(request, game_id):
     awaiting_players = game_helper.get_players_by_status(
         [StatusChoices.AWAITING], game, order_by="latest_creation_date"
     )
+
+    current_player = getattr(request.user, "player", None)
 
     is_past_game = game.when < timezone.now().date()
     if is_past_game:
@@ -168,24 +251,24 @@ def game_details(request, game_id):
         "games/game_details.html",
         {
             "game": game,
-            "planned_players_for_game": planned_players,
-            "standby_players_for_game": standby_players,
+            "planned_players_rows": _planned_players_rows(
+                planned_players,
+                _pair_cancelled_with_substitutes_and_payment(game),
+                game_helper.get_extra_capacity_slots(game),
+                current_player,
+                request.user.is_superuser,
+            ),
+            "reserve_list_rows": _reserve_list_rows(
+                confirmed_players, awaiting_players, standby_players, current_player
+            ),
             "confirmed_players_for_game": confirmed_players,
-            "awaiting_players_for_game": awaiting_players,
             "number_of_booked_players": len(planned_players)
             + len(confirmed_players)
             + len(awaiting_players),
             "warning_threshold": max(1, round(game.number_of_players * 0.8)),
             "number_of_confirmed_players": len(confirmed_players),
-            "cancelled_with_substitutes": _pair_cancelled_with_substitutes_and_payment(
-                game
-            ),
-            "extra_capacity_slots": game_helper.get_extra_capacity_slots(game),
             "has_open_slot": game_helper.has_open_slot(game),
             "number_of_cancelled_players": len(cancelled_players),
-            "booking_history": BookingHistoryForGame.objects.filter(game=game).order_by(
-                "-creation_date"
-            ),
             "status_options": GameStatus.labels,
             "is_past_game": is_past_game,
             "breadcrumbs": breadcrumbs,
@@ -213,9 +296,9 @@ def _notify_substitutes_of_payment(game: Game) -> None:
     """
     For a game that just became Played, email every confirmed player who
     took over a cancelled player's slot, telling them how much to send
-    that player (the price valid on the game's date).
+    that player (the price each player pays for that game).
     """
-    amount = settlement_helper.get_price_for_game(game.when)
+    amount = settlement_helper.get_price_for_game(game)
     if amount is None:
         return
 
@@ -699,7 +782,11 @@ def toggle_substitute_payment_confirmed(request, game_id):
     return redirect("game_details_url", game_id=game_id)
 
 
+squad_member_required = user_passes_test(player_helper.is_squad_member)
+
+
 @login_required
+@squad_member_required
 def all_players(request):
     filter_name = request.GET.get("name", "").strip()
     status = request.GET.get("status")
@@ -738,6 +825,7 @@ def all_players(request):
 
 
 @login_required
+@squad_member_required
 def player_details(request, player_id):
     player = get_object_or_404(Player, id=player_id)
     # bind the profile form (template uses plain input names that match the form fields)
@@ -855,10 +943,13 @@ def booking_history(request):
         page_size = 25
     page_size = max(5, min(page_size, 100))
 
+    game_id = request.GET.get("game_id", "")
     player_id = request.GET.get("player_id", "")
     status = request.GET.get("status", "")
 
     found_booking_history = BookingHistoryForGame.objects.all().order_by("-id")
+    if game_id:
+        found_booking_history = found_booking_history.filter(game_id=game_id)
     if player_id:
         found_booking_history = found_booking_history.filter(player_id=player_id)
     if status:
@@ -875,10 +966,14 @@ def booking_history(request):
             "booking_history": page_obj,
             "page_size": page_size,
             "page_sizes": [10, 25, 50, 100],
+            "games": Game.objects.filter(bookinghistoryforgame__isnull=False)
+            .distinct()
+            .order_by("-when"),
             "players": Player.objects.all().order_by(
                 "user__first_name", "user__last_name"
             ),
             "status_choices": StatusChoices.choices,
+            "selected_game_id": game_id,
             "selected_player_id": player_id,
             "selected_status": status,
         },
@@ -1137,6 +1232,10 @@ def settlement_overview(request):
         else []
     )
     year_choices, month_choices = _period_choices()
+    game_cost = settlement_helper.get_game_cost(year, month)
+    if game_cost is None and _is_sent(run):
+        # sent before game costs existed - show what the per-player price implied
+        game_cost = settlement_helper.get_legacy_game_cost(year, month)
 
     return render(
         request,
@@ -1149,9 +1248,58 @@ def settlement_overview(request):
             "settlements": settlements,
             "missing_price_games": missing_price_games,
             "run": run,
+            "is_sent": _is_sent(run),
+            "game_cost": game_cost,
             "charges": charges,
         },
     )
+
+
+def _is_sent(run: SettlementRun | None) -> bool:
+    return bool(run and run.send_count)
+
+
+def _parse_game_cost(value) -> Decimal | None:
+    try:
+        game_cost = Decimal(value)
+    except (TypeError, InvalidOperation):
+        return None
+    if not game_cost.is_finite() or game_cost <= 0:
+        return None
+    return game_cost.quantize(Decimal("0.01"))
+
+
+def _save_game_cost(request, year: int, month: int) -> bool:
+    """
+    Stores the posted game cost on the period's run, unless the settlement
+    was already sent (the cost is locked then). Returns whether it succeeded.
+    """
+    run = SettlementRun.objects.filter(year=year, month=month).first()
+    if _is_sent(run):
+        messages.error(
+            request, "The game cost can't be changed after the settlement was sent."
+        )
+        return False
+
+    game_cost = _parse_game_cost(request.POST.get("game_cost"))
+    if game_cost is None:
+        messages.error(request, "Enter a game cost greater than zero.")
+        return False
+
+    SettlementRun.objects.update_or_create(
+        year=year, month=month, defaults={"game_cost": game_cost}
+    )
+    return True
+
+
+@login_required
+@accountant_required
+@require_POST
+def save_game_cost(request):
+    year, month = _resolve_period(request, source=request.POST)
+    if _save_game_cost(request, year, month):
+        messages.success(request, "Game cost saved.")
+    return redirect(f"{reverse('settlement_overview_url')}?year={year}&month={month}")
 
 
 @login_required
@@ -1172,6 +1320,15 @@ def chat_send(request):
 @require_POST
 def send_settlement(request):
     year, month = _resolve_period(request, source=request.POST)
+    run = SettlementRun.objects.filter(year=year, month=month).first()
+    if (
+        not _is_sent(run)
+        and "game_cost" in request.POST
+        and not _save_game_cost(request, year, month)
+    ):
+        return redirect(
+            f"{reverse('settlement_overview_url')}?year={year}&month={month}"
+        )
     run = settlement_helper.persist_settlement(year, month)
 
     sent = 0
@@ -1199,6 +1356,9 @@ def toggle_paid(request, charge_id):
     marking_as_paid = not charge.is_paid
     charge.is_paid = marking_as_paid
     charge.paid_at = timezone.now() if marking_as_paid else None
+    if not marking_as_paid:
+        # the money didn't arrive after all - remind the player again
+        charge.sent_at = None
     charge.marked_by = request.user
     charge.save()
 
@@ -1210,6 +1370,33 @@ def toggle_paid(request, charge_id):
 
 
 @login_required
+@squad_member_required
+@require_POST
+def mark_charge_sent(request, charge_id):
+    """Lets a player report their own settlement charge as sent to the accountant."""
+    charge = get_object_or_404(
+        PlayerCharge.objects.select_related("player__user", "settlement_run"),
+        id=charge_id,
+    )
+    run = charge.settlement_run
+    who_paid_url = f"{reverse('who_paid_url')}?year={run.year}&month={run.month}"
+
+    if charge.player.user != request.user:
+        messages.error(request, "You can only mark your own payment as sent.")
+        return redirect(who_paid_url)
+
+    if not charge.is_paid and charge.sent_at is None:
+        charge.sent_at = timezone.now()
+        charge.save(update_fields=["sent_at"])
+        send_charge_sent_email_to_accountants(charge)
+        messages.success(
+            request, "Thanks! The accountant will confirm once the money arrives."
+        )
+    return redirect(who_paid_url)
+
+
+@login_required
+@squad_member_required
 def who_paid(request):
     year, month = _resolve_period(request)
     run = SettlementRun.objects.filter(year=year, month=month).first()

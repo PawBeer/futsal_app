@@ -76,25 +76,36 @@
                                     {% include 'games/_reminder_settings_fields.html' %}
                                 {% endif %}
                             </div>
-                            <button type="submit" class="btn btn-primary shadow-lg hover:shadow-xl">
-                                Update Game Details
-                            </button>
+                            <div class="flex flex-wrap justify-end gap-3">
+                                <a href="{% url 'booking_history_url' %}?game_id={{ game.id }}"
+                                   class="btn btn-outline shadow-lg hover:shadow-xl">
+                                    Booking history
+                                </a>
+                                <button type="submit" class="btn btn-primary shadow-lg hover:shadow-xl">
+                                    Update Game Details
+                                </button>
+                            </div>
                         </div>
                     {% endif %}
                 </form>
             </div>
 
-            <!-- Planned Players + Reserve List | Booking History -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% if game.status != 'Played' and player_should_see_reserved_table %}
+                <!-- Planned Players | Reserve List (a played game shows substitutes in Planned Players) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_planned_players_table.html' %}
+                    </div>
+
+                    <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+                        {% include 'games/_reserve_list_table.html' %}
+                    </div>
+                </div>
+            {% else %}
                 <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
                     {% include 'games/_planned_players_table.html' %}
-                    {% include 'games/_reserve_list_table.html' %}
                 </div>
-
-                <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-                    {% include 'games/_booking_history_table.html' %}
-                </div>
-            </div>
+            {% endif %}
 
         </div>
     {% else %}
@@ -189,16 +200,16 @@
                             Send standby invite now
                         </button>
                     </form>
+                    <a href="{% url 'booking_history_url' %}?game_id={{ game.id }}"
+                       class="btn btn-outline w-full max-w-md shadow-lg hover:shadow-xl">
+                        Booking history
+                    </a>
                 {% endif %}
             </div>
 
-            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
+            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg md:col-span-2">
                 {% include 'games/_planned_players_table.html' %}
                 {% include 'games/_reserve_list_table.html' %}
-            </div>
-
-            <div class="flex flex-col space-y-6 p-6 bg-base-100 rounded-xl shadow-lg">
-                {% include 'games/_booking_history_table.html' %}
             </div>
 
         </div>

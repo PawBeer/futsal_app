@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payment sent</title>
+</head>
+<body>
+    <h3>Payment sent for {{ run.month|stringformat:"02d" }}/{{ run.year }}</h3>
+
+    <p><strong>{{ player_display_name }}</strong> marked their payment of
+    <strong>{{ charge.amount }}</strong> for {{ run.month|stringformat:"02d" }}/{{ run.year }} as sent.</p>
+
+    <p>Please check whether the payment has arrived, and if so, log in to the app and mark it as paid
+    in the accountant panel.</p>
+
+    <p>Thank you,<br>
+    Futsal App Team</p>
+</body>
+</html>

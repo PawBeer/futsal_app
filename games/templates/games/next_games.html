@@ -11,7 +11,7 @@
                  data-tile-id="{{ game.id }}">
                 <div class="card-body p-6">
                     <a href="{% url 'game_details_url' game_id=game.id %}" class="block cursor-pointer">
-                        <h2 class="card-title text-primary text-xl">{{ game.when|date:'d M Y' }}
+                        <h2 class="card-title text-base-content text-xl">{{ game.when|date:'d M Y' }}
                             {% if game.status == 'Cancelled' %}
                                 <div class="badge badge-error badge-lg px-4 py-2 shadow-lg text-error-content font-bold tracking-wide">
                                     CANCELLED

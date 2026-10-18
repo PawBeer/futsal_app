@@ -57,10 +57,16 @@ urlpatterns = [
     path("booking_history/", views.booking_history, name="booking_history_url"),
     path("payments/", views.settlement_overview, name="settlement_overview_url"),
     path("payments/send/", views.send_settlement, name="send_settlement_url"),
+    path("payments/game-cost/", views.save_game_cost, name="save_game_cost_url"),
     path(
         "payments/charge/<int:charge_id>/toggle-paid/",
         views.toggle_paid,
         name="toggle_paid_url",
+    ),
+    path(
+        "payments/charge/<int:charge_id>/mark-sent/",
+        views.mark_charge_sent,
+        name="mark_charge_sent_url",
     ),
     path("payments/who-paid/", views.who_paid, name="who_paid_url"),
     path("logout/", LogoutView.as_view(next_page="/accounts/login"), name="logout_url"),

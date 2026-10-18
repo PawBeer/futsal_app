@@ -1,5 +1,17 @@
 from futsal_app import settings
-from games.models import BookingHistoryForGame, Game, Player
+from games.models import BookingHistoryForGame, Game, Player, PlayerRole
+
+
+def is_squad_member(user) -> bool:
+    """Admins, accountants and permanent players. Only they may see the
+    players list, profiles (with mobile numbers) and payments - reserves
+    (active/inactive players) get what they need by email."""
+    if user.is_superuser:
+        return True
+    player = getattr(user, "player", None)
+    return bool(
+        player and (player.role == PlayerRole.PERMANENT or player.is_accountant)
+    )
 
 
 def get_display_name(player: Player) -> str:

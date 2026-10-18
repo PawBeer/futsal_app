@@ -64,6 +64,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "games.context_processors.player_access",
+                "games.context_processors.pending_payments",
             ],
         },
     },

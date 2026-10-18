@@ -155,10 +155,10 @@ class PlayerModelTests(BaseTestCase):
 
     def test_non_superuser_cannot_update_player_profile(self):
         tola = Player.objects.get(user__username="tola")
-        reksio = Player.objects.get(user__username="reksio")
+        bolek = Player.objects.get(user__username="bolek")
 
-        # Login as regular user (not superuser)
-        self.client.force_login(reksio.user)
+        # Login as permanent player (not superuser)
+        self.client.force_login(bolek.user)
 
         # Try to update tola's profile
         data = {
@@ -189,11 +189,11 @@ class PlayerModelTests(BaseTestCase):
         self.assertIn("permission", str(messages[0]).lower())
 
     def test_non_superuser_cannot_send_welcome_email(self):
-        reksio = Player.objects.get(user__username="reksio")
+        bolek = Player.objects.get(user__username="bolek")
         tola = Player.objects.get(user__username="tola")
 
-        # Login as regular user (not superuser)
-        self.client.force_login(reksio.user)
+        # Login as permanent player (not superuser)
+        self.client.force_login(bolek.user)
 
         with patch("games.views.send_welcome_email") as mock_send_welcome_email:
             data = {
@@ -245,11 +245,11 @@ class PlayerModelTests(BaseTestCase):
         self.assertIn("success", str(messages[0]).lower())
 
     def test_non_superuser_can_view_player_profile(self):
-        reksio = Player.objects.get(user__username="reksio")
+        bolek = Player.objects.get(user__username="bolek")
         tola = Player.objects.get(user__username="tola")
 
-        # Login as regular user
-        self.client.force_login(reksio.user)
+        # Login as permanent player
+        self.client.force_login(bolek.user)
 
         url = reverse("player_details_url", kwargs={"player_id": tola.id})
         response = self.client.get(url)
@@ -258,3 +258,62 @@ class PlayerModelTests(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, tola.user.username)
         self.assertContains(response, tola.mobile_number)
+
+    def test_active_and_inactive_players_cannot_view_players(self):
+        reksio = Player.objects.get(user__username="reksio")
+        tola = Player.objects.get(user__username="tola")
+        self.client.force_login(reksio.user)
+
+        for role in (PlayerRole.ACTIVE, PlayerRole.INACTIVE):
+            reksio.role = role
+            reksio.save()
+            for url in (
+                reverse("all_players_url"),
+                reverse("player_details_url", kwargs={"player_id": tola.id}),
+            ):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 302, f"{role} {url}")
+                self.assertNotContains(response, tola.mobile_number, status_code=302)
+
+    def test_active_player_does_not_see_players_tab_or_profile_links(self):
+        reksio = Player.objects.get(user__username="reksio")
+        bolek = Player.objects.get(user__username="bolek")
+        game = Game.objects.create(
+            when="2024-08-01", description="test game", status=GameStatus.PLANNED
+        )
+        _create_booking_for_players(game, [bolek], StatusChoices.PLANNED)
+        self.client.force_login(reksio.user)
+
+        response = self.client.get(reverse("game_details_url", args=[game.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "bolek")
+        self.assertNotContains(response, reverse("all_players_url"))
+        self.assertNotContains(
+            response, reverse("player_details_url", kwargs={"player_id": bolek.id})
+        )
+
+    def test_permanent_player_sees_players_tab_and_profile_links(self):
+        bolek = Player.objects.get(user__username="bolek")
+        game = Game.objects.create(
+            when="2024-08-01", description="test game", status=GameStatus.PLANNED
+        )
+        _create_booking_for_players(game, [bolek], StatusChoices.PLANNED)
+        self.client.force_login(bolek.user)
+
+        response = self.client.get(reverse("game_details_url", args=[game.id]))
+
+        self.assertContains(response, reverse("all_players_url"))
+        self.assertContains(
+            response, reverse("player_details_url", kwargs={"player_id": bolek.id})
+        )
+
+    def test_accountant_with_active_role_can_view_players(self):
+        reksio = Player.objects.get(user__username="reksio")
+        reksio.is_accountant = True
+        reksio.save()
+        self.client.force_login(reksio.user)
+
+        response = self.client.get(reverse("all_players_url"))
+
+        self.assertEqual(response.status_code, 200)

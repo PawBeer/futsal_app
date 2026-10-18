@@ -197,6 +197,10 @@ class SettlementRun(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_sent_at = models.DateTimeField(null=True, blank=True)
     send_count = models.PositiveIntegerField(default=0)
+    # Cost of a whole game; each player pays it divided by the game's number of players.
+    game_cost = models.DecimalField(
+        max_digits=7, decimal_places=2, null=True, blank=True
+    )
 
     class Meta:
         ordering = ["-year", "-month"]
@@ -228,6 +232,8 @@ class PlayerCharge(models.Model):
         blank=True,
         related_name="payment_charges_marked",
     )
+    # set when the player reports the money as sent, awaiting the accountant's confirmation
+    sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["player__user__username"]

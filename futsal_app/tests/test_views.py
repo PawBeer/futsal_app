@@ -1,15 +1,19 @@
+from datetime import date
+
 from django.core import mail
+from django.urls import reverse
 
 from games.helpers import game_helper
 from games.helpers.game_helper import get_total_players_for_game
 from games.models import (
     BookingHistoryForGame,
     Game,
+    GameStatus,
     Player,
     StatusChoices,
 )
 
-from .base import BaseTestCase
+from .base import BaseTestCase, User
 
 
 class AddGameViewTests(BaseTestCase):
@@ -300,3 +304,117 @@ class AddGameViewTests(BaseTestCase):
         self.assertEqual(
             len(game_helper.get_players_by_status([StatusChoices.CANCELLED], game)), 1
         )
+
+
+class GameDetailsCurrentPlayerFirstTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.game = Game.objects.create(
+            when=date(2099, 1, 1), status=GameStatus.PLANNED, number_of_players=3
+        )
+        for user, status in [
+            (self.user_1_per, StatusChoices.PLANNED),
+            (self.user_2_per, StatusChoices.PLANNED),
+            (self.user_3_per, StatusChoices.PLANNED),
+        ]:
+            BookingHistoryForGame.objects.create(
+                game=self.game, player=user.player, status=status
+            )
+        self.url = reverse("game_details_url", args=[self.game.id])
+
+    def _row_players(self, response, rows_key):
+        return [row["players"][0] for row in response.context[rows_key]]
+
+    def test_logged_in_player_is_first_in_planned_players(self):
+        self.client.force_login(self.user_3_per)
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            self._row_players(response, "planned_players_rows"),
+            [self.user_3_per.player, self.user_1_per.player, self.user_2_per.player],
+        )
+
+    def test_logged_in_substitute_is_first_in_planned_players(self):
+        BookingHistoryForGame.objects.create(
+            game=self.game,
+            player=self.user_1_per.player,
+            status=StatusChoices.CANCELLED,
+        )
+        BookingHistoryForGame.objects.create(
+            game=self.game,
+            player=self.user_4_act.player,
+            status=StatusChoices.CONFIRMED,
+        )
+
+        self.client.force_login(self.user_4_act)
+        response = self.client.get(self.url)
+
+        first_row = response.context["planned_players_rows"][0]
+        self.assertEqual(first_row["cancelled_player"], self.user_1_per.player)
+        self.assertEqual(first_row["substitute"], self.user_4_act.player)
+
+    def test_logged_in_player_is_first_in_reserve_list(self):
+        reserve_user = User.objects.create_user(username="pankracy", password="pass_5")
+        Player.objects.create(user=reserve_user, mobile_number="123456789")
+        BookingHistoryForGame.objects.create(
+            game=self.game, player=reserve_user.player, status=StatusChoices.AWAITING
+        )
+        BookingHistoryForGame.objects.create(
+            game=self.game, player=self.user_4_act.player, status=StatusChoices.STANDBY
+        )
+
+        self.client.force_login(self.user_4_act)
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            self._row_players(response, "reserve_list_rows"),
+            [self.user_4_act.player, reserve_user.player],
+        )
+
+    def test_order_is_unchanged_for_user_without_player(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            self._row_players(response, "planned_players_rows"),
+            [self.user_1_per.player, self.user_2_per.player, self.user_3_per.player],
+        )
+
+
+class BookingHistoryViewTests(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.player = Player.objects.get(user=self.user_1_per)
+        self.game_1 = Game.objects.create(when=date(2026, 3, 5))
+        self.game_2 = Game.objects.create(when=date(2026, 3, 12))
+        self.booking_1 = BookingHistoryForGame.objects.create(
+            game=self.game_1, player=self.player, status=StatusChoices.PLANNED
+        )
+        self.booking_2 = BookingHistoryForGame.objects.create(
+            game=self.game_2, player=self.player, status=StatusChoices.CANCELLED
+        )
+        self.client.force_login(self.superuser)
+
+    def test_filters_by_game(self):
+        response = self.client.get(
+            reverse("booking_history_url"), {"game_id": self.game_1.id}
+        )
+
+        self.assertEqual(list(response.context["booking_history"]), [self.booking_1])
+
+    def test_lists_only_games_with_booking_history_newest_first(self):
+        Game.objects.create(when=date(2026, 3, 19))
+
+        response = self.client.get(reverse("booking_history_url"))
+
+        self.assertEqual(list(response.context["games"]), [self.game_2, self.game_1])
+
+    def test_game_details_links_to_filtered_history_for_admin_only(self):
+        link = f'{reverse("booking_history_url")}?game_id={self.game_1.id}'
+
+        response = self.client.get(reverse("game_details_url", args=[self.game_1.id]))
+        self.assertContains(response, link)
+
+        self.client.force_login(self.user_1_per)
+        response = self.client.get(reverse("game_details_url", args=[self.game_1.id]))
+        self.assertNotContains(response, link)

@@ -351,6 +351,46 @@ def send_payment_confirmation_email(charge: PlayerCharge) -> None:
     msg.send()
 
 
+def send_charge_sent_email_to_accountants(charge: PlayerCharge) -> None:
+    """
+    Notify the accountants (or the admins, if no accountant has an email)
+    that a player marked their settlement charge as sent, so they can check
+    it arrived and mark it as paid.
+    """
+    recipients = [
+        player.user.email
+        for player in Player.objects.filter(is_accountant=True).select_related("user")
+        if player.user and player.user.email
+    ] or [user.email for user in User.objects.filter(is_superuser=True) if user.email]
+    if not recipients:
+        return
+
+    run = charge.settlement_run
+    player_display_name = player_helper.get_display_name(charge.player)
+    subject = f"{player_display_name} sent the payment for {run.month:02d}/{run.year}"
+    from_email = settings.DEFAULT_FROM_EMAIL
+
+    text_content = (
+        f"{player_display_name} marked their payment of {charge.amount} for "
+        f"{run.month:02d}/{run.year} as sent. Please check whether it has arrived, "
+        f"and if so, mark it as paid in the accountant panel."
+    )
+
+    html_content = render_to_string(
+        "emails/charge_sent_for_accountant.html",
+        {
+            "player_display_name": player_display_name,
+            "charge": charge,
+            "run": run,
+        },
+    )
+
+    for to in recipients:
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+
 def send_settlement_email(charge: PlayerCharge) -> None:
     run = charge.settlement_run
     player_display_name = player_helper.get_display_name(charge.player)
